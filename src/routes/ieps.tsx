@@ -80,9 +80,6 @@ const seeded: IepGoal[] = seedGoals.map((g) => ({
   approvedAt: ["g5", "g6"].includes(g.id) ? "Wk 4 · 2026" : undefined,
 }));
 
-function IepsPage() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
 const SUBJECTS: IepDomain[] = [
   "English",
   "Maths",
@@ -93,6 +90,7 @@ const SUBJECTS: IepDomain[] = [
   "The Arts",
   "Self-care",
 ];
+
 
 function IepsPage() {
   const search = Route.useSearch();
