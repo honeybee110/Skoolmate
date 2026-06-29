@@ -435,7 +435,13 @@ function CrossCheckPanel({
             <p className="mt-1.5 text-sm leading-relaxed text-foreground/85">{recommendation.body}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" className="h-7 text-xs"><CheckCircle2 className="h-3.5 w-3.5" />Apply suggestion</Button>
-              <Link to="/evidence" className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">View evidence ({goal.evidenceCount})</Link>
+              <Link
+                to="/evidence"
+                search={{ student: goal.studentId, semester: goal.semester, goal: goal.id }}
+                className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                View evidence ({goal.evidenceCount})
+              </Link>
             </div>
           </div>
         </div>

@@ -5,14 +5,19 @@ import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { iepReports, students, type IepReportStatus } from "@/lib/mock-data";
+import { iepReports, students, type IepReportStatus, type Semester } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
-import { FileText, FileDown, CheckCircle2, Clock, Eye, PenLine, CalendarRange, Target, Camera } from "lucide-react";
+import { scopedSearch } from "@/lib/scope";
+import { FileText, FileDown, CheckCircle2, Clock, Eye, PenLine, CalendarRange, Target, Camera, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "IEP Reports · SchoolMate AU" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    student: typeof s.student === "string" ? s.student : undefined,
+    semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
+  }),
   component: ReportsPage,
 });
 
@@ -25,10 +30,15 @@ const statusMeta: Record<IepReportStatus, { label: string; tone: string; Icon: t
 
 function ReportsPage() {
   const { activeSemester, matches, setActiveSemester } = useActiveSemester();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const scopedStudent = search.student ? students.find((s) => s.id === search.student) : undefined;
 
   const visible = useMemo(
-    () => iepReports.filter((r) => matches(r.semester)),
-    [matches],
+    () => iepReports
+      .filter((r) => (search.semester ? r.semester === search.semester : matches(r.semester)))
+      .filter((r) => (search.student ? r.studentId === search.student : true)),
+    [matches, search.semester, search.student],
   );
 
   const counts = useMemo(() => {
@@ -60,6 +70,20 @@ function ReportsPage() {
             </Button>
           )}
         </Card>
+
+        {scopedStudent && (
+          <Card className="flex items-center justify-between gap-3 border-primary/30 bg-primary-soft/30 px-3 py-2 text-xs">
+            <div className="flex items-center gap-2">
+              <Filter className="h-3.5 w-3.5 text-primary" />
+              <span>Drilled in · showing reports for</span>
+              <Badge variant="outline" className="font-medium">{scopedStudent.firstName} {scopedStudent.lastName}</Badge>
+              {search.semester && <Badge variant="outline">{search.semester}</Badge>}
+            </div>
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate({ search: {} })}>
+              <X className="h-3 w-3" /> Clear
+            </Button>
+          </Card>
+        )}
 
         {/* Stat strip */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

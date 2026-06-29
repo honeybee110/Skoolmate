@@ -6,14 +6,18 @@ import {
   evidenceItems,
   iepGoals,
   actionQueue,
+  type Semester,
 } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
+import { scopedSearch, type ScopedSearch } from "@/lib/scope";
+
+type DrillTarget = "/" | "/ieps" | "/evidence" | "/reports";
 
 type Result =
-  | { kind: "student"; id: string; title: string; subtitle: string; to: string; params: { studentId: string } }
-  | { kind: "evidence"; id: string; title: string; subtitle: string; to: string }
-  | { kind: "iep"; id: string; title: string; subtitle: string; to: string }
-  | { kind: "report"; id: string; title: string; subtitle: string; to: string };
+  | { kind: "student"; id: string; title: string; subtitle: string; to: "/students/$studentId"; params: { studentId: string } }
+  | { kind: "evidence"; id: string; title: string; subtitle: string; to: DrillTarget; search: ScopedSearch }
+  | { kind: "iep"; id: string; title: string; subtitle: string; to: DrillTarget; search: ScopedSearch }
+  | { kind: "report"; id: string; title: string; subtitle: string; to: DrillTarget; search: ScopedSearch };
 
 const groupMeta: Record<Result["kind"], { label: string; Icon: typeof Users }> = {
   student: { label: "Students", Icon: Users },
@@ -68,7 +72,8 @@ export function GlobalSearch() {
         id: g.id,
         title: `${g.learningArea} — ${g.studentName}`,
         subtitle: `${g.semester} · ${g.level} · ${g.status.replace("-", " ")}`,
-        to: "/ieps",
+        to: "/ieps" as const,
+        search: scopedSearch(activeSemester, { student: g.studentId, semester: g.semester, goal: g.id }),
       }));
 
     const evidenceResults: Result[] = evidenceItems
@@ -82,7 +87,8 @@ export function GlobalSearch() {
         id: e.id,
         title: e.caption,
         subtitle: `${e.studentName} · ${e.medium} · ${e.semester}`,
-        to: "/evidence",
+        to: "/evidence" as const,
+        search: scopedSearch(activeSemester, { student: e.studentId, semester: e.semester as Semester, goal: e.goalIds[0] }),
       }));
 
     const reportResults: Result[] = actionQueue
@@ -94,11 +100,12 @@ export function GlobalSearch() {
         id: a.id,
         title: a.title,
         subtitle: `${a.kind} · due ${a.due} · ${a.semester}`,
-        to: a.kind === "report" ? "/reports" : "/",
+        to: (a.kind === "report" ? "/reports" : "/") as DrillTarget,
+        search: scopedSearch(activeSemester, { semester: a.semester }),
       }));
 
     return [...studentResults, ...iepResults, ...evidenceResults, ...reportResults];
-  }, [query, matches]);
+  }, [query, matches, activeSemester]);
 
   const grouped = useMemo(() => {
     const map = new Map<Result["kind"], Result[]>();
@@ -167,7 +174,8 @@ export function GlobalSearch() {
                             if (r.kind === "student") {
                               navigate({ to: "/students/$studentId", params: r.params });
                             } else {
-                              navigate({ to: r.to as "/" | "/ieps" | "/evidence" | "/reports" });
+                              // Pass scoped search so destination filters by active semester + student.
+                              navigate({ to: r.to, search: r.search } as Parameters<typeof navigate>[0]);
                             }
                           }}
                           className="flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left hover:bg-muted"
