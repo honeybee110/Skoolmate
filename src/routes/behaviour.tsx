@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { behaviourReports, students, type BehaviourReportStatus } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
+import { scopedSearch } from "@/lib/scope";
 import { AlertTriangle, Activity, CheckCircle2, CalendarRange, Target, Camera, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
