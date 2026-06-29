@@ -64,7 +64,9 @@ function IepPrintPage() {
           <Row label="Funding">{student?.funding ?? "—"}</Row>
           <Row label="Learning area">{goal.learningArea}</Row>
           <Row label="VC 2.0 level">Level {goal.level} · {goal.vcLink}</Row>
+          <Row label="Semester">{goal.semester}</Row>
           <Row label="Review due">{goal.reviewDue}</Row>
+
           <Row label="Domain">{goal.domain}</Row>
         </section>
 
