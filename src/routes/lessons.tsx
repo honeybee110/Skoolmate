@@ -1,35 +1,260 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { ModuleStub } from "@/components/module-stub";
-import { Sparkles, Plus } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw } from "lucide-react";
+import { generateLessonPlan, type GeneratedLesson } from "@/lib/lessons.functions";
+import { curriculumStrands, lessonExamples } from "@/lib/mock-data";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/lessons")({
-  head: () => ({ meta: [{ title: "Lesson Planner · SchoolMate AU" }] }),
-  component: () => (
+  head: () => ({ meta: [{ title: "AI Lesson Planner · SchoolMate AU" }] }),
+  component: LessonsPage,
+});
+
+const subjects = Object.keys(curriculumStrands) as Array<keyof typeof curriculumStrands>;
+
+function LessonsPage() {
+  const generate = useServerFn(generateLessonPlan);
+  const [subject, setSubject] = useState<string>("Mathematics");
+  const [strand, setStrand] = useState<string>("Number");
+  const [topic, setTopic] = useState("Counting to 20 with 10-frames");
+  const [duration, setDuration] = useState("45 min");
+  const [ability, setAbility] = useState("Towards Foundation A–D · mixed AAC users");
+  const [notes, setNotes] = useState("Mia is working on counting to 20. Jack and Hamish use AAC for requesting. Noah needs sensory regulation prompts.");
+  const [loading, setLoading] = useState(false);
+  const [lesson, setLesson] = useState<GeneratedLesson | null>(null);
+
+  const strandOptions = curriculumStrands[subject as keyof typeof curriculumStrands] ?? [];
+
+  async function handleGenerate() {
+    setLoading(true);
+    try {
+      const result = await generate({ data: { subject, strand, topic, duration, abilityRange: ability, notes } });
+      setLesson(result as GeneratedLesson);
+      toast.success("Lesson drafted by AI — review and submit for approval.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "AI generation failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function applyExample(i: number) {
+    const ex = lessonExamples[i];
+    setSubject(ex.subject);
+    setStrand(ex.strand);
+    setTopic(ex.topic);
+    setDuration(ex.duration);
+  }
+
+  return (
     <AppShell>
       <PageHeader
-        title="Lesson Planner"
-        subtitle="Aligned to Victorian Curriculum 2.0 · AI-assisted"
+        title="AI Lesson Planner"
+        subtitle="Victorian Curriculum 2.0 · differentiated · approval-ready"
         actions={
           <>
             <Button variant="outline" size="sm"><Plus className="h-4 w-4" />Blank lesson</Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90"><Sparkles className="h-4 w-4" />Generate with AI</Button>
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleGenerate} disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {loading ? "Drafting…" : "Generate with AI"}
+            </Button>
           </>
         }
       />
-      <div className="px-4 py-6 md:px-8">
-        <ModuleStub
-          feature="AI Lesson Planner & Approval"
-          points={[
-            "Generate Learning intention · Success criteria · Hook · I do / We do / You do",
-            "Auto-suggest differentiation, AAC supports, sensory & behaviour supports",
-            "Resource Bank recommendations (Twinkl, Topmarks, Starfall, Boardmaker, Canva)",
-            "Submit → Learning Specialist reviews → Approve or return",
-          ]}
-        />
+      <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[360px_1fr]">
+        {/* Brief panel */}
+        <Card className="h-fit p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <Wand2 className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold tracking-tight">Lesson brief</h2>
+          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Subject</Label>
+                <Select value={subject} onValueChange={(v) => { setSubject(v); setStrand((curriculumStrands as any)[v]?.[0] ?? ""); }}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>{subjects.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Strand</Label>
+                <Select value={strand} onValueChange={setStrand}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>{strandOptions.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Topic</Label>
+              <Input value={topic} onChange={(e) => setTopic(e.target.value)} className="h-9 text-sm" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Duration</Label>
+                <Input value={duration} onChange={(e) => setDuration(e.target.value)} className="h-9 text-sm" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Ability range</Label>
+                <Input value={ability} onChange={(e) => setAbility(e.target.value)} className="h-9 text-sm" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Class notes (students, supports)</Label>
+              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={5} className="text-sm" />
+            </div>
+            <Button onClick={handleGenerate} disabled={loading} className="w-full bg-primary hover:bg-primary/90">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {loading ? "Drafting lesson…" : "Draft with AI"}
+            </Button>
+          </div>
+
+          <div className="mt-6 border-t pt-4">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Quick starts</p>
+            <div className="space-y-1.5">
+              {lessonExamples.map((ex, i) => (
+                <button key={ex.topic} onClick={() => applyExample(i)} className="block w-full rounded-lg border bg-card px-3 py-2 text-left text-xs hover:border-primary/40 hover:bg-primary-soft/30 transition">
+                  <span className="font-medium">{ex.topic}</span>
+                  <span className="ml-1 text-muted-foreground">· {ex.subject}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        {/* Output */}
+        <div className="space-y-4">
+          {!lesson && !loading && <EmptyState />}
+          {loading && <LoadingSkeleton />}
+          {lesson && <LessonOutput lesson={lesson} onRegenerate={handleGenerate} />}
+        </div>
       </div>
     </AppShell>
-  ),
-});
+  );
+}
+
+function EmptyState() {
+  return (
+    <Card className="border-dashed border-primary/30 bg-gradient-to-br from-primary-soft/30 via-background to-background p-10 text-center">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+        <Sparkles className="h-5 w-5" />
+      </div>
+      <h3 className="mt-4 text-lg font-semibold">Draft a lesson in seconds</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+        Set the brief on the left and the AI will produce a VC 2.0-aligned plan with Learning Intention,
+        Success Criteria, I do / We do / You do, differentiation and AAC supports — ready for your Learning Specialist.
+      </p>
+    </Card>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <Card className="p-6">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+        Asking the AI to draft a differentiated plan…
+      </div>
+      <div className="mt-6 space-y-3">
+        {[...Array(6)].map((_, i) => <div key={i} className="h-3 w-full rounded bg-secondary/70 animate-pulse" style={{ width: `${60 + (i * 6) % 40}%` }} />)}
+      </div>
+    </Card>
+  );
+}
+
+function LessonOutput({ lesson, onRegenerate }: { lesson: GeneratedLesson; onRegenerate: () => void }) {
+  return (
+    <>
+      <Card className="overflow-hidden">
+        <div className="border-b bg-gradient-to-r from-primary-soft/40 to-background px-6 py-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-background">Draft</Badge>
+                <Badge className="bg-primary/10 text-primary hover:bg-primary/10">{lesson.vcCode}</Badge>
+              </div>
+              <h2 className="mt-2 text-xl font-semibold tracking-tight">{lesson.title}</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={onRegenerate}><RotateCcw className="h-4 w-4" />Regenerate</Button>
+              <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90"><Send className="h-4 w-4" />Submit for approval</Button>
+            </div>
+          </div>
+        </div>
+        <div className="grid gap-6 p-6 md:grid-cols-2">
+          <Field icon={<BookOpen className="h-4 w-4" />} label="Learning intention">{lesson.learningIntention}</Field>
+          <Field icon={<FileCheck2 className="h-4 w-4" />} label="Success criteria">
+            <ul className="space-y-1.5">{lesson.successCriteria.map((c, i) => (
+              <li key={i} className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />{c}</li>
+            ))}</ul>
+          </Field>
+        </div>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <PhaseCard tag="Hook" body={lesson.hook} />
+        <PhaseCard tag="I do" body={lesson.iDo} />
+        <PhaseCard tag="We do" body={lesson.weDo} />
+        <PhaseCard tag="You do" body={lesson.youDo} />
+        <PhaseCard tag="Assessment" body={lesson.assessment} />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="p-5">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold"><Hand className="h-4 w-4 text-primary" />Differentiation</h3>
+          <div className="space-y-3 text-sm">
+            <div><span className="font-medium text-foreground">Support:</span> <span className="text-muted-foreground">{lesson.differentiation.support}</span></div>
+            <div><span className="font-medium text-foreground">Extension:</span> <span className="text-muted-foreground">{lesson.differentiation.extension}</span></div>
+          </div>
+        </Card>
+        <Card className="p-5">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold"><Volume2 className="h-4 w-4 text-primary" />AAC & sensory supports</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {lesson.aacSupports.map((s, i) => <Badge key={`a${i}`} variant="secondary" className="font-normal">AAC · {s}</Badge>)}
+            {lesson.sensorySupports.map((s, i) => <Badge key={`s${i}`} className="bg-accent/15 text-accent hover:bg-accent/15 font-normal">Sensory · {s}</Badge>)}
+          </div>
+        </Card>
+      </div>
+
+      <Card className="p-5">
+        <h3 className="mb-3 text-sm font-semibold">Resource bank</h3>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {lesson.resources.map((r, i) => (
+            <div key={i} className="flex items-center justify-between rounded-lg border bg-card px-3 py-2 text-sm">
+              <span className="font-medium">{r.name}</span>
+              <Badge variant="outline" className="text-xs">{r.source}</Badge>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </>
+  );
+}
+
+function Field({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">{icon}{label}</div>
+      <div className="text-sm leading-relaxed">{children}</div>
+    </div>
+  );
+}
+
+function PhaseCard({ tag, body }: { tag: string; body: string }) {
+  return (
+    <Card className="p-4">
+      <Badge className="bg-primary/10 text-primary hover:bg-primary/10">{tag}</Badge>
+      <p className="mt-2 text-sm leading-relaxed text-foreground/90">{body}</p>
+    </Card>
+  );
+}
