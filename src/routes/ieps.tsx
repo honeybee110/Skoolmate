@@ -221,6 +221,7 @@ function GoalRow({ goal, selected, onSelect }: { goal: IepGoal; selected: boolea
             <Badge variant="outline" className={cn("font-normal", domainTone[goal.domain])}>{goal.domain}</Badge>
             <Badge variant="outline" className="font-normal text-[10px]">Level {goal.level} · {goal.learningArea}</Badge>
             <Badge variant="outline" className="font-mono text-[10px]">{goal.vcLink}</Badge>
+            <Badge variant="outline" className="font-normal text-[10px]"><Calendar className="h-2.5 w-2.5" />{goal.semester.replace(" · 2026", "")}</Badge>
             <Badge className={cn("font-normal text-[10px]", appr.tone)}><ApprIcon className="h-2.5 w-2.5" />{appr.label}</Badge>
           </div>
           <p className="mt-1.5 text-sm leading-snug text-foreground/85 line-clamp-2">{goal.smart}</p>
