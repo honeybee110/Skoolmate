@@ -37,7 +37,11 @@ function IepPrintPage() {
       <style>{`@media print { .no-print { display: none !important; } @page { margin: 18mm; } body { background: white !important; } }`}</style>
 
       <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b bg-card/95 px-6 py-3 backdrop-blur">
-        <Button asChild variant="ghost" size="sm"><a href="/ieps"><ArrowLeft className="h-4 w-4" />Back to IEPs</a></Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/ieps" search={{ student: goal.studentId, semester: goal.semester, goal: goal.id }}>
+            <ArrowLeft className="h-4 w-4" />Back to IEPs
+          </Link>
+        </Button>
         <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => window.print()}>
           <Printer className="h-4 w-4" />Print / Save as PDF
         </Button>
