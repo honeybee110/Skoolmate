@@ -137,7 +137,26 @@ function EvidencePage() {
         </div>
       )}
 
+      {(scopedStudent || semesterScope || goalScope) && (
+        <div className="px-4 pt-6 md:px-8">
+          <Card className="flex flex-wrap items-center justify-between gap-3 border-primary/30 bg-primary-soft/30 px-3 py-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <Filter className="h-3.5 w-3.5 text-primary" />
+              <span>Drilled in from report ·</span>
+              {scopedStudent && <Badge variant="outline" className="font-medium">{scopedStudent.firstName} {scopedStudent.lastName}</Badge>}
+              {semesterScope && semesterScope !== "all" && <Badge variant="outline">{semesterScope}</Badge>}
+              {goalScope && <Badge variant="outline">Goal · {goalScope}</Badge>}
+              <span className="text-muted-foreground">{filtered.length} item{filtered.length === 1 ? "" : "s"}</span>
+            </div>
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate({ search: {} })}>
+              <X className="h-3 w-3" /> Clear
+            </Button>
+          </Card>
+        </div>
+      )}
+
       <div className="flex flex-col gap-2 px-4 pt-6 sm:flex-row sm:items-center md:px-8">
+
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search captions, students…" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
