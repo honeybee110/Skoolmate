@@ -83,12 +83,27 @@ const seeded: IepGoal[] = seedGoals.map((g) => ({
 function IepsPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+const SUBJECTS: IepDomain[] = [
+  "English",
+  "Maths",
+  "Personal & Social",
+  "Science",
+  "HASS",
+  "Health & PE",
+  "The Arts",
+  "Self-care",
+];
+
+function IepsPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [goals, setGoals] = useState<IepGoal[]>(seeded);
   const [evidence, setEvidence] = useState<EvidenceItem[]>(seedEvidence);
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<ActiveStatus | "all">("all");
+  const [specialists, setSpecialists] = useState<SpecialistEntry[]>(seedSpecialists);
+  const [subject, setSubject] = useState<IepDomain | "all">("all");
   const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(search.semester ?? currentSemester);
   const studentScope = search.student;
+
   const initialGoalId = search.goal && seeded.some((g) => g.id === search.goal)
     ? search.goal
     : (studentScope ? (seeded.find((g) => g.studentId === studentScope)?.id ?? seeded[0].id) : seeded[0].id);
@@ -96,32 +111,25 @@ function IepsPage() {
 
   const scopedStudent = studentScope ? students.find((s) => s.id === studentScope) : undefined;
 
-  const filtered = useMemo(() => goals.filter((g) => {
-    const q = query.toLowerCase();
-    const matchesQ = !q || g.smart.toLowerCase().includes(q) || g.studentName.toLowerCase().includes(q) || g.learningArea.toLowerCase().includes(q) || g.vcLink.toLowerCase().includes(q);
-    const matchesF = filter === "all" || g.status === filter;
-    const matchesS = semesterFilter === "all" || g.semester === semesterFilter;
-    const matchesStudent = !studentScope || g.studentId === studentScope;
-    return matchesQ && matchesF && matchesS && matchesStudent;
-  }), [query, filter, semesterFilter, goals, studentScope]);
+  const scopedGoals = useMemo(() => goals.filter((g) => {
+    if (semesterFilter !== "all" && g.semester !== semesterFilter) return false;
+    if (studentScope && g.studentId !== studentScope) return false;
+    if (subject !== "all" && g.domain !== subject) return false;
+    return true;
+  }), [goals, semesterFilter, studentScope, subject]);
 
-  const selected = goals.find((g) => g.id === selectedId) ?? filtered[0] ?? goals[0];
+  const selected = goals.find((g) => g.id === selectedId) ?? scopedGoals[0] ?? goals[0];
 
-  const scoped = useMemo(
-    () => {
-      let xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
-      if (studentScope) xs = xs.filter((g) => g.studentId === studentScope);
-      return xs;
-    },
-    [goals, semesterFilter, studentScope],
-  );
-
-  const stats = useMemo(() => ({
-    total: scoped.length,
-    achieved: scoped.filter((g) => g.status === "achieved").length,
-    developing: scoped.filter((g) => g.status === "developing").length,
-    pending: scoped.filter((g) => g.approval === "pending").length,
-  }), [scoped]);
+  const stats = useMemo(() => {
+    const xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
+    const scope = studentScope ? xs.filter((g) => g.studentId === studentScope) : xs;
+    return {
+      total: scope.length,
+      achieved: scope.filter((g) => g.status === "achieved").length,
+      developing: scope.filter((g) => g.status === "developing").length,
+      pending: scope.filter((g) => g.approval === "pending").length,
+    };
+  }, [goals, semesterFilter, studentScope]);
 
   function setApproval(id: string, approval: IepApproval) {
     setGoals((prev) => prev.map((g) => g.id === id ? {
@@ -147,11 +155,32 @@ function IepsPage() {
     setEvidence((prev) => prev.map((e) => e.id === evId ? { ...e, aiSuggestedGoal: undefined } : e));
   }
 
+  function addSpecialistEntry(entry: Omit<SpecialistEntry, "id" | "addedAt" | "semester">) {
+    setSpecialists((prev) => [
+      { ...entry, id: `sp${prev.length + 1}-${Date.now()}`, addedAt: "Just now", semester: currentSemester },
+      ...prev,
+    ]);
+    toast.success(`Specialist note from ${entry.specialistName} added.`);
+  }
+
+  // Build class roster: one row per student, with per-subject goal aggregates
+  const roster = useMemo(() => students.map((s) => {
+    const studentGoals = (semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter))
+      .filter((g) => g.studentId === s.id);
+    const bySubject = SUBJECTS.reduce<Record<IepDomain, IepGoal[]>>((acc, d) => {
+      acc[d] = studentGoals.filter((g) => g.domain === d);
+      return acc;
+    }, {} as Record<IepDomain, IepGoal[]>);
+    return { student: s, all: studentGoals, bySubject };
+  }), [goals, semesterFilter]);
+
+  const rosterFiltered = studentScope ? roster.filter((r) => r.student.id === studentScope) : roster;
+
   return (
     <AppShell>
       <PageHeader
         title="IEP Goals"
-        subtitle="Structured from Scope & Sequence · cross-checked against Developing → Working Towards → Achieved"
+        subtitle="Class list · cross-subject goal tracker · specialist teacher notes"
         actions={
           <>
             <Button asChild variant="outline" size="sm">
@@ -165,7 +194,7 @@ function IepsPage() {
 
       <div className="grid grid-cols-2 gap-3 px-4 pt-6 md:grid-cols-4 md:px-8">
         <StatCard label={semesterFilter === "all" ? "Active goals (all sem.)" : `Active goals · ${semesterFilter.replace(" · 2026", "")}`} value={stats.total} icon={<Target className="h-4 w-4" />} />
-        <StatCard label={semesterFilter === "all" ? "Achieved (all sem.)" : `Achieved · ${semesterFilter.replace(" · 2026", "")}`} value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
+        <StatCard label="Achieved" value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
         <StatCard label="Developing" value={stats.developing} icon={<Target className="h-4 w-4 text-orange-600" />} />
         <StatCard label="Pending approval" value={stats.pending} icon={<Send className="h-4 w-4 text-amber-600" />} highlight />
       </div>
@@ -186,11 +215,8 @@ function IepsPage() {
             </Card>
           )}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search by student, goal, learning area or VC code…" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
-            </div>
+          {/* Semester + subject tabs */}
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
               <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
               <button onClick={() => setSemesterFilter("all")} className={cn("rounded-md px-2.5 py-1 transition", semesterFilter === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All sem.</button>
@@ -200,24 +226,32 @@ function IepsPage() {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
-              <Filter className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-              {(["all", "developing", "working-towards", "achieved"] as const).map((f) => (
-                <button key={f} onClick={() => setFilter(f)} className={cn("rounded-md px-2.5 py-1 transition", filter === f ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
-                  {f === "all" ? "All" : statusMeta[f].label}
+            <div className="flex flex-wrap items-center gap-1 rounded-lg border bg-card p-1 text-xs">
+              <BookOpen className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+              <button onClick={() => setSubject("all")} className={cn("rounded-md px-2.5 py-1 transition", subject === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All subjects</button>
+              {SUBJECTS.map((d) => (
+                <button key={d} onClick={() => setSubject(d)} className={cn("rounded-md px-2.5 py-1 transition whitespace-nowrap", subject === d ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
+                  {d}
                 </button>
               ))}
             </div>
           </div>
 
-          {filtered.length === 0 && (
-            <Card className="p-6 text-center text-sm text-muted-foreground">
-              No IEP goals match the current filters{semesterFilter !== "all" && <> in <span className="font-medium text-foreground">{semesterFilter}</span></>}.
-            </Card>
-          )}
-          {filtered.map((g) => (
-            <GoalRow key={g.id} goal={g} selected={g.id === selected.id} onSelect={() => setSelectedId(g.id)} />
-          ))}
+          {/* Class roster table — subjects as columns */}
+          <ClassRoster
+            rows={rosterFiltered}
+            subjectFilter={subject}
+            selectedId={selected.id}
+            onSelect={setSelectedId}
+          />
+
+          {/* Specialist teachers — comments + photos */}
+          <SpecialistsSection
+            entries={specialists.filter((e) => semesterFilter === "all" || e.semester === semesterFilter)}
+            goals={goals}
+            onAdd={addSpecialistEntry}
+            scopedStudentId={studentScope}
+          />
         </div>
 
         <CrossCheckPanel
