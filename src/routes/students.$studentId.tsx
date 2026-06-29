@@ -89,7 +89,7 @@ function StudentProfile() {
             <div>
               <div className="text-[10px] font-semibold uppercase tracking-widest text-primary">Today's Snapshot</div>
               <p className="mt-1 text-sm leading-relaxed">
-                {student.firstName} arrived {student.attendance === "late" ? "10 minutes late but settled within 5 minutes" : "calm and engaged"} this morning. {student.iepGoalsAchieved} of {student.iepGoalsActive} IEP goals achieved this term. Last week's behaviour data shows consistent regulation through the morning block — consider extending independent work time by 5 minutes.
+                {student.firstName} arrived {student.attendance === "late" ? "10 minutes late but settled within 5 minutes" : "calm and engaged"} this morning. {student.iepGoalsAchieved} of {student.iepGoalsActive} IEP goals achieved this semester. Last week's behaviour data shows consistent regulation through the morning block — consider extending independent work time by 5 minutes.
               </p>
             </div>
           </div>
