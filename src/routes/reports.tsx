@@ -71,6 +71,20 @@ function ReportsPage() {
           )}
         </Card>
 
+        {scopedStudent && (
+          <Card className="flex items-center justify-between gap-3 border-primary/30 bg-primary-soft/30 px-3 py-2 text-xs">
+            <div className="flex items-center gap-2">
+              <Filter className="h-3.5 w-3.5 text-primary" />
+              <span>Drilled in · showing reports for</span>
+              <Badge variant="outline" className="font-medium">{scopedStudent.firstName} {scopedStudent.lastName}</Badge>
+              {search.semester && <Badge variant="outline">{search.semester}</Badge>}
+            </div>
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate({ search: {} })}>
+              <X className="h-3 w-3" /> Clear
+            </Button>
+          </Card>
+        )}
+
         {/* Stat strip */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {(["draft", "in-review", "approved", "published"] as IepReportStatus[]).map((k) => {
