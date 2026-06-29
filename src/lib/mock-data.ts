@@ -181,6 +181,31 @@ export const iepReports: IepReport[] = [
   { id: "r9", studentId: "s5", studentName: "Zara Patel",    semester: "Semester 1 · 2026", status: "published", goalsIncluded: 5, evidenceCount: 12, updatedAt: "12 Jun 2026",  author: "Honey", approver: "Leadership" },
 ];
 
+export type BehaviourReportStatus = "open" | "monitoring" | "resolved";
+export interface BehaviourReport {
+  id: string;
+  studentId: string;
+  studentName: string;
+  semester: Semester;
+  status: BehaviourReportStatus;
+  incidents: number;
+  evidenceCount: number;
+  linkedGoalIds: string[];
+  summary: string;
+  updatedAt: string;
+  author: string;
+}
+
+export const behaviourReports: BehaviourReport[] = [
+  { id: "b1", studentId: "s4", studentName: "Noah Williams",  semester: currentSemester, status: "open",       incidents: 6, evidenceCount: 4, linkedGoalIds: [], summary: "Cluster at 11:15 post-recess — sensory overload",         updatedAt: "Today 12:10",    author: "Honey" },
+  { id: "b2", studentId: "s2", studentName: "Jack O'Brien",   semester: currentSemester, status: "monitoring", incidents: 3, evidenceCount: 2, linkedGoalIds: [], summary: "Turn-taking conflicts during group play",                  updatedAt: "Yesterday 15:40", author: "Honey" },
+  { id: "b3", studentId: "s8", studentName: "Hamish Carter",  semester: currentSemester, status: "monitoring", incidents: 2, evidenceCount: 3, linkedGoalIds: [], summary: "AAC requesting break — strategy working",                  updatedAt: "2 days ago",     author: "Sharifa" },
+  { id: "b4", studentId: "s4", studentName: "Noah Williams",  semester: "Semester 1 · 2026", status: "resolved", incidents: 11, evidenceCount: 9, linkedGoalIds: [], summary: "Visual schedule reduced transitions incidents by 60%",   updatedAt: "10 Jun 2026",    author: "Honey" },
+];
+
+
+
+
 
 export interface NotificationItem {
   id: string;
