@@ -74,27 +74,41 @@ const seeded: IepGoal[] = seedGoals.map((g) => ({
 }));
 
 function IepsPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [goals, setGoals] = useState<IepGoal[]>(seeded);
   const [evidence, setEvidence] = useState<EvidenceItem[]>(seedEvidence);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ActiveStatus | "all">("all");
-  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(currentSemester);
-  const [selectedId, setSelectedId] = useState<string>(seeded[0].id);
+  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(search.semester ?? currentSemester);
+  const studentScope = search.student;
+  const initialGoalId = search.goal && seeded.some((g) => g.id === search.goal)
+    ? search.goal
+    : (studentScope ? (seeded.find((g) => g.studentId === studentScope)?.id ?? seeded[0].id) : seeded[0].id);
+  const [selectedId, setSelectedId] = useState<string>(initialGoalId);
+
+  const scopedStudent = studentScope ? students.find((s) => s.id === studentScope) : undefined;
 
   const filtered = useMemo(() => goals.filter((g) => {
     const q = query.toLowerCase();
     const matchesQ = !q || g.smart.toLowerCase().includes(q) || g.studentName.toLowerCase().includes(q) || g.learningArea.toLowerCase().includes(q) || g.vcLink.toLowerCase().includes(q);
     const matchesF = filter === "all" || g.status === filter;
     const matchesS = semesterFilter === "all" || g.semester === semesterFilter;
-    return matchesQ && matchesF && matchesS;
-  }), [query, filter, semesterFilter, goals]);
+    const matchesStudent = !studentScope || g.studentId === studentScope;
+    return matchesQ && matchesF && matchesS && matchesStudent;
+  }), [query, filter, semesterFilter, goals, studentScope]);
 
-  const selected = goals.find((g) => g.id === selectedId) ?? goals[0];
+  const selected = goals.find((g) => g.id === selectedId) ?? filtered[0] ?? goals[0];
 
   const scoped = useMemo(
-    () => (semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)),
-    [goals, semesterFilter],
+    () => {
+      let xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
+      if (studentScope) xs = xs.filter((g) => g.studentId === studentScope);
+      return xs;
+    },
+    [goals, semesterFilter, studentScope],
   );
+
   const stats = useMemo(() => ({
     total: scoped.length,
     achieved: scoped.filter((g) => g.status === "achieved").length,
