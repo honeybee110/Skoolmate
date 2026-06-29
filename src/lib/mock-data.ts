@@ -390,9 +390,10 @@ export interface EvidenceItem {
   aiTagged: boolean;
   aiSuggestedGoal?: string;
   thumbHue: number;
+  semester: Semester;
 }
 
-export const evidenceItems: EvidenceItem[] = [
+const evidenceSeed: Omit<EvidenceItem, "semester">[] = [
   { id: "e1", studentId: "s3", studentName: "Aaliyah Tahir", studentInitials: "AT", medium: "work-sample", caption: "Traced 'Aaliyah' with model — first time independent on all 7 letters.", goalIds: ["g5"], vcStrand: "English · Writing", capturedBy: "Honey", capturedAt: "Today 10:42", aiTagged: true, thumbHue: 25 },
   { id: "e2", studentId: "s2", studentName: "Jack O'Brien", studentInitials: "JO", medium: "video", caption: "Used AAC to request 'break please' when class became loud.", goalIds: ["g3"], vcStrand: "Personal & Social", capturedBy: "Sharifa", capturedAt: "Today 11:15", aiTagged: true, thumbHue: 220 },
   { id: "e3", studentId: "s1", studentName: "Mia Nguyen", studentInitials: "MN", medium: "photo", caption: "Counted out 14 counters into 10-frame, self-corrected once.", goalIds: ["g1"], vcStrand: "Maths · Number", capturedBy: "Honey", capturedAt: "Today 09:55", aiTagged: true, thumbHue: 192 },
@@ -404,6 +405,14 @@ export const evidenceItems: EvidenceItem[] = [
   { id: "e9", studentId: "s4", studentName: "Noah Williams", studentInitials: "NW", medium: "work-sample", caption: "Followed 3/5 handwashing steps with visual sequence.", goalIds: ["g7"], vcStrand: "Health & PE", capturedBy: "Sharifa", capturedAt: "Today 12:30", aiTagged: true, thumbHue: 60 },
   { id: "e10", studentId: "s2", studentName: "Jack O'Brien", studentInitials: "JO", medium: "work-sample", caption: "Matched 4 CVC picture-to-word pairs (cat, dog, hat, pig).", goalIds: [], vcStrand: "English · Reading", capturedBy: "Honey", capturedAt: "3 days ago", aiTagged: false, aiSuggestedGoal: "g4", thumbHue: 220 },
 ];
+
+// A couple of items captured during Semester 1 so global search can demonstrate semester scoping.
+const sem1EvidenceIds = new Set(["e6", "e10"]);
+
+export const evidenceItems: EvidenceItem[] = evidenceSeed.map((e) => ({
+  ...e,
+  semester: sem1EvidenceIds.has(e.id) ? "Semester 1 · 2026" : currentSemester,
+}));
 
 export const lessonExamples = [
   { subject: "Mathematics", strand: "Number", topic: "Counting to 20 with 10-frames", duration: "45 min" },
