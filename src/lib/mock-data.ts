@@ -155,6 +155,32 @@ export const actionQueue: ActionItem[] = [
   { id: "a5", kind: "report", title: "Semester 2 IEP reports draft (8 students)", due: "Fri 4 Jul", semester: "Semester 2 · 2026" },
 ];
 
+export type IepReportStatus = "draft" | "in-review" | "approved" | "published";
+export interface IepReport {
+  id: string;
+  studentId: string;
+  studentName: string;
+  semester: Semester;
+  status: IepReportStatus;
+  goalsIncluded: number;
+  evidenceCount: number;
+  updatedAt: string;
+  author: string;
+  approver?: string;
+}
+
+export const iepReports: IepReport[] = [
+  { id: "r1", studentId: "s1", studentName: "Mia Nguyen",    semester: currentSemester, status: "draft",     goalsIncluded: 6, evidenceCount: 11, updatedAt: "Today 09:55",     author: "Honey" },
+  { id: "r2", studentId: "s2", studentName: "Jack O'Brien",  semester: currentSemester, status: "in-review", goalsIncluded: 5, evidenceCount: 8,  updatedAt: "Yesterday 16:20", author: "Honey", approver: "L. Specialist" },
+  { id: "r3", studentId: "s3", studentName: "Aaliyah Tahir", semester: currentSemester, status: "approved",  goalsIncluded: 7, evidenceCount: 14, updatedAt: "2 days ago",      author: "Honey", approver: "L. Specialist" },
+  { id: "r4", studentId: "s4", studentName: "Noah Williams", semester: currentSemester, status: "draft",     goalsIncluded: 8, evidenceCount: 9,  updatedAt: "Today 12:30",     author: "Sharifa" },
+  { id: "r5", studentId: "s5", studentName: "Zara Patel",    semester: currentSemester, status: "in-review", goalsIncluded: 5, evidenceCount: 7,  updatedAt: "Yesterday 14:00", author: "Honey", approver: "L. Specialist" },
+  { id: "r6", studentId: "s1", studentName: "Mia Nguyen",    semester: "Semester 1 · 2026", status: "published", goalsIncluded: 6, evidenceCount: 18, updatedAt: "12 Jun 2026",  author: "Honey", approver: "Leadership" },
+  { id: "r7", studentId: "s2", studentName: "Jack O'Brien",  semester: "Semester 1 · 2026", status: "published", goalsIncluded: 5, evidenceCount: 13, updatedAt: "12 Jun 2026",  author: "Honey", approver: "Leadership" },
+  { id: "r8", studentId: "s3", studentName: "Aaliyah Tahir", semester: "Semester 1 · 2026", status: "published", goalsIncluded: 6, evidenceCount: 16, updatedAt: "12 Jun 2026",  author: "Honey", approver: "Leadership" },
+  { id: "r9", studentId: "s5", studentName: "Zara Patel",    semester: "Semester 1 · 2026", status: "published", goalsIncluded: 5, evidenceCount: 12, updatedAt: "12 Jun 2026",  author: "Honey", approver: "Leadership" },
+];
+
 
 export interface NotificationItem {
   id: string;
