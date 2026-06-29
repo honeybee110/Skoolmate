@@ -11,12 +11,15 @@ import {
   Target, Plus, Sparkles, AlertTriangle, CheckCircle2,
   Search, Filter, ChevronRight, Calendar, BookOpen, ListChecks,
   FileDown, ExternalLink, Send, ShieldCheck, Clock, Link2, X,
+  Camera, MessageSquarePlus, Pencil, UserCog,
 } from "lucide-react";
 import {
   iepGoals as seedGoals, students, evidenceItems as seedEvidence,
+  specialistEntries as seedSpecialists,
   availableSemesters, currentSemester,
   type IepGoal, type IepStatus, type IepDomain, type IepApproval,
   type SuccessCriterion, type EvidenceItem, type Semester,
+  type SpecialistEntry, type SpecialistSubject,
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
