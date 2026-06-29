@@ -172,7 +172,7 @@ function EvidencePage() {
       </div>
 
       <div className="grid gap-4 px-4 py-6 sm:grid-cols-2 md:grid-cols-3 md:px-8 xl:grid-cols-4">
-        {filtered.map((e) => <EvidenceCard key={e.id} item={e} />)}
+        {filtered.map((e) => <EvidenceCard key={e.id} item={e} activeSemester={activeSemester} />)}
       </div>
     </AppShell>
   );
