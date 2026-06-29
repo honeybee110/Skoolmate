@@ -14,8 +14,9 @@ import {
 } from "lucide-react";
 import {
   iepGoals as seedGoals, students, evidenceItems as seedEvidence,
+  availableSemesters, currentSemester,
   type IepGoal, type IepStatus, type IepDomain, type IepApproval,
-  type SuccessCriterion, type EvidenceItem,
+  type SuccessCriterion, type EvidenceItem, type Semester,
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
