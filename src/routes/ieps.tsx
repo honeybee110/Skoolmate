@@ -165,6 +165,20 @@ function IepsPage() {
 
       <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[1fr_460px]">
         <div className="space-y-3">
+          {scopedStudent && (
+            <Card className="flex items-center justify-between gap-3 border-primary/30 bg-primary-soft/30 px-3 py-2 text-xs">
+              <div className="flex items-center gap-2">
+                <Filter className="h-3.5 w-3.5 text-primary" />
+                <span>Drilled in from report · showing goals for</span>
+                <Badge variant="outline" className="font-medium">{scopedStudent.firstName} {scopedStudent.lastName}</Badge>
+                {search.semester && <Badge variant="outline">{search.semester}</Badge>}
+              </div>
+              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate({ search: {} })}>
+                <X className="h-3 w-3" /> Clear
+              </Button>
+            </Card>
+          )}
+
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
