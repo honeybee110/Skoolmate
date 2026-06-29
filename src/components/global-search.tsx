@@ -159,20 +159,21 @@ export function GlobalSearch() {
                   <ul>
                     {items.map((r) => (
                       <li key={`${r.kind}-${r.id}`}>
-                        <Link
-                          {...(r.kind === "student"
-                            ? { to: "/students/$studentId" as const, params: r.params }
-                            : r.kind === "iep"
-                              ? { to: "/ieps" as const }
-                              : r.kind === "evidence"
-                                ? { to: "/evidence" as const }
-                                : { to: r.to as "/" | "/reports" })}
-                          onClick={() => setOpen(false)}
-                          className="flex flex-col gap-0.5 rounded-md px-3 py-2 hover:bg-muted"
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOpen(false);
+                            if (r.kind === "student") {
+                              navigate({ to: "/students/$studentId", params: r.params });
+                            } else {
+                              navigate({ to: r.to as "/" | "/ieps" | "/evidence" | "/reports" });
+                            }
+                          }}
+                          className="flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left hover:bg-muted"
                         >
                           <span className="text-sm font-medium text-foreground line-clamp-1">{r.title}</span>
                           <span className="text-xs text-muted-foreground line-clamp-1">{r.subtitle}</span>
-                        </Link>
+                        </button>
                       </li>
                     ))}
                   </ul>
