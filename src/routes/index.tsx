@@ -149,9 +149,13 @@ function Dashboard() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="text-sm leading-snug">{a.title}</div>
-                        <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <Clock className="h-3 w-3" /> {a.due}
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {a.due}</span>
+                          {(a.kind === "iep" || a.kind === "report") && (
+                            <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-foreground/70">{a.semester}</span>
+                          )}
                         </div>
+
                       </div>
                     </li>
                   );
