@@ -6,8 +6,12 @@ import {
   evidenceItems,
   iepGoals,
   actionQueue,
+  type Semester,
 } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
+import { scopedSearch, type ScopedSearch } from "@/lib/scope";
+
+type DrillTarget = "/" | "/ieps" | "/evidence" | "/reports";
 
 type Result =
   | { kind: "student"; id: string; title: string; subtitle: string; to: string; params: { studentId: string } }
