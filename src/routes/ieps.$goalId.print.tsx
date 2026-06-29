@@ -238,7 +238,7 @@ function IepPrintPage() {
           const sectionGoals = section.areas.length
             ? studentGoals.filter((g) => section.areas.includes(g.learningArea))
             : section.key === "Personal & Social"
-              ? studentGoals.filter((g) => g.domain === "Social-Emotional" || g.domain === "Self-care")
+              ? studentGoals.filter((g) => g.domain === "Personal & Social" || g.domain === "Self-care")
               : [];
 
           return (
