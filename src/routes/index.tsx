@@ -181,7 +181,7 @@ function Dashboard() {
         <div className="mt-8">
           <div className="flex items-end justify-between">
             <div>
-              <h2 className="text-base font-semibold tracking-tight">Rosella — Year 3</h2>
+              <h2 className="text-base font-semibold tracking-tight">P7 — Term 3 2026</h2>
               <p className="text-xs text-muted-foreground">8 students · 7 present today</p>
             </div>
             <Button variant="outline" size="sm">Open class view</Button>
