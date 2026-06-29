@@ -183,3 +183,70 @@ export const curriculumStrands = {
   Arts: ["Drama", "Visual Arts"],
   "Learn to Play": ["Turn-taking", "Social interaction", "Independent play"],
 };
+
+export type IepStatus = "not-started" | "emerging" | "working-towards" | "achieved";
+export type IepDomain = "Communication" | "Literacy" | "Numeracy" | "Social-Emotional" | "Self-care" | "Motor";
+
+export interface IepGoal {
+  id: string;
+  studentId: string;
+  studentName: string;
+  domain: IepDomain;
+  smart: string;
+  baseline: string;
+  status: IepStatus;
+  evidenceCount: number;
+  lastEvidence: string;
+  reviewDue: string;
+  vcLink: string;
+}
+
+export const iepGoals: IepGoal[] = [
+  { id: "g1", studentId: "s1", studentName: "Mia Nguyen", domain: "Numeracy", smart: "Mia will rote count 1–20 with 80% accuracy across 3 sessions by end of Term 3.", baseline: "Counts 1–10 with prompts", status: "working-towards", evidenceCount: 8, lastEvidence: "2 days ago", reviewDue: "Wk 8", vcLink: "VC2M1N01" },
+  { id: "g2", studentId: "s1", studentName: "Mia Nguyen", domain: "Communication", smart: "Mia will use 3-word requests independently in 4/5 opportunities daily.", baseline: "1–2 word requests with prompts", status: "emerging", evidenceCount: 4, lastEvidence: "Yesterday", reviewDue: "Wk 9", vcLink: "VC2EAS-A" },
+  { id: "g3", studentId: "s2", studentName: "Jack O'Brien", domain: "Social-Emotional", smart: "Jack will request a break using his AAC device when escalated in 3/5 opportunities.", baseline: "Currently elopes when overwhelmed", status: "working-towards", evidenceCount: 12, lastEvidence: "Today", reviewDue: "Wk 7", vcLink: "VC2PSM-B" },
+  { id: "g4", studentId: "s2", studentName: "Jack O'Brien", domain: "Literacy", smart: "Jack will match 6 CVC pictures to words with 80% accuracy.", baseline: "Matches 2 CVC pictures", status: "emerging", evidenceCount: 3, lastEvidence: "3 days ago", reviewDue: "Wk 8", vcLink: "VC2E1LY09" },
+  { id: "g5", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Literacy", smart: "Aaliyah will trace her first name with a model present, 4 of 5 attempts.", baseline: "Traces 3 letters with hand-over-hand", status: "achieved", evidenceCount: 14, lastEvidence: "Today", reviewDue: "Wk 6", vcLink: "VC2EFLY10" },
+  { id: "g6", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Communication", smart: "Aaliyah will request help using her PECS card in 4/5 opportunities.", baseline: "Requests with adult prompt", status: "achieved", evidenceCount: 11, lastEvidence: "Yesterday", reviewDue: "Wk 6", vcLink: "VC2EAS-A" },
+  { id: "g7", studentId: "s4", studentName: "Noah Williams", domain: "Self-care", smart: "Noah will independently wash hands following 5-step visual sequence after toileting.", baseline: "Completes 2/5 steps", status: "working-towards", evidenceCount: 6, lastEvidence: "Today", reviewDue: "Wk 8", vcLink: "VC2HPEP-B" },
+  { id: "g8", studentId: "s4", studentName: "Noah Williams", domain: "Social-Emotional", smart: "Noah will use a sensory regulation chart to identify his state 3 times daily.", baseline: "Adult-led check-ins only", status: "emerging", evidenceCount: 5, lastEvidence: "Yesterday", reviewDue: "Wk 9", vcLink: "VC2PSM-A" },
+  { id: "g9", studentId: "s5", studentName: "Zara Patel", domain: "Communication", smart: "Zara will initiate AAC requests for 3 preferred items independently.", baseline: "Requests 1 item with model", status: "working-towards", evidenceCount: 9, lastEvidence: "2 days ago", reviewDue: "Wk 7", vcLink: "VC2EAS-A" },
+  { id: "g10", studentId: "s8", studentName: "Hamish Carter", domain: "Social-Emotional", smart: "Hamish will request a break with AAC in 4/5 escalation moments.", baseline: "Verbal protest only", status: "working-towards", evidenceCount: 7, lastEvidence: "Today", reviewDue: "Wk 8", vcLink: "VC2PSM-B" },
+];
+
+export type EvidenceMedium = "photo" | "video" | "work-sample" | "anecdotal" | "audio";
+export interface EvidenceItem {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentInitials: string;
+  medium: EvidenceMedium;
+  caption: string;
+  goalIds: string[];
+  vcStrand: string;
+  capturedBy: string;
+  capturedAt: string;
+  aiTagged: boolean;
+  aiSuggestedGoal?: string;
+  thumbHue: number;
+}
+
+export const evidenceItems: EvidenceItem[] = [
+  { id: "e1", studentId: "s3", studentName: "Aaliyah Tahir", studentInitials: "AT", medium: "work-sample", caption: "Traced 'Aaliyah' with model — first time independent on all 7 letters.", goalIds: ["g5"], vcStrand: "English · Writing", capturedBy: "Honey", capturedAt: "Today 10:42", aiTagged: true, thumbHue: 25 },
+  { id: "e2", studentId: "s2", studentName: "Jack O'Brien", studentInitials: "JO", medium: "video", caption: "Used AAC to request 'break please' when class became loud.", goalIds: ["g3"], vcStrand: "Personal & Social", capturedBy: "Sharifa", capturedAt: "Today 11:15", aiTagged: true, thumbHue: 220 },
+  { id: "e3", studentId: "s1", studentName: "Mia Nguyen", studentInitials: "MN", medium: "photo", caption: "Counted out 14 counters into 10-frame, self-corrected once.", goalIds: ["g1"], vcStrand: "Maths · Number", capturedBy: "Honey", capturedAt: "Today 09:55", aiTagged: true, thumbHue: 192 },
+  { id: "e4", studentId: "s4", studentName: "Noah Williams", studentInitials: "NW", medium: "anecdotal", caption: "Pointed to 'yellow' on regulation chart unprompted before recess.", goalIds: ["g8"], vcStrand: "Personal & Social", capturedBy: "Honey", capturedAt: "Yesterday 14:10", aiTagged: true, thumbHue: 60 },
+  { id: "e5", studentId: "s8", studentName: "Hamish Carter", studentInitials: "HC", medium: "video", caption: "Requested break with AAC during Maths — accepted sensory corner offer.", goalIds: ["g10"], vcStrand: "Personal & Social", capturedBy: "Sharifa", capturedAt: "Today 12:05", aiTagged: true, thumbHue: 330 },
+  { id: "e6", studentId: "s5", studentName: "Zara Patel", studentInitials: "ZP", medium: "audio", caption: "Initiated 'more iPad please' using AAC without model.", goalIds: ["g9"], vcStrand: "English · Speaking", capturedBy: "Honey", capturedAt: "2 days ago", aiTagged: true, thumbHue: 280 },
+  { id: "e7", studentId: "s1", studentName: "Mia Nguyen", studentInitials: "MN", medium: "photo", caption: "Three-word phrase 'I want red' during snack choice.", goalIds: [], vcStrand: "English · Speaking", capturedBy: "Sharifa", capturedAt: "Today 10:35", aiTagged: false, aiSuggestedGoal: "g2", thumbHue: 192 },
+  { id: "e8", studentId: "s3", studentName: "Aaliyah Tahir", studentInitials: "AT", medium: "photo", caption: "Used PECS 'help' card during shoelace task.", goalIds: ["g6"], vcStrand: "English · Speaking", capturedBy: "Honey", capturedAt: "Yesterday 13:20", aiTagged: true, thumbHue: 25 },
+  { id: "e9", studentId: "s4", studentName: "Noah Williams", studentInitials: "NW", medium: "work-sample", caption: "Followed 3/5 handwashing steps with visual sequence.", goalIds: ["g7"], vcStrand: "Health & PE", capturedBy: "Sharifa", capturedAt: "Today 12:30", aiTagged: true, thumbHue: 60 },
+  { id: "e10", studentId: "s2", studentName: "Jack O'Brien", studentInitials: "JO", medium: "work-sample", caption: "Matched 4 CVC picture-to-word pairs (cat, dog, hat, pig).", goalIds: [], vcStrand: "English · Reading", capturedBy: "Honey", capturedAt: "3 days ago", aiTagged: false, aiSuggestedGoal: "g4", thumbHue: 220 },
+];
+
+export const lessonExamples = [
+  { subject: "Mathematics", strand: "Number", topic: "Counting to 20 with 10-frames", duration: "45 min" },
+  { subject: "English", strand: "Writing", topic: "Tracing my first name", duration: "30 min" },
+  { subject: "Personal & Social", strand: "Self-management", topic: "Using my zones of regulation chart", duration: "30 min" },
+];
+
