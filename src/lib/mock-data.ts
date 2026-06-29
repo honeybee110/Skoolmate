@@ -71,11 +71,11 @@ export const classInfo = {
 export const todayTimetable: TimetableBlock[] = [
   { start: "9:00", end: "10:00", title: "Start the Day / Phonics", room: "P7", type: "literacy" },
   { start: "10:00", end: "10:30", title: "Literacy — Writing", room: "P7", type: "literacy" },
-  { start: "10:30", end: "11:00", title: "Morning Tea", room: "Yard", type: "break" },
+  { start: "10:30", end: "11:00", title: "Morning Tea", room: "P7", type: "break" },
   { start: "11:00", end: "11:30", title: "Morning Play", room: "Yard", type: "break" },
   { start: "11:30", end: "12:30", title: "Maths — Numbers", room: "P7", type: "numeracy" },
   { start: "12:30", end: "1:00", title: "Learn to Play", room: "P7", type: "literacy" },
-  { start: "1:00", end: "1:30", title: "Lunch", room: "Yard", type: "break" },
+  { start: "1:00", end: "1:30", title: "Lunch", room: "P7", type: "break" },
   { start: "1:30", end: "2:00", title: "Lunch Play", room: "Yard", type: "break" },
   { start: "2:00", end: "3:00", title: "Social Games", room: "P7", type: "specialist" },
 ];
