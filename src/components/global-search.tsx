@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Search, Users, Camera, ClipboardList, Target, X } from "lucide-react";
 import {
   students,
