@@ -32,15 +32,29 @@ const mediumMeta: Record<EvidenceMedium, { icon: React.ComponentType<{ className
 };
 
 function EvidencePage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const { matches } = useActiveSemester();
   const [items, setItems] = useState<EvidenceItem[]>(evidenceItems);
   const [query, setQuery] = useState("");
   const [medium, setMedium] = useState<EvidenceMedium | "all">("all");
 
+  const studentScope = search.student;
+  const semesterScope = search.semester;
+  const goalScope = search.goal;
+  const scopedStudent = studentScope ? students.find((s) => s.id === studentScope) : undefined;
+
   const filtered = useMemo(() => items.filter((e) => {
     const q = !query || e.caption.toLowerCase().includes(query.toLowerCase()) || e.studentName.toLowerCase().includes(query.toLowerCase());
     const m = medium === "all" || e.medium === medium;
-    return q && m;
-  }), [items, query, medium]);
+    const stu = !studentScope || e.studentId === studentScope;
+    const sem = !semesterScope || semesterScope === "all" || e.semester === semesterScope
+      ? (semesterScope ? true : matches(e.semester))
+      : false;
+    const goal = !goalScope || e.goalIds.includes(goalScope);
+    return q && m && stu && sem && goal;
+  }), [items, query, medium, studentScope, semesterScope, goalScope, matches]);
+
 
   const untagged = items.filter((e) => !e.aiTagged && e.aiSuggestedGoal);
 
