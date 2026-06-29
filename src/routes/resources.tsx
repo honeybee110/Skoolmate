@@ -7,7 +7,7 @@ export const Route = createFileRoute("/resources")({
   head: () => ({ meta: [{ title: "Resource Bank · SchoolMate AU" }] }),
   component: () => (
     <AppShell>
-      <PageHeader title="Resource Bank" subtitle="Numeracy · Literacy · Electives — with AI-recommended matches per lesson" />
+      <PageHeader title="Resource Bank" subtitle="Maths · English · Electives — with AI-recommended matches per lesson" />
       <div className="px-4 py-6 md:px-8">
         <ModuleStub
           feature="Searchable Resource Library"

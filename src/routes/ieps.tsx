@@ -11,12 +11,15 @@ import {
   Target, Plus, Sparkles, AlertTriangle, CheckCircle2,
   Search, Filter, ChevronRight, Calendar, BookOpen, ListChecks,
   FileDown, ExternalLink, Send, ShieldCheck, Clock, Link2, X,
+  Camera, MessageSquarePlus, Pencil, UserCog,
 } from "lucide-react";
 import {
   iepGoals as seedGoals, students, evidenceItems as seedEvidence,
+  specialistEntries as seedSpecialists,
   availableSemesters, currentSemester,
   type IepGoal, type IepStatus, type IepDomain, type IepApproval,
   type SuccessCriterion, type EvidenceItem, type Semester,
+  type SpecialistEntry, type SpecialistSubject,
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -50,12 +53,14 @@ const approvalMeta: Record<IepApproval, { label: string; tone: string; icon: Rea
 };
 
 const domainTone: Record<IepDomain, string> = {
-  Communication: "bg-primary/10 text-primary",
-  Literacy: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
-  Numeracy: "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
-  "Social-Emotional": "bg-accent/15 text-accent",
+  English: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
+  Maths: "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
+  "Personal & Social": "bg-accent/15 text-accent",
+  Science: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+  HASS: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+  "Health & PE": "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
+  "The Arts": "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
   "Self-care": "bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300",
-  Motor: "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
 };
 
 function goalProgress(goal: IepGoal) {
@@ -75,15 +80,28 @@ const seeded: IepGoal[] = seedGoals.map((g) => ({
   approvedAt: ["g5", "g6"].includes(g.id) ? "Wk 4 · 2026" : undefined,
 }));
 
+const SUBJECTS: IepDomain[] = [
+  "English",
+  "Maths",
+  "Personal & Social",
+  "Science",
+  "HASS",
+  "Health & PE",
+  "The Arts",
+  "Self-care",
+];
+
+
 function IepsPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [goals, setGoals] = useState<IepGoal[]>(seeded);
   const [evidence, setEvidence] = useState<EvidenceItem[]>(seedEvidence);
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<ActiveStatus | "all">("all");
+  const [specialists, setSpecialists] = useState<SpecialistEntry[]>(seedSpecialists);
+  const [subject, setSubject] = useState<IepDomain | "all">("all");
   const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(search.semester ?? currentSemester);
   const studentScope = search.student;
+
   const initialGoalId = search.goal && seeded.some((g) => g.id === search.goal)
     ? search.goal
     : (studentScope ? (seeded.find((g) => g.studentId === studentScope)?.id ?? seeded[0].id) : seeded[0].id);
@@ -91,32 +109,25 @@ function IepsPage() {
 
   const scopedStudent = studentScope ? students.find((s) => s.id === studentScope) : undefined;
 
-  const filtered = useMemo(() => goals.filter((g) => {
-    const q = query.toLowerCase();
-    const matchesQ = !q || g.smart.toLowerCase().includes(q) || g.studentName.toLowerCase().includes(q) || g.learningArea.toLowerCase().includes(q) || g.vcLink.toLowerCase().includes(q);
-    const matchesF = filter === "all" || g.status === filter;
-    const matchesS = semesterFilter === "all" || g.semester === semesterFilter;
-    const matchesStudent = !studentScope || g.studentId === studentScope;
-    return matchesQ && matchesF && matchesS && matchesStudent;
-  }), [query, filter, semesterFilter, goals, studentScope]);
+  const scopedGoals = useMemo(() => goals.filter((g) => {
+    if (semesterFilter !== "all" && g.semester !== semesterFilter) return false;
+    if (studentScope && g.studentId !== studentScope) return false;
+    if (subject !== "all" && g.domain !== subject) return false;
+    return true;
+  }), [goals, semesterFilter, studentScope, subject]);
 
-  const selected = goals.find((g) => g.id === selectedId) ?? filtered[0] ?? goals[0];
+  const selected = goals.find((g) => g.id === selectedId) ?? scopedGoals[0] ?? goals[0];
 
-  const scoped = useMemo(
-    () => {
-      let xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
-      if (studentScope) xs = xs.filter((g) => g.studentId === studentScope);
-      return xs;
-    },
-    [goals, semesterFilter, studentScope],
-  );
-
-  const stats = useMemo(() => ({
-    total: scoped.length,
-    achieved: scoped.filter((g) => g.status === "achieved").length,
-    developing: scoped.filter((g) => g.status === "developing").length,
-    pending: scoped.filter((g) => g.approval === "pending").length,
-  }), [scoped]);
+  const stats = useMemo(() => {
+    const xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
+    const scope = studentScope ? xs.filter((g) => g.studentId === studentScope) : xs;
+    return {
+      total: scope.length,
+      achieved: scope.filter((g) => g.status === "achieved").length,
+      developing: scope.filter((g) => g.status === "developing").length,
+      pending: scope.filter((g) => g.approval === "pending").length,
+    };
+  }, [goals, semesterFilter, studentScope]);
 
   function setApproval(id: string, approval: IepApproval) {
     setGoals((prev) => prev.map((g) => g.id === id ? {
@@ -142,11 +153,32 @@ function IepsPage() {
     setEvidence((prev) => prev.map((e) => e.id === evId ? { ...e, aiSuggestedGoal: undefined } : e));
   }
 
+  function addSpecialistEntry(entry: Omit<SpecialistEntry, "id" | "addedAt" | "semester">) {
+    setSpecialists((prev) => [
+      { ...entry, id: `sp${prev.length + 1}-${Date.now()}`, addedAt: "Just now", semester: currentSemester },
+      ...prev,
+    ]);
+    toast.success(`Specialist note from ${entry.specialistName} added.`);
+  }
+
+  // Build class roster: one row per student, with per-subject goal aggregates
+  const roster = useMemo(() => students.map((s) => {
+    const studentGoals = (semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter))
+      .filter((g) => g.studentId === s.id);
+    const bySubject = SUBJECTS.reduce<Record<IepDomain, IepGoal[]>>((acc, d) => {
+      acc[d] = studentGoals.filter((g) => g.domain === d);
+      return acc;
+    }, {} as Record<IepDomain, IepGoal[]>);
+    return { student: s, all: studentGoals, bySubject };
+  }), [goals, semesterFilter]);
+
+  const rosterFiltered = studentScope ? roster.filter((r) => r.student.id === studentScope) : roster;
+
   return (
     <AppShell>
       <PageHeader
         title="IEP Goals"
-        subtitle="Structured from Scope & Sequence · cross-checked against Developing → Working Towards → Achieved"
+        subtitle="Class list · cross-subject goal tracker · specialist teacher notes"
         actions={
           <>
             <Button asChild variant="outline" size="sm">
@@ -160,7 +192,7 @@ function IepsPage() {
 
       <div className="grid grid-cols-2 gap-3 px-4 pt-6 md:grid-cols-4 md:px-8">
         <StatCard label={semesterFilter === "all" ? "Active goals (all sem.)" : `Active goals · ${semesterFilter.replace(" · 2026", "")}`} value={stats.total} icon={<Target className="h-4 w-4" />} />
-        <StatCard label={semesterFilter === "all" ? "Achieved (all sem.)" : `Achieved · ${semesterFilter.replace(" · 2026", "")}`} value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
+        <StatCard label="Achieved" value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
         <StatCard label="Developing" value={stats.developing} icon={<Target className="h-4 w-4 text-orange-600" />} />
         <StatCard label="Pending approval" value={stats.pending} icon={<Send className="h-4 w-4 text-amber-600" />} highlight />
       </div>
@@ -181,11 +213,8 @@ function IepsPage() {
             </Card>
           )}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search by student, goal, learning area or VC code…" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
-            </div>
+          {/* Semester + subject tabs */}
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
               <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
               <button onClick={() => setSemesterFilter("all")} className={cn("rounded-md px-2.5 py-1 transition", semesterFilter === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All sem.</button>
@@ -195,24 +224,32 @@ function IepsPage() {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
-              <Filter className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-              {(["all", "developing", "working-towards", "achieved"] as const).map((f) => (
-                <button key={f} onClick={() => setFilter(f)} className={cn("rounded-md px-2.5 py-1 transition", filter === f ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
-                  {f === "all" ? "All" : statusMeta[f].label}
+            <div className="flex flex-wrap items-center gap-1 rounded-lg border bg-card p-1 text-xs">
+              <BookOpen className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+              <button onClick={() => setSubject("all")} className={cn("rounded-md px-2.5 py-1 transition", subject === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All subjects</button>
+              {SUBJECTS.map((d) => (
+                <button key={d} onClick={() => setSubject(d)} className={cn("rounded-md px-2.5 py-1 transition whitespace-nowrap", subject === d ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
+                  {d}
                 </button>
               ))}
             </div>
           </div>
 
-          {filtered.length === 0 && (
-            <Card className="p-6 text-center text-sm text-muted-foreground">
-              No IEP goals match the current filters{semesterFilter !== "all" && <> in <span className="font-medium text-foreground">{semesterFilter}</span></>}.
-            </Card>
-          )}
-          {filtered.map((g) => (
-            <GoalRow key={g.id} goal={g} selected={g.id === selected.id} onSelect={() => setSelectedId(g.id)} />
-          ))}
+          {/* Class roster table — subjects as columns */}
+          <ClassRoster
+            rows={rosterFiltered}
+            subjectFilter={subject}
+            selectedId={selected.id}
+            onSelect={setSelectedId}
+          />
+
+          {/* Specialist teachers — comments + photos */}
+          <SpecialistsSection
+            entries={specialists.filter((e) => semesterFilter === "all" || e.semester === semesterFilter)}
+            goals={goals}
+            onAdd={addSpecialistEntry}
+            scopedStudentId={studentScope}
+          />
         </div>
 
         <CrossCheckPanel
@@ -505,3 +542,269 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
     </div>
   );
 }
+
+// ---------- Class Roster ----------
+
+function ClassRoster({
+  rows, subjectFilter, selectedId, onSelect,
+}: {
+  rows: { student: typeof students[number]; all: IepGoal[]; bySubject: Record<IepDomain, IepGoal[]> }[];
+  subjectFilter: IepDomain | "all";
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  const columns: IepDomain[] = subjectFilter === "all" ? SUBJECTS : [subjectFilter];
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="flex items-center justify-between border-b bg-secondary/30 px-4 py-2.5">
+        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <Target className="h-3.5 w-3.5" />Class IEP Goal Tracker · {classInfoCode()}
+        </div>
+        <span className="text-[10px] text-muted-foreground">{rows.length} students · {columns.length} subject{columns.length === 1 ? "" : "s"}</span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[820px] border-collapse text-sm">
+          <thead>
+            <tr className="border-b bg-muted/30 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+              <th className="sticky left-0 z-10 bg-muted/30 px-3 py-2 font-medium">Student</th>
+              {columns.map((c) => (
+                <th key={c} className="px-3 py-2 font-medium">{c}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ student, bySubject }) => (
+              <tr key={student.id} className="border-b align-top last:border-b-0 hover:bg-secondary/20">
+                <td className="sticky left-0 z-10 w-[180px] bg-card px-3 py-3">
+                  <div className="flex items-center gap-2">
+                    <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold text-foreground/80", student.avatarColor)}>
+                      {student.initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold leading-tight">{student.firstName} {student.lastName}</p>
+                      <p className="text-[10px] text-muted-foreground">{student.yearLevel}</p>
+                    </div>
+                  </div>
+                </td>
+                {columns.map((c) => (
+                  <td key={c} className="px-3 py-3 align-top">
+                    <SubjectCell
+                      goals={bySubject[c] ?? []}
+                      selectedId={selectedId}
+                      onSelect={onSelect}
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
+function classInfoCode() {
+  return "P7 · Honey";
+}
+
+function SubjectCell({ goals, selectedId, onSelect }: { goals: IepGoal[]; selectedId: string; onSelect: (id: string) => void }) {
+  if (goals.length === 0) {
+    return (
+      <button className="rounded-md border border-dashed border-border/60 px-2 py-1 text-[11px] text-muted-foreground/70 hover:border-primary/40 hover:text-primary">
+        <Plus className="mr-0.5 inline h-3 w-3" />Add
+      </button>
+    );
+  }
+  return (
+    <div className="space-y-1.5">
+      {goals.map((g) => {
+        const pct = goalProgress(g);
+        const meta = statusMeta[g.status];
+        const isSel = g.id === selectedId;
+        return (
+          <button
+            key={g.id}
+            onClick={() => onSelect(g.id)}
+            className={cn(
+              "group block w-full rounded-md border px-2 py-1.5 text-left transition",
+              isSel ? "border-primary bg-primary-soft/40 ring-1 ring-primary/30" : "border-border/60 hover:border-primary/40 hover:bg-secondary/40",
+            )}
+            title={g.smart}
+          >
+            <p className="line-clamp-2 text-[11px] font-medium leading-snug text-foreground/90">{g.learningArea.replace(/^[^·]+·\s*/, "")}</p>
+            <div className="mt-1 flex items-center gap-1.5">
+              <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
+                <div className={cn("h-full", meta.dot)} style={{ width: `${pct}%` }} />
+              </div>
+              <span className="text-[10px] tabular-nums text-muted-foreground">{pct}%</span>
+            </div>
+            <div className="mt-1 flex items-center justify-between gap-1">
+              <Badge variant="outline" className={cn("h-4 px-1 text-[9px] font-normal", meta.tone)}>{meta.label}</Badge>
+              <span className="text-[9px] text-muted-foreground">L{g.level} · {g.evidenceCount}ev</span>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------- Specialists ----------
+
+const SPECIALIST_ROLES: SpecialistSubject[] = [
+  "Health & PE",
+  "The Arts · Music",
+  "The Arts · Drama",
+  "The Arts · Visual Arts",
+  "Cooking / Kitchen Garden",
+  "Speech Therapy",
+  "Occupational Therapy",
+];
+
+function SpecialistsSection({
+  entries, goals, onAdd, scopedStudentId,
+}: {
+  entries: SpecialistEntry[];
+  goals: IepGoal[];
+  onAdd: (entry: Omit<SpecialistEntry, "id" | "addedAt" | "semester">) => void;
+  scopedStudentId?: string;
+}) {
+  const visible = scopedStudentId ? entries.filter((e) => e.studentId === scopedStudentId) : entries;
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    specialistName: "",
+    specialistRole: "Health & PE" as SpecialistSubject,
+    studentId: scopedStudentId ?? students[0].id,
+    goalId: "",
+    comment: "",
+    withPhoto: true,
+  });
+
+  function submit() {
+    if (!form.specialistName.trim() || !form.comment.trim()) {
+      toast.error("Add your name and a comment.");
+      return;
+    }
+    onAdd({
+      specialistName: form.specialistName.trim(),
+      specialistRole: form.specialistRole,
+      studentId: form.studentId,
+      goalId: form.goalId || undefined,
+      comment: form.comment.trim(),
+      photoHue: form.withPhoto ? Math.floor(Math.random() * 360) : undefined,
+    });
+    setForm((f) => ({ ...f, specialistName: "", comment: "", goalId: "" }));
+    setOpen(false);
+  }
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="flex items-center justify-between border-b bg-gradient-to-r from-accent/10 to-background px-4 py-2.5">
+        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <UserCog className="h-3.5 w-3.5 text-accent" />Specialist teachers · IEP edits, comments & photos
+        </div>
+        <Button size="sm" variant={open ? "outline" : "default"} className={cn("h-7 text-xs", !open && "bg-accent text-accent-foreground hover:bg-accent/90")} onClick={() => setOpen((v) => !v)}>
+          {open ? <><X className="h-3 w-3" />Close</> : <><MessageSquarePlus className="h-3 w-3" />Add specialist note</>}
+        </Button>
+      </div>
+
+      {open && (
+        <div className="grid gap-2 border-b bg-secondary/30 p-4 text-xs md:grid-cols-2">
+          <label className="space-y-1">
+            <span className="font-medium text-muted-foreground">Specialist name</span>
+            <Input value={form.specialistName} onChange={(e) => setForm((f) => ({ ...f, specialistName: e.target.value }))} placeholder="e.g. Coach Tom" className="h-8" />
+          </label>
+          <label className="space-y-1">
+            <span className="font-medium text-muted-foreground">Role</span>
+            <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.specialistRole} onChange={(e) => setForm((f) => ({ ...f, specialistRole: e.target.value as SpecialistSubject }))}>
+              {SPECIALIST_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </label>
+          <label className="space-y-1">
+            <span className="font-medium text-muted-foreground">Student</span>
+            <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.studentId} onChange={(e) => setForm((f) => ({ ...f, studentId: e.target.value, goalId: "" }))}>
+              {students.map((s) => <option key={s.id} value={s.id}>{s.firstName} {s.lastName}</option>)}
+            </select>
+          </label>
+          <label className="space-y-1">
+            <span className="font-medium text-muted-foreground">Link to IEP goal (optional)</span>
+            <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.goalId} onChange={(e) => setForm((f) => ({ ...f, goalId: e.target.value }))}>
+              <option value="">— None —</option>
+              {goals.filter((g) => g.studentId === form.studentId).map((g) => (
+                <option key={g.id} value={g.id}>{g.learningArea} — {g.smart.slice(0, 60)}…</option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-1 md:col-span-2">
+            <span className="font-medium text-muted-foreground">Comment</span>
+            <textarea
+              value={form.comment}
+              onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
+              placeholder="e.g. Noah caught the ball 3/5 today — best result yet."
+              className="min-h-[64px] w-full rounded-md border bg-card p-2 text-xs"
+            />
+          </label>
+          <div className="flex items-center justify-between md:col-span-2">
+            <label className="flex items-center gap-2 text-xs">
+              <input type="checkbox" checked={form.withPhoto} onChange={(e) => setForm((f) => ({ ...f, withPhoto: e.target.checked }))} />
+              <Camera className="h-3.5 w-3.5" />Attach session photo
+            </label>
+            <Button size="sm" className="h-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={submit}>
+              <Send className="h-3.5 w-3.5" />Post to IEP
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {visible.length === 0 ? (
+        <p className="p-4 text-xs italic text-muted-foreground">No specialist notes yet for this scope.</p>
+      ) : (
+        <div className="grid gap-3 p-4 md:grid-cols-2">
+          {visible.map((e) => {
+            const student = students.find((s) => s.id === e.studentId);
+            const linkedGoal = e.goalId ? goals.find((g) => g.id === e.goalId) : undefined;
+            return (
+              <div key={e.id} className="flex gap-3 rounded-lg border bg-card p-3">
+                {e.photoHue !== undefined ? (
+                  <div
+                    className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md ring-1 ring-border"
+                    style={{ background: `linear-gradient(135deg, oklch(0.82 0.09 ${e.photoHue}) 0%, oklch(0.92 0.05 ${(e.photoHue + 40) % 360}) 100%)` }}
+                  >
+                    <Camera className="absolute bottom-1 right-1 h-3 w-3 text-foreground/40" />
+                  </div>
+                ) : (
+                  <div className="grid h-20 w-20 shrink-0 place-items-center rounded-md bg-muted text-[10px] text-muted-foreground">No photo</div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-sm font-semibold">{e.specialistName}</span>
+                    <Badge variant="outline" className="text-[10px]">{e.specialistRole}</Badge>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    {student ? `${student.firstName} ${student.lastName}` : "—"} · {e.addedAt}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-snug text-foreground/85">{e.comment}</p>
+                  {linkedGoal && (
+                    <div className="mt-2 flex items-center gap-1.5 text-[10px]">
+                      <Link2 className="h-3 w-3 text-primary" />
+                      <Badge variant="outline" className="font-normal text-[10px]">{linkedGoal.learningArea}</Badge>
+                      <span className="truncate text-muted-foreground">{linkedGoal.smart}</span>
+                    </div>
+                  )}
+                  <div className="mt-2 flex gap-1">
+                    <Button size="sm" variant="ghost" className="h-6 text-[10px]"><Pencil className="h-3 w-3" />Edit</Button>
+                    <Button size="sm" variant="ghost" className="h-6 text-[10px]"><Plus className="h-3 w-3" />Add to goal</Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Card>
+  );
+}
+

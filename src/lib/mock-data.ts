@@ -244,7 +244,15 @@ export const curriculumStrands = {
 
 export type IepStatus = "not-started" | "developing" | "working-towards" | "achieved";
 export type IepApproval = "draft" | "pending" | "approved";
-export type IepDomain = "Communication" | "Literacy" | "Numeracy" | "Social-Emotional" | "Self-care" | "Motor";
+export type IepDomain =
+  | "English"
+  | "Maths"
+  | "Personal & Social"
+  | "Science"
+  | "HASS"
+  | "Health & PE"
+  | "The Arts"
+  | "Self-care";
 export type VcLevel = "A" | "B" | "C" | "D" | "F" | "1" | "2";
 export type LearningArea =
   | "English · Phonics"
@@ -256,7 +264,14 @@ export type LearningArea =
   | "Maths · Space"
   | "Humanities · History"
   | "Humanities · Geography"
-  | "Science";
+  | "Science"
+  | "Personal & Social"
+  | "Health & PE"
+  | "The Arts · Music"
+  | "The Arts · Drama"
+  | "The Arts · Visual Arts"
+  | "Cooking / Kitchen Garden";
+
 
 export interface SuccessCriterion {
   step: string;
@@ -294,7 +309,7 @@ const seedSemester: Semester = currentSemester;
 export const iepGoals: IepGoal[] = ([
 
   {
-    id: "g1", studentId: "s1", studentName: "Mia Nguyen", domain: "Numeracy",
+    id: "g1", studentId: "s1", studentName: "Mia Nguyen", domain: "Maths",
     learningArea: "Maths · Number", level: "F", vcLink: "VC2MFN01",
     learningIntention: "Name, represent and order numbers, including zero to at least 20, using physical and virtual materials and numerals.",
     smart: "Mia will name, represent and order numbers 0–20 with 80% accuracy across 3 sessions by end of Semester 2.",
@@ -307,7 +322,7 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g2", studentId: "s1", studentName: "Mia Nguyen", domain: "Communication",
+    id: "g2", studentId: "s1", studentName: "Mia Nguyen", domain: "English",
     learningArea: "English · Speaking & Listening", level: "D", vcLink: "VC2EFDLA02",
     learningIntention: "Use phrases to communicate preferences, likes and dislikes.",
     smart: "Mia will use 3-word phrases to indicate preferences independently in 4/5 opportunities daily.",
@@ -320,7 +335,7 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g3", studentId: "s2", studentName: "Jack O'Brien", domain: "Social-Emotional",
+    id: "g3", studentId: "s2", studentName: "Jack O'Brien", domain: "Personal & Social",
     learningArea: "English · Speaking & Listening", level: "C", vcLink: "VC2EFCLA01",
     learningIntention: "Use short phrases to request, accept or reject an object, action or event.",
     smart: "Jack will request a break using his AAC device when escalated in 3/5 opportunities.",
@@ -333,7 +348,7 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g4", studentId: "s2", studentName: "Jack O'Brien", domain: "Literacy",
+    id: "g4", studentId: "s2", studentName: "Jack O'Brien", domain: "English",
     learningArea: "English · Phonics", level: "D", vcLink: "VC2EFDLY02",
     learningIntention: "Blend and segment a small number of one-syllable words; read some CVC words.",
     smart: "Jack will read 6 CVC words by blending sounds with 80% accuracy across 3 sessions.",
@@ -346,7 +361,7 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g5", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Literacy",
+    id: "g5", studentId: "s3", studentName: "Aaliyah Tahir", domain: "English",
     learningArea: "English · Writing", level: "F", vcLink: "VC2EFLY15",
     learningIntention: "Form most lower-case and upper-case letters using learnt letter formations.",
     smart: "Aaliyah will form the letters of her first name with a model present, 4 of 5 attempts.",
@@ -359,7 +374,7 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g6", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Communication",
+    id: "g6", studentId: "s3", studentName: "Aaliyah Tahir", domain: "English",
     learningArea: "English · Speaking & Listening", level: "C", vcLink: "VC2EFCLA01",
     learningIntention: "Use short phrases to request, accept or reject an object, action or event.",
     smart: "Aaliyah will request help using her PECS card in 4/5 opportunities.",
@@ -385,7 +400,7 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g8", studentId: "s4", studentName: "Noah Williams", domain: "Social-Emotional",
+    id: "g8", studentId: "s4", studentName: "Noah Williams", domain: "Personal & Social",
     learningArea: "English · Speaking & Listening", level: "D", vcLink: "VC2EFDLA02",
     learningIntention: "Use phrases to communicate preferences, likes and dislikes.",
     smart: "Noah will use a sensory regulation chart to label his state 3 times daily.",
@@ -398,7 +413,7 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g9", studentId: "s5", studentName: "Zara Patel", domain: "Communication",
+    id: "g9", studentId: "s5", studentName: "Zara Patel", domain: "English",
     learningArea: "English · Speaking & Listening", level: "B", vcLink: "VC2EFBLA01",
     learningIntention: "Use preferred communication modality to indicate a preference.",
     smart: "Zara will initiate AAC requests for 3 preferred items independently.",
@@ -411,7 +426,7 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g10", studentId: "s8", studentName: "Hamish Carter", domain: "Social-Emotional",
+    id: "g10", studentId: "s8", studentName: "Hamish Carter", domain: "Personal & Social",
     learningArea: "English · Speaking & Listening", level: "C", vcLink: "VC2EFCLA01",
     learningIntention: "Use short phrases to request, accept or reject an object, action or event.",
     smart: "Hamish will request a break with AAC in 4/5 escalation moments.",
@@ -423,7 +438,118 @@ export const iepGoals: IepGoal[] = ([
       { step: "Request break before escalation", workingTowards: "After incident", developing: "Mid-escalation with prompt", achieved: "Before escalation", status: "working-towards" },
     ],
   },
+  {
+    id: "g11", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Science",
+    learningArea: "Science", level: "F", vcLink: "VC2SFU01",
+    learningIntention: "Explore the needs of living things and identify what is living and non-living.",
+    smart: "Aaliyah will sort 6 picture cards into living / non-living in 3/4 sessions.",
+    baseline: "Sorts 2 with adult support", status: "developing",
+    evidenceCount: 3, lastEvidence: "3 days ago", reviewDue: "Wk 9",
+    successCriteria: [
+      { step: "Name 3 living things in the classroom", workingTowards: "Names 1 with cue", developing: "Names 2 with cue", achieved: "Names 3 independently", status: "developing" },
+      { step: "Sort 6 picture cards", workingTowards: "Sorts 2", developing: "Sorts 4 with cues", achieved: "Sorts 6 independently", status: "developing" },
+      { step: "Explain one need (food / water / air)", workingTowards: "Points to picture", developing: "Single word", achieved: "Short phrase", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g12", studentId: "s1", studentName: "Mia Nguyen", domain: "HASS",
+    learningArea: "Humanities · Geography", level: "F", vcLink: "VC2HGFK01",
+    learningIntention: "Identify the places I belong to — home, classroom, school.",
+    smart: "Mia will match 4 place photos to labels (home, classroom, yard, hall) in 4/5 trials.",
+    baseline: "Matches 2 places with model", status: "developing",
+    evidenceCount: 2, lastEvidence: "Yesterday", reviewDue: "Wk 10",
+    successCriteria: [
+      { step: "Recognise own classroom photo", workingTowards: "With prompt", developing: "With cue", achieved: "Independently", status: "achieved" },
+      { step: "Match 4 places to labels", workingTowards: "Matches 1", developing: "Matches 2–3", achieved: "Matches all 4", status: "developing" },
+      { step: "Name place during walk", workingTowards: "Imitates word", developing: "Single word with cue", achieved: "Names independently", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g13", studentId: "s4", studentName: "Noah Williams", domain: "Health & PE",
+    learningArea: "Health & PE", level: "D", vcLink: "VC2HPFM02",
+    learningIntention: "Perform fundamental movement skills with growing control.",
+    smart: "Noah will catch a large soft ball from 1m in 4/5 attempts during PE.",
+    baseline: "Traps ball against chest occasionally", status: "developing",
+    evidenceCount: 4, lastEvidence: "Today", reviewDue: "Wk 9",
+    successCriteria: [
+      { step: "Track ball with eyes", workingTowards: "Inconsistent tracking", developing: "Tracks with cue", achieved: "Tracks independently", status: "developing" },
+      { step: "Position hands to catch", workingTowards: "Closes after contact", developing: "Closes with cue", achieved: "Closes on contact", status: "developing" },
+      { step: "Catch from 1m", workingTowards: "1/5", developing: "2–3/5", achieved: "4/5", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g14", studentId: "s5", studentName: "Zara Patel", domain: "The Arts",
+    learningArea: "The Arts · Music", level: "C", vcLink: "VC2AMUFE01",
+    learningIntention: "Respond to music using voice, body and instruments.",
+    smart: "Zara will tap a steady beat on a drum for 8 counts in 3/4 sessions.",
+    baseline: "Taps inconsistently with model", status: "developing",
+    evidenceCount: 2, lastEvidence: "2 days ago", reviewDue: "Wk 10",
+    successCriteria: [
+      { step: "Hold mallet correctly", workingTowards: "HOH", developing: "With cue", achieved: "Independently", status: "developing" },
+      { step: "Tap 4 counts", workingTowards: "1–2 taps", developing: "3 taps", achieved: "4 taps in time", status: "working-towards" },
+      { step: "Tap 8 counts", workingTowards: "Loses beat", developing: "Maintains 5–6", achieved: "Maintains 8", status: "developing" },
+    ],
+  },
+  {
+    id: "g15", studentId: "s8", studentName: "Hamish Carter", domain: "The Arts",
+    learningArea: "The Arts · Drama", level: "C", vcLink: "VC2ADRFE01",
+    learningIntention: "Take on a role using voice, movement and props.",
+    smart: "Hamish will hold a prop and copy 3 actions in role during Drama.",
+    baseline: "Watches peers, joins briefly", status: "developing",
+    evidenceCount: 1, lastEvidence: "Last week", reviewDue: "Wk 10",
+    successCriteria: [
+      { step: "Hold prop for 30s", workingTowards: "Drops quickly", developing: "Holds with cue", achieved: "Holds independently", status: "developing" },
+      { step: "Copy 1 action", workingTowards: "With HOH", developing: "With model", achieved: "Independently", status: "developing" },
+      { step: "Copy 3 actions", workingTowards: "Copies 1", developing: "Copies 2", achieved: "Copies 3", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g16", studentId: "s7", studentName: "Charlotte Reid", domain: "The Arts",
+    learningArea: "Cooking / Kitchen Garden", level: "D", vcLink: "VC2DTFK01",
+    learningIntention: "Follow a 3-step picture recipe with support.",
+    smart: "Charlotte will follow a 3-step recipe sequence (spread, top, fold) in Cooking with 1 prompt.",
+    baseline: "Completes 1 step", status: "developing",
+    evidenceCount: 2, lastEvidence: "Friday", reviewDue: "Wk 9",
+    successCriteria: [
+      { step: "Identify each step on visual", workingTowards: "Points with cue", developing: "Points with model", achieved: "Identifies all 3", status: "developing" },
+      { step: "Perform each step", workingTowards: "1 step with HOH", developing: "2 steps with cue", achieved: "3 steps with 1 prompt", status: "developing" },
+      { step: "Sequence correctly", workingTowards: "Random", developing: "With visual prompt", achieved: "Independent sequence", status: "working-towards" },
+    ],
+  },
 ] as Omit<IepGoal, "semester">[]).map((g) => ({ ...g, semester: seedSemester }));
+
+// Specialist teacher entries — comments and photo evidence attached to a student
+// by visiting specialists (PE, Music, Drama, Cooking, OT, SLP) who edit IEPs.
+export type SpecialistSubject =
+  | "Health & PE"
+  | "The Arts · Music"
+  | "The Arts · Drama"
+  | "The Arts · Visual Arts"
+  | "Cooking / Kitchen Garden"
+  | "Speech Therapy"
+  | "Occupational Therapy";
+
+export interface SpecialistEntry {
+  id: string;
+  specialistName: string;
+  specialistRole: SpecialistSubject;
+  studentId: string;
+  goalId?: string;
+  comment: string;
+  photoHue?: number;
+  addedAt: string;
+  semester: Semester;
+}
+
+export const specialistEntries: SpecialistEntry[] = [
+  { id: "sp1", specialistName: "Coach Tom",   specialistRole: "Health & PE",             studentId: "s4", goalId: "g13", comment: "Noah caught the ball 3/5 today — best result yet. Trying a yellow ball next week for higher contrast.", photoHue: 60,  addedAt: "Today 11:20",   semester: currentSemester },
+  { id: "sp2", specialistName: "Ms Aria",     specialistRole: "The Arts · Music",        studentId: "s5", goalId: "g14", comment: "Zara held the mallet independently and tapped 6 even beats. Adding visual count cards for 8-beat target.", photoHue: 280, addedAt: "Yesterday 14:05", semester: currentSemester },
+  { id: "sp3", specialistName: "Mr Davies",   specialistRole: "The Arts · Drama",        studentId: "s8", goalId: "g15", comment: "Hamish held the hat for full 30s and copied 1 action. Will pair him with Aaliyah for next role-play.", photoHue: 330, addedAt: "2 days ago",    semester: currentSemester },
+  { id: "sp4", specialistName: "Chef Bea",    specialistRole: "Cooking / Kitchen Garden", studentId: "s7", goalId: "g16", comment: "Charlotte completed spread → top with one verbal prompt. Folding needs hand-over-hand still.",            photoHue: 25,  addedAt: "Friday 13:40",  semester: currentSemester },
+  { id: "sp5", specialistName: "Lana (SLP)",  specialistRole: "Speech Therapy",          studentId: "s2", goalId: "g3",  comment: "Jack initiated 'break please' once unprompted. Visual scripts working — recommend continuing in class.",   photoHue: 220, addedAt: "Today 09:50",   semester: currentSemester },
+  { id: "sp6", specialistName: "Priya (OT)",  specialistRole: "Occupational Therapy",    studentId: "s1",                comment: "Mia tolerated 8 minutes of seated table work today (up from 5). Suggest wobble cushion trial next week.",   photoHue: 192, addedAt: "Today 10:30",   semester: currentSemester },
+];
+
 
 
 export type EvidenceMedium = "photo" | "video" | "work-sample" | "anecdotal" | "audio";
