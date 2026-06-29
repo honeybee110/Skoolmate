@@ -89,6 +89,34 @@ function ParentPortal() {
           </div>
         </section>
 
+        {/* Semester switcher */}
+        <section>
+          <div className="flex flex-wrap items-center gap-2">
+            <CalendarRange className="h-4 w-4 text-primary" />
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Reporting period</p>
+            <div className="ml-1 flex flex-wrap items-center gap-1 rounded-full border bg-card p-1">
+              {(["all", ...availableSemesters] as const).map((opt) => {
+                const active = opt === activeSemester;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setActiveSemester(opt)}
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-xs font-medium transition",
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {semesterShortLabel(opt)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* Hero */}
         <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary-soft/40 to-background">
           <div className="grid gap-4 p-6 md:grid-cols-[1fr_auto] md:items-center">
