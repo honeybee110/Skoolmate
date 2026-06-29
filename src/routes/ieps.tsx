@@ -23,8 +23,14 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEPs · SchoolMate AU" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    student: typeof s.student === "string" ? s.student : undefined,
+    semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
+    goal: typeof s.goal === "string" ? s.goal : undefined,
+  }),
   component: IepsPage,
 });
+
 
 type ActiveStatus = Exclude<IepStatus, "not-started">;
 
@@ -68,27 +74,41 @@ const seeded: IepGoal[] = seedGoals.map((g) => ({
 }));
 
 function IepsPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [goals, setGoals] = useState<IepGoal[]>(seeded);
   const [evidence, setEvidence] = useState<EvidenceItem[]>(seedEvidence);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ActiveStatus | "all">("all");
-  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(currentSemester);
-  const [selectedId, setSelectedId] = useState<string>(seeded[0].id);
+  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(search.semester ?? currentSemester);
+  const studentScope = search.student;
+  const initialGoalId = search.goal && seeded.some((g) => g.id === search.goal)
+    ? search.goal
+    : (studentScope ? (seeded.find((g) => g.studentId === studentScope)?.id ?? seeded[0].id) : seeded[0].id);
+  const [selectedId, setSelectedId] = useState<string>(initialGoalId);
+
+  const scopedStudent = studentScope ? students.find((s) => s.id === studentScope) : undefined;
 
   const filtered = useMemo(() => goals.filter((g) => {
     const q = query.toLowerCase();
     const matchesQ = !q || g.smart.toLowerCase().includes(q) || g.studentName.toLowerCase().includes(q) || g.learningArea.toLowerCase().includes(q) || g.vcLink.toLowerCase().includes(q);
     const matchesF = filter === "all" || g.status === filter;
     const matchesS = semesterFilter === "all" || g.semester === semesterFilter;
-    return matchesQ && matchesF && matchesS;
-  }), [query, filter, semesterFilter, goals]);
+    const matchesStudent = !studentScope || g.studentId === studentScope;
+    return matchesQ && matchesF && matchesS && matchesStudent;
+  }), [query, filter, semesterFilter, goals, studentScope]);
 
-  const selected = goals.find((g) => g.id === selectedId) ?? goals[0];
+  const selected = goals.find((g) => g.id === selectedId) ?? filtered[0] ?? goals[0];
 
   const scoped = useMemo(
-    () => (semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)),
-    [goals, semesterFilter],
+    () => {
+      let xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
+      if (studentScope) xs = xs.filter((g) => g.studentId === studentScope);
+      return xs;
+    },
+    [goals, semesterFilter, studentScope],
   );
+
   const stats = useMemo(() => ({
     total: scoped.length,
     achieved: scoped.filter((g) => g.status === "achieved").length,
@@ -145,6 +165,20 @@ function IepsPage() {
 
       <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[1fr_460px]">
         <div className="space-y-3">
+          {scopedStudent && (
+            <Card className="flex items-center justify-between gap-3 border-primary/30 bg-primary-soft/30 px-3 py-2 text-xs">
+              <div className="flex items-center gap-2">
+                <Filter className="h-3.5 w-3.5 text-primary" />
+                <span>Drilled in from report · showing goals for</span>
+                <Badge variant="outline" className="font-medium">{scopedStudent.firstName} {scopedStudent.lastName}</Badge>
+                {search.semester && <Badge variant="outline">{search.semester}</Badge>}
+              </div>
+              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate({ search: {} })}>
+                <X className="h-3 w-3" /> Clear
+              </Button>
+            </Card>
+          )}
+
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

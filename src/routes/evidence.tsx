@@ -6,15 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Upload, Sparkles, Image as ImageIcon, Video, FileText, Mic, FileEdit, Search, Link2, Check, X } from "lucide-react";
-import { evidenceItems, iepGoals, type EvidenceItem, type EvidenceMedium } from "@/lib/mock-data";
+import { Upload, Sparkles, Image as ImageIcon, Video, FileText, Mic, FileEdit, Search, Link2, Check, X, Filter } from "lucide-react";
+import { evidenceItems, iepGoals, students, type EvidenceItem, type EvidenceMedium, type Semester } from "@/lib/mock-data";
+import { useActiveSemester } from "@/lib/semester-context";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/evidence")({
   head: () => ({ meta: [{ title: "Evidence Hub · SchoolMate AU" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    student: typeof s.student === "string" ? s.student : undefined,
+    semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
+    goal: typeof s.goal === "string" ? s.goal : undefined,
+  }),
   component: EvidencePage,
 });
+
 
 const mediumMeta: Record<EvidenceMedium, { icon: React.ComponentType<{ className?: string }>; label: string; tone: string }> = {
   photo: { icon: ImageIcon, label: "Photo", tone: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" },
@@ -25,15 +32,29 @@ const mediumMeta: Record<EvidenceMedium, { icon: React.ComponentType<{ className
 };
 
 function EvidencePage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const { matches } = useActiveSemester();
   const [items, setItems] = useState<EvidenceItem[]>(evidenceItems);
   const [query, setQuery] = useState("");
   const [medium, setMedium] = useState<EvidenceMedium | "all">("all");
 
+  const studentScope = search.student;
+  const semesterScope = search.semester;
+  const goalScope = search.goal;
+  const scopedStudent = studentScope ? students.find((s) => s.id === studentScope) : undefined;
+
   const filtered = useMemo(() => items.filter((e) => {
     const q = !query || e.caption.toLowerCase().includes(query.toLowerCase()) || e.studentName.toLowerCase().includes(query.toLowerCase());
     const m = medium === "all" || e.medium === medium;
-    return q && m;
-  }), [items, query, medium]);
+    const stu = !studentScope || e.studentId === studentScope;
+    const sem = !semesterScope || semesterScope === "all" || e.semester === semesterScope
+      ? (semesterScope ? true : matches(e.semester))
+      : false;
+    const goal = !goalScope || e.goalIds.includes(goalScope);
+    return q && m && stu && sem && goal;
+  }), [items, query, medium, studentScope, semesterScope, goalScope, matches]);
+
 
   const untagged = items.filter((e) => !e.aiTagged && e.aiSuggestedGoal);
 
@@ -116,7 +137,26 @@ function EvidencePage() {
         </div>
       )}
 
+      {(scopedStudent || semesterScope || goalScope) && (
+        <div className="px-4 pt-6 md:px-8">
+          <Card className="flex flex-wrap items-center justify-between gap-3 border-primary/30 bg-primary-soft/30 px-3 py-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <Filter className="h-3.5 w-3.5 text-primary" />
+              <span>Drilled in from report ·</span>
+              {scopedStudent && <Badge variant="outline" className="font-medium">{scopedStudent.firstName} {scopedStudent.lastName}</Badge>}
+              {semesterScope && semesterScope !== "all" && <Badge variant="outline">{semesterScope}</Badge>}
+              {goalScope && <Badge variant="outline">Goal · {goalScope}</Badge>}
+              <span className="text-muted-foreground">{filtered.length} item{filtered.length === 1 ? "" : "s"}</span>
+            </div>
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate({ search: {} })}>
+              <X className="h-3 w-3" /> Clear
+            </Button>
+          </Card>
+        </div>
+      )}
+
       <div className="flex flex-col gap-2 px-4 pt-6 sm:flex-row sm:items-center md:px-8">
+
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search captions, students…" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
