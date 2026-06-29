@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { iepGoals, students, evidenceItems, classInfo, type IepGoal } from "@/lib/mock-data";
-import { Sparkles, Heart, BookOpen, Camera, FileDown, ChevronRight } from "lucide-react";
+import { iepGoals, students, evidenceItems, iepReports, classInfo, availableSemesters, type IepGoal, type IepReportStatus } from "@/lib/mock-data";
+import { useActiveSemester, semesterShortLabel } from "@/lib/semester-context";
+import { Sparkles, Heart, BookOpen, Camera, FileDown, ChevronRight, FileText, CalendarRange } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/parent")({
