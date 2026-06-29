@@ -55,6 +55,11 @@ const blockColor: Record<string, string> = {
 };
 
 function Dashboard() {
+  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(currentSemester);
+  const visibleActions = useMemo(
+    () => (semesterFilter === "all" ? actionQueue : actionQueue.filter((a) => a.semester === semesterFilter)),
+    [semesterFilter],
+  );
   return (
     <AppShell>
       <div className="px-4 py-6 md:px-8">
