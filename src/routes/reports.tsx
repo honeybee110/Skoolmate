@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { iepReports, students, type IepReportStatus } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
-import { FileText, FileDown, CheckCircle2, Clock, Eye, PenLine, CalendarRange } from "lucide-react";
+import { FileText, FileDown, CheckCircle2, Clock, Eye, PenLine, CalendarRange, Target, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "IEP Reports · SchoolMate AU" }] }),
