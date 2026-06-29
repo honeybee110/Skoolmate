@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -10,12 +10,15 @@ import { Input } from "@/components/ui/input";
 import {
   Target, Plus, Sparkles, AlertTriangle, CheckCircle2,
   Search, Filter, ChevronRight, Calendar, BookOpen, ListChecks,
+  FileDown, ExternalLink, Send, ShieldCheck, Clock, Link2, X,
 } from "lucide-react";
 import {
-  iepGoals, students,
-  type IepGoal, type IepStatus, type IepDomain, type SuccessCriterion,
+  iepGoals as seedGoals, students, evidenceItems as seedEvidence,
+  type IepGoal, type IepStatus, type IepDomain, type IepApproval,
+  type SuccessCriterion, type EvidenceItem,
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEPs · SchoolMate AU" }] }),
@@ -26,9 +29,15 @@ type ActiveStatus = Exclude<IepStatus, "not-started">;
 
 const statusMeta: Record<IepStatus, { label: string; tone: string; pct: number; dot: string }> = {
   "not-started": { label: "Not started", tone: "bg-muted text-muted-foreground", pct: 0, dot: "bg-muted-foreground" },
-  "working-towards": { label: "Working Towards", tone: "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300", pct: 33, dot: "bg-orange-500" },
-  developing: { label: "Developing", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300", pct: 66, dot: "bg-amber-500" },
+  developing: { label: "Developing", tone: "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300", pct: 33, dot: "bg-orange-500" },
+  "working-towards": { label: "Working Towards", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300", pct: 66, dot: "bg-amber-500" },
   achieved: { label: "Achieved", tone: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300", pct: 100, dot: "bg-emerald-500" },
+};
+
+const approvalMeta: Record<IepApproval, { label: string; tone: string; icon: React.ComponentType<{ className?: string }> }> = {
+  draft: { label: "Draft", tone: "bg-muted text-muted-foreground", icon: Clock },
+  pending: { label: "Pending approval", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300", icon: Send },
+  approved: { label: "Approved", tone: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300", icon: ShieldCheck },
 };
 
 const domainTone: Record<IepDomain, string> = {
@@ -45,35 +54,75 @@ function goalProgress(goal: IepGoal) {
   return Math.round(sum / goal.successCriteria.length);
 }
 
+const initialApproval = (id: string): IepApproval => {
+  if (["g5", "g6"].includes(id)) return "approved";
+  if (["g1", "g3"].includes(id)) return "pending";
+  return "draft";
+};
+const seeded: IepGoal[] = seedGoals.map((g) => ({
+  ...g,
+  approval: g.approval ?? initialApproval(g.id),
+  approvedBy: ["g5", "g6"].includes(g.id) ? "K. Patel (Learning Specialist)" : undefined,
+  approvedAt: ["g5", "g6"].includes(g.id) ? "Wk 4 · 2026" : undefined,
+}));
+
 function IepsPage() {
+  const [goals, setGoals] = useState<IepGoal[]>(seeded);
+  const [evidence, setEvidence] = useState<EvidenceItem[]>(seedEvidence);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ActiveStatus | "all">("all");
-  const [selectedId, setSelectedId] = useState<string>(iepGoals[0].id);
+  const [selectedId, setSelectedId] = useState<string>(seeded[0].id);
 
-  const filtered = useMemo(() => iepGoals.filter((g) => {
+  const filtered = useMemo(() => goals.filter((g) => {
     const q = query.toLowerCase();
     const matchesQ = !q || g.smart.toLowerCase().includes(q) || g.studentName.toLowerCase().includes(q) || g.learningArea.toLowerCase().includes(q) || g.vcLink.toLowerCase().includes(q);
     const matchesF = filter === "all" || g.status === filter;
     return matchesQ && matchesF;
-  }), [query, filter]);
+  }), [query, filter, goals]);
 
-  const selected = iepGoals.find((g) => g.id === selectedId) ?? iepGoals[0];
+  const selected = goals.find((g) => g.id === selectedId) ?? goals[0];
 
-  const stats = useMemo(() => {
-    const total = iepGoals.length;
-    const achieved = iepGoals.filter((g) => g.status === "achieved").length;
-    const developing = iepGoals.filter((g) => g.status === "developing").length;
-    const reviewSoon = iepGoals.filter((g) => g.reviewDue === "Wk 6" || g.reviewDue === "Wk 7").length;
-    return { total, achieved, developing, reviewSoon };
-  }, []);
+  const stats = useMemo(() => ({
+    total: goals.length,
+    achieved: goals.filter((g) => g.status === "achieved").length,
+    developing: goals.filter((g) => g.status === "developing").length,
+    pending: goals.filter((g) => g.approval === "pending").length,
+  }), [goals]);
+
+  function setApproval(id: string, approval: IepApproval) {
+    setGoals((prev) => prev.map((g) => g.id === id ? {
+      ...g, approval,
+      approvedBy: approval === "approved" ? "K. Patel (Learning Specialist)" : g.approvedBy,
+      approvedAt: approval === "approved" ? "Today" : g.approvedAt,
+    } : g));
+    if (approval === "pending") toast.success("Submitted for Learning Specialist approval.");
+    if (approval === "approved") toast.success("IEP goal approved.");
+    if (approval === "draft") toast("Returned to draft for edits.");
+  }
+
+  function linkEvidence(evId: string, goalId: string) {
+    setEvidence((prev) => prev.map((e) => e.id === evId
+      ? { ...e, aiTagged: true, goalIds: [...e.goalIds, goalId], aiSuggestedGoal: undefined }
+      : e));
+    setGoals((prev) => prev.map((g) => g.id === goalId
+      ? { ...g, evidenceCount: g.evidenceCount + 1, lastEvidence: "Just now" }
+      : g));
+    toast.success("Evidence linked to goal.");
+  }
+  function dismissSuggestion(evId: string) {
+    setEvidence((prev) => prev.map((e) => e.id === evId ? { ...e, aiSuggestedGoal: undefined } : e));
+  }
 
   return (
     <AppShell>
       <PageHeader
         title="IEP Goals"
-        subtitle="Structured from Scope & Sequence · cross-checked against Working Towards → Developing → Achieved"
+        subtitle="Structured from Scope & Sequence · cross-checked against Developing → Working Towards → Achieved"
         actions={
           <>
+            <Button asChild variant="outline" size="sm">
+              <a href="/parent" target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" />Parent portal</a>
+            </Button>
             <Button variant="outline" size="sm"><Calendar className="h-4 w-4" />Schedule review</Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4" />New goal from S&S</Button>
           </>
@@ -83,8 +132,8 @@ function IepsPage() {
       <div className="grid grid-cols-2 gap-3 px-4 pt-6 md:grid-cols-4 md:px-8">
         <StatCard label="Active goals" value={stats.total} icon={<Target className="h-4 w-4" />} />
         <StatCard label="Achieved this term" value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
-        <StatCard label="Developing" value={stats.developing} icon={<Target className="h-4 w-4 text-amber-600" />} />
-        <StatCard label="Reviews due ≤ 2 wks" value={stats.reviewSoon} icon={<AlertTriangle className="h-4 w-4 text-accent" />} highlight />
+        <StatCard label="Developing" value={stats.developing} icon={<Target className="h-4 w-4 text-orange-600" />} />
+        <StatCard label="Pending approval" value={stats.pending} icon={<Send className="h-4 w-4 text-amber-600" />} highlight />
       </div>
 
       <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[1fr_460px]">
@@ -96,7 +145,7 @@ function IepsPage() {
             </div>
             <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
               <Filter className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-              {(["all", "working-towards", "developing", "achieved"] as const).map((f) => (
+              {(["all", "developing", "working-towards", "achieved"] as const).map((f) => (
                 <button key={f} onClick={() => setFilter(f)} className={cn("rounded-md px-2.5 py-1 transition", filter === f ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
                   {f === "all" ? "All" : statusMeta[f].label}
                 </button>
@@ -109,7 +158,13 @@ function IepsPage() {
           ))}
         </div>
 
-        <CrossCheckPanel goal={selected} />
+        <CrossCheckPanel
+          goal={selected}
+          evidence={evidence}
+          onApprovalChange={(a) => setApproval(selected.id, a)}
+          onLinkEvidence={(evId) => linkEvidence(evId, selected.id)}
+          onDismiss={dismissSuggestion}
+        />
       </div>
     </AppShell>
   );
@@ -129,6 +184,8 @@ function StatCard({ label, value, icon, highlight }: { label: string; value: num
 
 function GoalRow({ goal, selected, onSelect }: { goal: IepGoal; selected: boolean; onSelect: () => void }) {
   const meta = statusMeta[goal.status];
+  const appr = approvalMeta[goal.approval ?? "draft"];
+  const ApprIcon = appr.icon;
   const student = students.find((s) => s.id === goal.studentId);
   const pct = goalProgress(goal);
   return (
@@ -143,6 +200,7 @@ function GoalRow({ goal, selected, onSelect }: { goal: IepGoal; selected: boolea
             <Badge variant="outline" className={cn("font-normal", domainTone[goal.domain])}>{goal.domain}</Badge>
             <Badge variant="outline" className="font-normal text-[10px]">Level {goal.level} · {goal.learningArea}</Badge>
             <Badge variant="outline" className="font-mono text-[10px]">{goal.vcLink}</Badge>
+            <Badge className={cn("font-normal text-[10px]", appr.tone)}><ApprIcon className="h-2.5 w-2.5" />{appr.label}</Badge>
           </div>
           <p className="mt-1.5 text-sm leading-snug text-foreground/85 line-clamp-2">{goal.smart}</p>
           <div className="mt-3 flex items-center gap-3">
@@ -157,9 +215,23 @@ function GoalRow({ goal, selected, onSelect }: { goal: IepGoal; selected: boolea
   );
 }
 
-function CrossCheckPanel({ goal }: { goal: IepGoal }) {
+function CrossCheckPanel({
+  goal, evidence, onApprovalChange, onLinkEvidence, onDismiss,
+}: {
+  goal: IepGoal;
+  evidence: EvidenceItem[];
+  onApprovalChange: (a: IepApproval) => void;
+  onLinkEvidence: (evId: string) => void;
+  onDismiss: (evId: string) => void;
+}) {
   const meta = statusMeta[goal.status];
   const pct = goalProgress(goal);
+  const appr = approvalMeta[goal.approval ?? "draft"];
+  const ApprIcon = appr.icon;
+
+  const suggestions = evidence.filter(
+    (e) => e.studentId === goal.studentId && !e.goalIds.includes(goal.id) && (e.aiSuggestedGoal === goal.id || !e.aiTagged),
+  ).slice(0, 3);
 
   const recommendation = useMemo(() => {
     const achievedSteps = goal.successCriteria.filter((s) => s.status === "achieved").length;
@@ -198,6 +270,50 @@ function CrossCheckPanel({ goal }: { goal: IepGoal }) {
             </div>
             <Progress value={pct} className="h-2" />
           </div>
+          <div className="flex flex-wrap gap-2 border-t pt-3">
+            <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+              <a href={`/ieps/${goal.id}/print`} target="_blank" rel="noreferrer"><FileDown className="h-3.5 w-3.5" />Generate IEP PDF</a>
+            </Button>
+            <Button asChild size="sm" variant="ghost" className="h-8 text-xs">
+              <a href={`/parent?goal=${goal.id}`} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" />Open in parent portal</a>
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Approval flow */}
+      <Card className="overflow-hidden">
+        <div className="flex items-center justify-between border-b px-4 py-2.5">
+          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5" />Approval flow
+          </div>
+          <Badge className={cn("font-normal text-[10px]", appr.tone)}><ApprIcon className="h-2.5 w-2.5" />{appr.label}</Badge>
+        </div>
+        <div className="space-y-3 p-4 text-sm">
+          <div className="flex items-center gap-2 text-xs">
+            <Stage active={["draft", "pending", "approved"].includes(goal.approval ?? "draft")} label="Draft" />
+            <span className="text-muted-foreground">→</span>
+            <Stage active={["pending", "approved"].includes(goal.approval ?? "draft")} label="Pending" />
+            <span className="text-muted-foreground">→</span>
+            <Stage active={goal.approval === "approved"} label="Approved" />
+          </div>
+          {goal.approval === "approved" && goal.approvedBy && (
+            <p className="text-xs text-muted-foreground">Approved by <span className="font-medium text-foreground">{goal.approvedBy}</span> · {goal.approvedAt}</p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {(goal.approval ?? "draft") === "draft" && (
+              <Button size="sm" className="h-8 bg-primary text-xs hover:bg-primary/90" onClick={() => onApprovalChange("pending")}><Send className="h-3.5 w-3.5" />Submit for approval</Button>
+            )}
+            {goal.approval === "pending" && (
+              <>
+                <Button size="sm" className="h-8 bg-emerald-600 text-xs text-white hover:bg-emerald-600/90" onClick={() => onApprovalChange("approved")}><CheckCircle2 className="h-3.5 w-3.5" />Approve</Button>
+                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => onApprovalChange("draft")}>Return to draft</Button>
+              </>
+            )}
+            {goal.approval === "approved" && (
+              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => onApprovalChange("draft")}>Reopen for edits</Button>
+            )}
+          </div>
         </div>
       </Card>
 
@@ -215,6 +331,38 @@ function CrossCheckPanel({ goal }: { goal: IepGoal }) {
         </div>
       </Card>
 
+      {/* One-click evidence linking */}
+      <Card className="overflow-hidden">
+        <div className="flex items-center justify-between border-b px-4 py-2.5">
+          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <Link2 className="h-3.5 w-3.5" />Suggested evidence
+          </div>
+          <span className="text-[10px] text-muted-foreground">{suggestions.length} match{suggestions.length === 1 ? "" : "es"}</span>
+        </div>
+        {suggestions.length === 0 ? (
+          <p className="p-4 text-xs italic text-muted-foreground">No unlinked evidence for {goal.studentName.split(" ")[0]} right now.</p>
+        ) : (
+          <div className="divide-y">
+            {suggestions.map((e) => (
+              <div key={e.id} className="flex items-start gap-3 p-3">
+                <div
+                  className="h-10 w-10 shrink-0 rounded-lg"
+                  style={{ background: `linear-gradient(135deg, oklch(0.85 0.08 ${e.thumbHue}) 0%, oklch(0.92 0.05 ${e.thumbHue + 30}) 100%)` }}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium">{e.medium} · {e.capturedAt}</p>
+                  <p className="text-xs leading-snug text-foreground/85 line-clamp-2">{e.caption}</p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Button size="sm" className="h-7 bg-primary text-[11px] hover:bg-primary/90" onClick={() => onLinkEvidence(e.id)}><Link2 className="h-3 w-3" />Link</Button>
+                  <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => onDismiss(e.id)}><X className="h-3 w-3" />Skip</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
       <Card className="border-primary/30 bg-gradient-to-br from-primary-soft/30 via-background to-background p-5">
         <div className="flex items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
@@ -229,7 +377,7 @@ function CrossCheckPanel({ goal }: { goal: IepGoal }) {
             <p className="mt-1.5 text-sm leading-relaxed text-foreground/85">{recommendation.body}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" className="h-7 text-xs"><CheckCircle2 className="h-3.5 w-3.5" />Apply suggestion</Button>
-              <Button size="sm" variant="ghost" className="h-7 text-xs">View evidence ({goal.evidenceCount})</Button>
+              <Link to="/evidence" className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">View evidence ({goal.evidenceCount})</Link>
             </div>
           </div>
         </div>
@@ -238,10 +386,18 @@ function CrossCheckPanel({ goal }: { goal: IepGoal }) {
   );
 }
 
+function Stage({ active, label }: { active: boolean; label: string }) {
+  return (
+    <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+      {label}
+    </span>
+  );
+}
+
 function CrossCheckRow({ index, criterion }: { index: number; criterion: SuccessCriterion }) {
   const stages: Array<{ key: ActiveStatus; label: string; text: string }> = [
-    { key: "working-towards", label: "Working Towards", text: criterion.workingTowards },
     { key: "developing", label: "Developing", text: criterion.developing },
+    { key: "working-towards", label: "Working Towards", text: criterion.workingTowards },
     { key: "achieved", label: "Achieved", text: criterion.achieved },
   ];
   return (
