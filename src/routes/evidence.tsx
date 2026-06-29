@@ -6,15 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Upload, Sparkles, Image as ImageIcon, Video, FileText, Mic, FileEdit, Search, Link2, Check, X } from "lucide-react";
-import { evidenceItems, iepGoals, type EvidenceItem, type EvidenceMedium } from "@/lib/mock-data";
+import { Upload, Sparkles, Image as ImageIcon, Video, FileText, Mic, FileEdit, Search, Link2, Check, X, Filter } from "lucide-react";
+import { evidenceItems, iepGoals, students, type EvidenceItem, type EvidenceMedium, type Semester } from "@/lib/mock-data";
+import { useActiveSemester } from "@/lib/semester-context";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/evidence")({
   head: () => ({ meta: [{ title: "Evidence Hub · SchoolMate AU" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    student: typeof s.student === "string" ? s.student : undefined,
+    semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
+    goal: typeof s.goal === "string" ? s.goal : undefined,
+  }),
   component: EvidencePage,
 });
+
 
 const mediumMeta: Record<EvidenceMedium, { icon: React.ComponentType<{ className?: string }>; label: string; tone: string }> = {
   photo: { icon: ImageIcon, label: "Photo", tone: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" },
