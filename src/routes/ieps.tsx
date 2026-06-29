@@ -23,8 +23,14 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEPs · SchoolMate AU" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    student: typeof s.student === "string" ? s.student : undefined,
+    semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
+    goal: typeof s.goal === "string" ? s.goal : undefined,
+  }),
   component: IepsPage,
 });
+
 
 type ActiveStatus = Exclude<IepStatus, "not-started">;
 
