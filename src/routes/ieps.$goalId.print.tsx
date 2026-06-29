@@ -41,7 +41,7 @@ function IepPrintPage() {
 
       <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b bg-card/95 px-6 py-3 backdrop-blur">
         <Button asChild variant="ghost" size="sm">
-          <Link to="/ieps" search={{ student: goal.studentId, semester: goal.semester, goal: goal.id }}>
+          <Link to="/ieps" search={scopedSearch(activeSemester, { student: goal.studentId, semester: goal.semester, goal: goal.id })}>
             <ArrowLeft className="h-4 w-4" />Back to IEPs
           </Link>
         </Button>
