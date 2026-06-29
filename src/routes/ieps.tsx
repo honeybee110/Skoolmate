@@ -20,6 +20,8 @@ import {
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useActiveSemester } from "@/lib/semester-context";
+import { scopedSearch } from "@/lib/scope";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEPs · SchoolMate AU" }] }),
@@ -280,6 +282,7 @@ function CrossCheckPanel({
   onLinkEvidence: (evId: string) => void;
   onDismiss: (evId: string) => void;
 }) {
+  const { activeSemester } = useActiveSemester();
   const meta = statusMeta[goal.status];
   const pct = goalProgress(goal);
   const appr = approvalMeta[goal.approval ?? "draft"];
@@ -437,7 +440,7 @@ function CrossCheckPanel({
               <Button size="sm" variant="outline" className="h-7 text-xs"><CheckCircle2 className="h-3.5 w-3.5" />Apply suggestion</Button>
               <Link
                 to="/evidence"
-                search={{ student: goal.studentId, semester: goal.semester, goal: goal.id }}
+                search={scopedSearch(activeSemester, { student: goal.studentId, semester: goal.semester, goal: goal.id })}
                 className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
               >
                 View evidence ({goal.evidenceCount})

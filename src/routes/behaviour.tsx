@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { behaviourReports, students, type BehaviourReportStatus } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
+import { scopedSearch } from "@/lib/scope";
 import { AlertTriangle, Activity, CheckCircle2, CalendarRange, Target, Camera, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -115,7 +116,7 @@ function BehaviourPage() {
                       <td className="px-4 py-3">
                         <Link
                           to="/evidence"
-                          search={{ student: r.studentId, semester: r.semester }}
+                          search={scopedSearch(activeSemester, { student: r.studentId, semester: r.semester })}
                           className="inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-0.5 tabular-nums text-primary hover:border-primary/40 hover:bg-primary/5"
                         >
                           <Camera className="h-3 w-3" /> {r.evidenceCount} items
@@ -125,12 +126,12 @@ function BehaviourPage() {
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-1">
                           <Button asChild size="sm" variant="ghost" className="h-7 text-xs">
-                            <Link to="/ieps" search={{ student: r.studentId, semester: r.semester }}>
+                            <Link to="/ieps" search={scopedSearch(activeSemester, { student: r.studentId, semester: r.semester })}>
                               <Target className="h-3 w-3" /> Goals
                             </Link>
                           </Button>
                           <Button asChild size="sm" variant="ghost" className="h-7 text-xs">
-                            <Link to="/evidence" search={{ student: r.studentId, semester: r.semester }}>
+                            <Link to="/evidence" search={scopedSearch(activeSemester, { student: r.studentId, semester: r.semester })}>
                               <FileText className="h-3 w-3" /> Evidence
                             </Link>
                           </Button>

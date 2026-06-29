@@ -2,6 +2,8 @@ import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { iepGoals, students, classInfo, evidenceItems, type SuccessCriterion } from "@/lib/mock-data";
+import { useActiveSemester } from "@/lib/semester-context";
+import { scopedSearch } from "@/lib/scope";
 import { Printer, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/ieps/$goalId/print")({
@@ -24,6 +26,7 @@ const stageLabel: Record<Exclude<import("@/lib/mock-data").IepStatus, "not-start
 
 function IepPrintPage() {
   const { goal } = Route.useLoaderData();
+  const { activeSemester } = useActiveSemester();
   const student = students.find((s) => s.id === goal.studentId);
   const evidence = evidenceItems.filter((e) => e.goalIds.includes(goal.id));
 
@@ -38,7 +41,7 @@ function IepPrintPage() {
 
       <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b bg-card/95 px-6 py-3 backdrop-blur">
         <Button asChild variant="ghost" size="sm">
-          <Link to="/ieps" search={{ student: goal.studentId, semester: goal.semester, goal: goal.id }}>
+          <Link to="/ieps" search={scopedSearch(activeSemester, { student: goal.studentId, semester: goal.semester, goal: goal.id })}>
             <ArrowLeft className="h-4 w-4" />Back to IEPs
           </Link>
         </Button>
