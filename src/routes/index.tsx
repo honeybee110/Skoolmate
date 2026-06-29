@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useMemo } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,9 @@ import {
   actionQueue,
   notifications,
   aiSnapshot,
+  availableSemesters,
+  currentSemester,
+  type Semester,
 } from "@/lib/mock-data";
 import {
   Sparkles,
@@ -51,6 +55,11 @@ const blockColor: Record<string, string> = {
 };
 
 function Dashboard() {
+  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(currentSemester);
+  const visibleActions = useMemo(
+    () => (semesterFilter === "all" ? actionQueue : actionQueue.filter((a) => a.semester === semesterFilter)),
+    [semesterFilter],
+  );
   return (
     <AppShell>
       <div className="px-4 py-6 md:px-8">
@@ -128,14 +137,25 @@ function Dashboard() {
           {/* Action queue + notifications */}
           <div className="flex flex-col gap-6">
             <Card className="p-5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold">Action Queue</h2>
                 <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold text-accent-foreground">
-                  {actionQueue.filter((a) => a.urgent).length} urgent
+                  {visibleActions.filter((a) => a.urgent).length} urgent
                 </span>
               </div>
+              <div className="mt-3 flex items-center gap-1 rounded-lg border bg-card p-1 text-[11px]">
+                <button onClick={() => setSemesterFilter("all")} className={cn("flex-1 rounded-md px-2 py-1 transition", semesterFilter === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All</button>
+                {availableSemesters.map((s) => (
+                  <button key={s} onClick={() => setSemesterFilter(s)} className={cn("flex-1 rounded-md px-2 py-1 transition whitespace-nowrap", semesterFilter === s ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
+                    {s.replace(" · 2026", "")}
+                  </button>
+                ))}
+              </div>
               <ul className="mt-4 space-y-3">
-                {actionQueue.map((a) => {
+                {visibleActions.length === 0 && (
+                  <li className="rounded-md border border-dashed py-4 text-center text-xs text-muted-foreground">No actions for {semesterFilter}.</li>
+                )}
+                {visibleActions.map((a) => {
                   const Icon = kindIcon[a.kind];
                   return (
                     <li key={a.id} className="flex items-start gap-3">
@@ -151,11 +171,8 @@ function Dashboard() {
                         <div className="text-sm leading-snug">{a.title}</div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
                           <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {a.due}</span>
-                          {(a.kind === "iep" || a.kind === "report") && (
-                            <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-foreground/70">{a.semester}</span>
-                          )}
+                          <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-foreground/70">{a.semester.replace(" · 2026", "")}</span>
                         </div>
-
                       </div>
                     </li>
                   );

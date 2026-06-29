@@ -60,6 +60,7 @@ export interface TimetableBlock {
 
 // P7 — Term 3 SY 2026 (Semester 2) · Teacher: Honey · ES: Sharifa
 export type Semester = "Semester 1 · 2026" | "Semester 2 · 2026";
+export const availableSemesters: Semester[] = ["Semester 1 · 2026", "Semester 2 · 2026"];
 export const currentSemester: Semester = "Semester 2 · 2026";
 export const classInfo = {
   code: "P7",

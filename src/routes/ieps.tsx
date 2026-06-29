@@ -14,8 +14,9 @@ import {
 } from "lucide-react";
 import {
   iepGoals as seedGoals, students, evidenceItems as seedEvidence,
+  availableSemesters, currentSemester,
   type IepGoal, type IepStatus, type IepDomain, type IepApproval,
-  type SuccessCriterion, type EvidenceItem,
+  type SuccessCriterion, type EvidenceItem, type Semester,
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -71,23 +72,29 @@ function IepsPage() {
   const [evidence, setEvidence] = useState<EvidenceItem[]>(seedEvidence);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ActiveStatus | "all">("all");
+  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(currentSemester);
   const [selectedId, setSelectedId] = useState<string>(seeded[0].id);
 
   const filtered = useMemo(() => goals.filter((g) => {
     const q = query.toLowerCase();
     const matchesQ = !q || g.smart.toLowerCase().includes(q) || g.studentName.toLowerCase().includes(q) || g.learningArea.toLowerCase().includes(q) || g.vcLink.toLowerCase().includes(q);
     const matchesF = filter === "all" || g.status === filter;
-    return matchesQ && matchesF;
-  }), [query, filter, goals]);
+    const matchesS = semesterFilter === "all" || g.semester === semesterFilter;
+    return matchesQ && matchesF && matchesS;
+  }), [query, filter, semesterFilter, goals]);
 
   const selected = goals.find((g) => g.id === selectedId) ?? goals[0];
 
+  const scoped = useMemo(
+    () => (semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)),
+    [goals, semesterFilter],
+  );
   const stats = useMemo(() => ({
-    total: goals.length,
-    achieved: goals.filter((g) => g.status === "achieved").length,
-    developing: goals.filter((g) => g.status === "developing").length,
-    pending: goals.filter((g) => g.approval === "pending").length,
-  }), [goals]);
+    total: scoped.length,
+    achieved: scoped.filter((g) => g.status === "achieved").length,
+    developing: scoped.filter((g) => g.status === "developing").length,
+    pending: scoped.filter((g) => g.approval === "pending").length,
+  }), [scoped]);
 
   function setApproval(id: string, approval: IepApproval) {
     setGoals((prev) => prev.map((g) => g.id === id ? {
@@ -130,8 +137,8 @@ function IepsPage() {
       />
 
       <div className="grid grid-cols-2 gap-3 px-4 pt-6 md:grid-cols-4 md:px-8">
-        <StatCard label="Active goals" value={stats.total} icon={<Target className="h-4 w-4" />} />
-        <StatCard label="Achieved this semester" value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
+        <StatCard label={semesterFilter === "all" ? "Active goals (all sem.)" : `Active goals · ${semesterFilter.replace(" · 2026", "")}`} value={stats.total} icon={<Target className="h-4 w-4" />} />
+        <StatCard label={semesterFilter === "all" ? "Achieved (all sem.)" : `Achieved · ${semesterFilter.replace(" · 2026", "")}`} value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
         <StatCard label="Developing" value={stats.developing} icon={<Target className="h-4 w-4 text-orange-600" />} />
         <StatCard label="Pending approval" value={stats.pending} icon={<Send className="h-4 w-4 text-amber-600" />} highlight />
       </div>
@@ -144,6 +151,15 @@ function IepsPage() {
               <Input placeholder="Search by student, goal, learning area or VC code…" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
             </div>
             <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
+              <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+              <button onClick={() => setSemesterFilter("all")} className={cn("rounded-md px-2.5 py-1 transition", semesterFilter === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All sem.</button>
+              {availableSemesters.map((s) => (
+                <button key={s} onClick={() => setSemesterFilter(s)} className={cn("rounded-md px-2.5 py-1 transition whitespace-nowrap", semesterFilter === s ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
+                  {s.replace(" · 2026", "")}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
               <Filter className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
               {(["all", "developing", "working-towards", "achieved"] as const).map((f) => (
                 <button key={f} onClick={() => setFilter(f)} className={cn("rounded-md px-2.5 py-1 transition", filter === f ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
@@ -153,6 +169,11 @@ function IepsPage() {
             </div>
           </div>
 
+          {filtered.length === 0 && (
+            <Card className="p-6 text-center text-sm text-muted-foreground">
+              No IEP goals match the current filters{semesterFilter !== "all" && <> in <span className="font-medium text-foreground">{semesterFilter}</span></>}.
+            </Card>
+          )}
           {filtered.map((g) => (
             <GoalRow key={g.id} goal={g} selected={g.id === selected.id} onSelect={() => setSelectedId(g.id)} />
           ))}
@@ -200,6 +221,7 @@ function GoalRow({ goal, selected, onSelect }: { goal: IepGoal; selected: boolea
             <Badge variant="outline" className={cn("font-normal", domainTone[goal.domain])}>{goal.domain}</Badge>
             <Badge variant="outline" className="font-normal text-[10px]">Level {goal.level} · {goal.learningArea}</Badge>
             <Badge variant="outline" className="font-mono text-[10px]">{goal.vcLink}</Badge>
+            <Badge variant="outline" className="font-normal text-[10px]"><Calendar className="h-2.5 w-2.5" />{goal.semester.replace(" · 2026", "")}</Badge>
             <Badge className={cn("font-normal text-[10px]", appr.tone)}><ApprIcon className="h-2.5 w-2.5" />{appr.label}</Badge>
           </div>
           <p className="mt-1.5 text-sm leading-snug text-foreground/85 line-clamp-2">{goal.smart}</p>
