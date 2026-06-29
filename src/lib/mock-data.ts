@@ -371,7 +371,8 @@ export const iepGoals: IepGoal[] = ([
       { step: "Request break before escalation", workingTowards: "After incident", developing: "Mid-escalation with prompt", achieved: "Before escalation", status: "working-towards" },
     ],
   },
-];
+] as Omit<IepGoal, "semester">[]).map((g) => ({ ...g, semester: seedSemester }));
+
 
 export type EvidenceMedium = "photo" | "video" | "work-sample" | "anecdotal" | "audio";
 export interface EvidenceItem {
