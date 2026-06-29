@@ -137,8 +137,8 @@ function IepsPage() {
       />
 
       <div className="grid grid-cols-2 gap-3 px-4 pt-6 md:grid-cols-4 md:px-8">
-        <StatCard label="Active goals" value={stats.total} icon={<Target className="h-4 w-4" />} />
-        <StatCard label="Achieved this semester" value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
+        <StatCard label={semesterFilter === "all" ? "Active goals (all sem.)" : `Active goals · ${semesterFilter.replace(" · 2026", "")}`} value={stats.total} icon={<Target className="h-4 w-4" />} />
+        <StatCard label={semesterFilter === "all" ? "Achieved (all sem.)" : `Achieved · ${semesterFilter.replace(" · 2026", "")}`} value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
         <StatCard label="Developing" value={stats.developing} icon={<Target className="h-4 w-4 text-orange-600" />} />
         <StatCard label="Pending approval" value={stats.pending} icon={<Send className="h-4 w-4 text-amber-600" />} highlight />
       </div>
