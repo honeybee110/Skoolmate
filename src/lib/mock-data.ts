@@ -219,7 +219,7 @@ export interface IepGoal {
   smart: string;
   baseline: string;
   status: IepStatus;
-  approval: IepApproval;
+  approval?: IepApproval;
   approvedBy?: string;
   approvedAt?: string;
   evidenceCount: number;
