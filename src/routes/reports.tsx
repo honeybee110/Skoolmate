@@ -5,14 +5,19 @@ import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { iepReports, students, type IepReportStatus } from "@/lib/mock-data";
+import { iepReports, students, type IepReportStatus, type Semester } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
-import { FileText, FileDown, CheckCircle2, Clock, Eye, PenLine, CalendarRange, Target, Camera } from "lucide-react";
+import { scopedSearch } from "@/lib/scope";
+import { FileText, FileDown, CheckCircle2, Clock, Eye, PenLine, CalendarRange, Target, Camera, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "IEP Reports · SchoolMate AU" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    student: typeof s.student === "string" ? s.student : undefined,
+    semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
+  }),
   component: ReportsPage,
 });
 
