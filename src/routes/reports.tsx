@@ -30,10 +30,15 @@ const statusMeta: Record<IepReportStatus, { label: string; tone: string; Icon: t
 
 function ReportsPage() {
   const { activeSemester, matches, setActiveSemester } = useActiveSemester();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const scopedStudent = search.student ? students.find((s) => s.id === search.student) : undefined;
 
   const visible = useMemo(
-    () => iepReports.filter((r) => matches(r.semester)),
-    [matches],
+    () => iepReports
+      .filter((r) => (search.semester ? r.semester === search.semester : matches(r.semester)))
+      .filter((r) => (search.student ? r.studentId === search.student : true)),
+    [matches, search.semester, search.student],
   );
 
   const counts = useMemo(() => {
