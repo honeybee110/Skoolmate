@@ -13,6 +13,7 @@ import { Route as StudentsRouteImport } from './routes/students'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ParentRouteImport } from './routes/parent'
 import { Route as LessonsRouteImport } from './routes/lessons'
 import { Route as IepsRouteImport } from './routes/ieps'
 import { Route as EvidenceRouteImport } from './routes/evidence'
@@ -21,6 +22,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BehaviourRouteImport } from './routes/behaviour'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
+import { Route as IepsGoalIdPrintRouteImport } from './routes/ieps.$goalId.print'
 
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
@@ -40,6 +42,11 @@ const ResourcesRoute = ResourcesRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentRoute = ParentRouteImport.update({
+  id: '/parent',
+  path: '/parent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LessonsRoute = LessonsRouteImport.update({
@@ -82,6 +89,11 @@ const StudentsStudentIdRoute = StudentsStudentIdRouteImport.update({
   path: '/$studentId',
   getParentRoute: () => StudentsRoute,
 } as any)
+const IepsGoalIdPrintRoute = IepsGoalIdPrintRouteImport.update({
+  id: '/$goalId/print',
+  path: '/$goalId/print',
+  getParentRoute: () => IepsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,13 +101,15 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
   '/evidence': typeof EvidenceRoute
-  '/ieps': typeof IepsRoute
+  '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
+  '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -103,13 +117,15 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
   '/evidence': typeof EvidenceRoute
-  '/ieps': typeof IepsRoute
+  '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
+  '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -118,13 +134,15 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
   '/evidence': typeof EvidenceRoute
-  '/ieps': typeof IepsRoute
+  '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
+  '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -136,11 +154,13 @@ export interface FileRouteTypes {
     | '/evidence'
     | '/ieps'
     | '/lessons'
+    | '/parent'
     | '/reports'
     | '/resources'
     | '/settings'
     | '/students'
     | '/students/$studentId'
+    | '/ieps/$goalId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -150,11 +170,13 @@ export interface FileRouteTypes {
     | '/evidence'
     | '/ieps'
     | '/lessons'
+    | '/parent'
     | '/reports'
     | '/resources'
     | '/settings'
     | '/students'
     | '/students/$studentId'
+    | '/ieps/$goalId/print'
   id:
     | '__root__'
     | '/'
@@ -164,11 +186,13 @@ export interface FileRouteTypes {
     | '/evidence'
     | '/ieps'
     | '/lessons'
+    | '/parent'
     | '/reports'
     | '/resources'
     | '/settings'
     | '/students'
     | '/students/$studentId'
+    | '/ieps/$goalId/print'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -177,8 +201,9 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   ClassesRoute: typeof ClassesRoute
   EvidenceRoute: typeof EvidenceRoute
-  IepsRoute: typeof IepsRoute
+  IepsRoute: typeof IepsRouteWithChildren
   LessonsRoute: typeof LessonsRoute
+  ParentRoute: typeof ParentRoute
   ReportsRoute: typeof ReportsRoute
   ResourcesRoute: typeof ResourcesRoute
   SettingsRoute: typeof SettingsRoute
@@ -213,6 +238,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parent': {
+      id: '/parent'
+      path: '/parent'
+      fullPath: '/parent'
+      preLoaderRoute: typeof ParentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lessons': {
@@ -271,8 +303,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentsStudentIdRouteImport
       parentRoute: typeof StudentsRoute
     }
+    '/ieps/$goalId/print': {
+      id: '/ieps/$goalId/print'
+      path: '/$goalId/print'
+      fullPath: '/ieps/$goalId/print'
+      preLoaderRoute: typeof IepsGoalIdPrintRouteImport
+      parentRoute: typeof IepsRoute
+    }
   }
 }
+
+interface IepsRouteChildren {
+  IepsGoalIdPrintRoute: typeof IepsGoalIdPrintRoute
+}
+
+const IepsRouteChildren: IepsRouteChildren = {
+  IepsGoalIdPrintRoute: IepsGoalIdPrintRoute,
+}
+
+const IepsRouteWithChildren = IepsRoute._addFileChildren(IepsRouteChildren)
 
 interface StudentsRouteChildren {
   StudentsStudentIdRoute: typeof StudentsStudentIdRoute
@@ -292,8 +341,9 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   ClassesRoute: ClassesRoute,
   EvidenceRoute: EvidenceRoute,
-  IepsRoute: IepsRoute,
+  IepsRoute: IepsRouteWithChildren,
   LessonsRoute: LessonsRoute,
+  ParentRoute: ParentRoute,
   ReportsRoute: ReportsRoute,
   ResourcesRoute: ResourcesRoute,
   SettingsRoute: SettingsRoute,

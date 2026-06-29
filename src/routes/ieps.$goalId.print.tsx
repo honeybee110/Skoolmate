@@ -51,7 +51,7 @@ function IepPrintPage() {
             <p className="text-xs text-muted-foreground">{classInfo.term} · Class {classInfo.code} · Teacher {classInfo.teacher}</p>
           </div>
           <div className="text-right text-xs">
-            <p><span className="text-muted-foreground">Status: </span><span className="font-medium">{stageLabel[goal.status as Exclude<typeof goal.status, "not-started">] ?? "Not started"}</span></p>
+            <p><span className="text-muted-foreground">Status: </span><span className="font-medium">{goal.status === "not-started" ? "Not started" : stageLabel[goal.status]}</span></p>
             <p><span className="text-muted-foreground">Approval: </span><span className="font-medium capitalize">{goal.approval ?? "draft"}</span></p>
             {goal.approvedBy && <p className="mt-0.5 text-[10px] text-muted-foreground">{goal.approvedBy} · {goal.approvedAt}</p>}
           </div>
