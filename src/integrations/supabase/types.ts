@@ -14,7 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      action_queue: {
+        Row: {
+          created_at: string
+          due: string
+          id: string
+          kind: string
+          semester: Database["public"]["Enums"]["semester"]
+          student_id: string | null
+          title: string
+          updated_at: string
+          urgent: boolean
+        }
+        Insert: {
+          created_at?: string
+          due: string
+          id: string
+          kind: string
+          semester?: Database["public"]["Enums"]["semester"]
+          student_id?: string | null
+          title: string
+          updated_at?: string
+          urgent?: boolean
+        }
+        Update: {
+          created_at?: string
+          due?: string
+          id?: string
+          kind?: string
+          semester?: Database["public"]["Enums"]["semester"]
+          student_id?: string | null
+          title?: string
+          updated_at?: string
+          urgent?: boolean
+        }
+        Relationships: []
+      }
+      iep_goals: {
+        Row: {
+          approval: string
+          approved_at: string | null
+          approved_by: string | null
+          baseline: string
+          created_at: string
+          domain: string
+          evidence_count: number
+          id: string
+          last_evidence: string | null
+          learning_area: string
+          learning_intention: string
+          level: string
+          review_due: string | null
+          semester: Database["public"]["Enums"]["semester"]
+          smart: string
+          status: string
+          student_id: string
+          student_name: string
+          success_criteria: Json
+          updated_at: string
+          vc_link: string | null
+        }
+        Insert: {
+          approval?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          baseline: string
+          created_at?: string
+          domain: string
+          evidence_count?: number
+          id: string
+          last_evidence?: string | null
+          learning_area: string
+          learning_intention: string
+          level: string
+          review_due?: string | null
+          semester?: Database["public"]["Enums"]["semester"]
+          smart: string
+          status?: string
+          student_id: string
+          student_name: string
+          success_criteria?: Json
+          updated_at?: string
+          vc_link?: string | null
+        }
+        Update: {
+          approval?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          baseline?: string
+          created_at?: string
+          domain?: string
+          evidence_count?: number
+          id?: string
+          last_evidence?: string | null
+          learning_area?: string
+          learning_intention?: string
+          level?: string
+          review_due?: string | null
+          semester?: Database["public"]["Enums"]["semester"]
+          smart?: string
+          status?: string
+          student_id?: string
+          student_name?: string
+          success_criteria?: Json
+          updated_at?: string
+          vc_link?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +130,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      semester: "Semester 1 · 2026" | "Semester 2 · 2026"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +257,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      semester: ["Semester 1 · 2026", "Semester 2 · 2026"],
+    },
   },
 } as const
