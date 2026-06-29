@@ -262,7 +262,9 @@ function CrossCheckPanel({
         <div className="space-y-3 p-5 text-sm">
           <Detail label="Student">{goal.studentName}</Detail>
           <Detail label="Baseline">{goal.baseline}</Detail>
+          <Detail label="Semester">{goal.semester}</Detail>
           <Detail label="Review due">{goal.reviewDue}</Detail>
+
           <div className="border-t pt-3">
             <div className="mb-1 flex items-center justify-between text-xs">
               <span className="font-medium text-muted-foreground">Step-by-step progress</span>
