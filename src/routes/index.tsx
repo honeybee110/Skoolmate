@@ -76,20 +76,19 @@ function Dashboard() {
             <Button variant="ghost" size="sm" className="shrink-0">Open <ChevronRight className="h-4 w-4" /></Button>
           </div>
           <div className="grid grid-cols-2 gap-px bg-border md:grid-cols-4">
-            {aiSnapshot.highlights.map((h) => (
-              <div key={h.label} className="bg-card px-5 py-4">
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{h.label}</div>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <span className="text-2xl font-semibold tracking-tight">{h.value}</span>
-                  {"trend" in h && h.trend === "down" && (
-                    <TrendingDown className="h-4 w-4 text-success" />
-                  )}
-                  {"trend" in h && h.trend === "up" && (
-                    <TrendingUp className="h-4 w-4 text-accent" />
-                  )}
+            {aiSnapshot.highlights.map((h) => {
+              const trend = "trend" in h ? (h as { trend?: string }).trend : undefined;
+              return (
+                <div key={h.label} className="bg-card px-5 py-4">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{h.label}</div>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="text-2xl font-semibold tracking-tight">{h.value}</span>
+                    {trend === "down" && <TrendingDown className="h-4 w-4 text-success" />}
+                    {trend === "up" && <TrendingUp className="h-4 w-4 text-accent" />}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
 
