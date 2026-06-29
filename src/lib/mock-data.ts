@@ -141,17 +141,19 @@ export interface ActionItem {
   kind: "lesson" | "iep" | "behaviour" | "medication" | "report";
   title: string;
   due: string;
+  semester: Semester;
   urgent?: boolean;
   studentId?: string;
 }
 
 export const actionQueue: ActionItem[] = [
-  { id: "a1", kind: "medication", title: "Kristian — Asthma plan check before Swimming", due: "Thu 9:00", urgent: true },
-  { id: "a2", kind: "behaviour", title: "Jack O'Brien — ABC incident form", due: "Today", urgent: true, studentId: "s2" },
-  { id: "a3", kind: "lesson", title: "Submit Wed 'Maths — Algebra' lesson plan", due: "Today" },
-  { id: "a4", kind: "iep", title: "Aaliyah Tahir — IEP review meeting prep", due: "Tomorrow" },
-  { id: "a5", kind: "report", title: "Semester 2 IEP reports draft (8 students)", due: "Fri 4 Jul" },
+  { id: "a1", kind: "medication", title: "Kristian — Asthma plan check before Swimming", due: "Thu 9:00", semester: currentSemester, urgent: true },
+  { id: "a2", kind: "behaviour", title: "Jack O'Brien — ABC incident form", due: "Today", semester: currentSemester, urgent: true, studentId: "s2" },
+  { id: "a3", kind: "lesson", title: "Submit Wed 'Maths — Algebra' lesson plan", due: "Today", semester: currentSemester },
+  { id: "a4", kind: "iep", title: "Aaliyah Tahir — IEP review meeting prep", due: "Tomorrow", semester: currentSemester },
+  { id: "a5", kind: "report", title: "Semester 2 IEP reports draft (8 students)", due: "Fri 4 Jul", semester: "Semester 2 · 2026" },
 ];
+
 
 export interface NotificationItem {
   id: string;
