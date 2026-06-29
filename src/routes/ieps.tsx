@@ -72,23 +72,29 @@ function IepsPage() {
   const [evidence, setEvidence] = useState<EvidenceItem[]>(seedEvidence);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ActiveStatus | "all">("all");
+  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(currentSemester);
   const [selectedId, setSelectedId] = useState<string>(seeded[0].id);
 
   const filtered = useMemo(() => goals.filter((g) => {
     const q = query.toLowerCase();
     const matchesQ = !q || g.smart.toLowerCase().includes(q) || g.studentName.toLowerCase().includes(q) || g.learningArea.toLowerCase().includes(q) || g.vcLink.toLowerCase().includes(q);
     const matchesF = filter === "all" || g.status === filter;
-    return matchesQ && matchesF;
-  }), [query, filter, goals]);
+    const matchesS = semesterFilter === "all" || g.semester === semesterFilter;
+    return matchesQ && matchesF && matchesS;
+  }), [query, filter, semesterFilter, goals]);
 
   const selected = goals.find((g) => g.id === selectedId) ?? goals[0];
 
+  const scoped = useMemo(
+    () => (semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)),
+    [goals, semesterFilter],
+  );
   const stats = useMemo(() => ({
-    total: goals.length,
-    achieved: goals.filter((g) => g.status === "achieved").length,
-    developing: goals.filter((g) => g.status === "developing").length,
-    pending: goals.filter((g) => g.approval === "pending").length,
-  }), [goals]);
+    total: scoped.length,
+    achieved: scoped.filter((g) => g.status === "achieved").length,
+    developing: scoped.filter((g) => g.status === "developing").length,
+    pending: scoped.filter((g) => g.approval === "pending").length,
+  }), [scoped]);
 
   function setApproval(id: string, approval: IepApproval) {
     setGoals((prev) => prev.map((g) => g.id === id ? {
