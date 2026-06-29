@@ -58,15 +58,19 @@ export interface TimetableBlock {
   type: "literacy" | "numeracy" | "specialist" | "break" | "therapy";
 }
 
-// P7 — Term 3 SY 2026 · Teacher: Honey · ES: Sharifa
+// P7 — Term 3 SY 2026 (Semester 2) · Teacher: Honey · ES: Sharifa
+export type Semester = "Semester 1 · 2026" | "Semester 2 · 2026";
+export const currentSemester: Semester = "Semester 2 · 2026";
 export const classInfo = {
   code: "P7",
   term: "Term 3 · 2026",
+  semester: currentSemester,
   teacher: "Honey",
   educationSupport: "Sharifa",
   room: "P7",
   medicalAlerts: [{ student: "Kristian", plan: "Asthma Plan" }],
 };
+
 
 export const todayTimetable: TimetableBlock[] = [
   { start: "9:00", end: "10:00", title: "Start the Day / Phonics", room: "P7", type: "literacy" },
