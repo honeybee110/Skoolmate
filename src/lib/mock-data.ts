@@ -184,7 +184,8 @@ export const curriculumStrands = {
   "Learn to Play": ["Turn-taking", "Social interaction", "Independent play"],
 };
 
-export type IepStatus = "not-started" | "working-towards" | "developing" | "achieved";
+export type IepStatus = "not-started" | "developing" | "working-towards" | "achieved";
+export type IepApproval = "draft" | "pending" | "approved";
 export type IepDomain = "Communication" | "Literacy" | "Numeracy" | "Social-Emotional" | "Self-care" | "Motor";
 export type VcLevel = "A" | "B" | "C" | "D" | "F" | "1" | "2";
 export type LearningArea =
@@ -201,8 +202,8 @@ export type LearningArea =
 
 export interface SuccessCriterion {
   step: string;
-  workingTowards: string;
   developing: string;
+  workingTowards: string;
   achieved: string;
   status: Exclude<IepStatus, "not-started">;
 }
@@ -218,6 +219,9 @@ export interface IepGoal {
   smart: string;
   baseline: string;
   status: IepStatus;
+  approval: IepApproval;
+  approvedBy?: string;
+  approvedAt?: string;
   evidenceCount: number;
   lastEvidence: string;
   reviewDue: string;
