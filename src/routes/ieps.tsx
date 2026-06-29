@@ -151,6 +151,15 @@ function IepsPage() {
               <Input placeholder="Search by student, goal, learning area or VC code…" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
             </div>
             <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
+              <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+              <button onClick={() => setSemesterFilter("all")} className={cn("rounded-md px-2.5 py-1 transition", semesterFilter === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All sem.</button>
+              {availableSemesters.map((s) => (
+                <button key={s} onClick={() => setSemesterFilter(s)} className={cn("rounded-md px-2.5 py-1 transition whitespace-nowrap", semesterFilter === s ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
+                  {s.replace(" · 2026", "")}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
               <Filter className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
               {(["all", "developing", "working-towards", "achieved"] as const).map((f) => (
                 <button key={f} onClick={() => setFilter(f)} className={cn("rounded-md px-2.5 py-1 transition", filter === f ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
@@ -160,6 +169,11 @@ function IepsPage() {
             </div>
           </div>
 
+          {filtered.length === 0 && (
+            <Card className="p-6 text-center text-sm text-muted-foreground">
+              No IEP goals match the current filters{semesterFilter !== "all" && <> in <span className="font-medium text-foreground">{semesterFilter}</span></>}.
+            </Card>
+          )}
           {filtered.map((g) => (
             <GoalRow key={g.id} goal={g} selected={g.id === selected.id} onSelect={() => setSelectedId(g.id)} />
           ))}
