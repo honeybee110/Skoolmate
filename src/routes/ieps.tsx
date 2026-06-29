@@ -20,6 +20,8 @@ import {
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useActiveSemester } from "@/lib/semester-context";
+import { scopedSearch } from "@/lib/scope";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEPs · SchoolMate AU" }] }),
