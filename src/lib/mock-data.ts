@@ -142,11 +142,11 @@ export interface ActionItem {
 }
 
 export const actionQueue: ActionItem[] = [
-  { id: "a1", kind: "medication", title: "Noah Williams — ADHD meds at 11:00", due: "in 35 min", urgent: true },
+  { id: "a1", kind: "medication", title: "Kristian — Asthma plan check before Swimming", due: "Thu 9:00", urgent: true },
   { id: "a2", kind: "behaviour", title: "Jack O'Brien — ABC incident form", due: "Today", urgent: true, studentId: "s2" },
-  { id: "a3", kind: "lesson", title: "Submit Friday Numeracy lesson plan", due: "Today", studentId: undefined },
+  { id: "a3", kind: "lesson", title: "Submit Wed 'Maths — Algebra' lesson plan", due: "Today" },
   { id: "a4", kind: "iep", title: "Aaliyah Tahir — IEP review meeting prep", due: "Tomorrow" },
-  { id: "a5", kind: "report", title: "Term 2 IEP reports draft (8 students)", due: "Fri 4 Jul" },
+  { id: "a5", kind: "report", title: "Term 3 IEP reports draft (8 students)", due: "Fri 4 Jul" },
 ];
 
 export interface NotificationItem {
