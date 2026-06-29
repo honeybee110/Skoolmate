@@ -14,10 +14,10 @@ import { scopedSearch, type ScopedSearch } from "@/lib/scope";
 type DrillTarget = "/" | "/ieps" | "/evidence" | "/reports";
 
 type Result =
-  | { kind: "student"; id: string; title: string; subtitle: string; to: string; params: { studentId: string } }
-  | { kind: "evidence"; id: string; title: string; subtitle: string; to: string }
-  | { kind: "iep"; id: string; title: string; subtitle: string; to: string }
-  | { kind: "report"; id: string; title: string; subtitle: string; to: string };
+  | { kind: "student"; id: string; title: string; subtitle: string; to: "/students/$studentId"; params: { studentId: string } }
+  | { kind: "evidence"; id: string; title: string; subtitle: string; to: DrillTarget; search: ScopedSearch }
+  | { kind: "iep"; id: string; title: string; subtitle: string; to: DrillTarget; search: ScopedSearch }
+  | { kind: "report"; id: string; title: string; subtitle: string; to: DrillTarget; search: ScopedSearch };
 
 const groupMeta: Record<Result["kind"], { label: string; Icon: typeof Users }> = {
   student: { label: "Students", Icon: Users },
