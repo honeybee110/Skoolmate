@@ -35,7 +35,7 @@ const mediumMeta: Record<EvidenceMedium, { icon: React.ComponentType<{ className
 function EvidencePage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const { matches } = useActiveSemester();
+  const { activeSemester, matches } = useActiveSemester();
   const [items, setItems] = useState<EvidenceItem[]>(evidenceItems);
   const [query, setQuery] = useState("");
   const [medium, setMedium] = useState<EvidenceMedium | "all">("all");
