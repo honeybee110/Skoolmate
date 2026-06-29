@@ -26,6 +26,7 @@ const stageLabel: Record<Exclude<import("@/lib/mock-data").IepStatus, "not-start
 
 function IepPrintPage() {
   const { goal } = Route.useLoaderData();
+  const { activeSemester } = useActiveSemester();
   const student = students.find((s) => s.id === goal.studentId);
   const evidence = evidenceItems.filter((e) => e.goalIds.includes(goal.id));
 
