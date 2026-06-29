@@ -28,13 +28,22 @@ function progressOf(g: IepGoal) {
   return Math.round(sum / g.successCriteria.length);
 }
 
+const reportStatusTone: Record<IepReportStatus, string> = {
+  draft: "bg-muted text-muted-foreground",
+  "in-review": "bg-amber-100 text-amber-800",
+  approved: "bg-emerald-100 text-emerald-700",
+  published: "bg-primary/15 text-primary",
+};
+
 function ParentPortal() {
+  const { activeSemester, setActiveSemester, matches } = useActiveSemester();
   const parentStudents = useMemo(() => students.slice(0, 3), []);
   const [activeId, setActiveId] = useState(parentStudents[0].id);
   const child = parentStudents.find((s) => s.id === activeId)!;
-  const childGoals = iepGoals.filter((g) => g.studentId === child.id && g.approval === "approved");
-  const draftGoals = iepGoals.filter((g) => g.studentId === child.id && g.approval !== "approved");
-  const childEvidence = evidenceItems.filter((e) => e.studentId === child.id).slice(0, 6);
+  const childGoals = iepGoals.filter((g) => g.studentId === child.id && g.approval === "approved" && matches(g.semester));
+  const draftGoals = iepGoals.filter((g) => g.studentId === child.id && g.approval !== "approved" && matches(g.semester));
+  const childEvidence = evidenceItems.filter((e) => e.studentId === child.id && matches(e.semester)).slice(0, 6);
+  const childReports = iepReports.filter((r) => r.studentId === child.id && matches(r.semester) && (r.status === "approved" || r.status === "published"));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-soft/30 via-background to-background">
