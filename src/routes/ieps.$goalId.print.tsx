@@ -2,6 +2,8 @@ import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { iepGoals, students, classInfo, evidenceItems, type SuccessCriterion } from "@/lib/mock-data";
+import { useActiveSemester } from "@/lib/semester-context";
+import { scopedSearch } from "@/lib/scope";
 import { Printer, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/ieps/$goalId/print")({
