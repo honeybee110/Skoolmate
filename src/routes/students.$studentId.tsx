@@ -66,7 +66,7 @@ function StudentProfile() {
                 {student.aacUser && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px]"><MessageSquareText className="h-3 w-3" />AAC user</span>
                 )}
-                {student.medicalAlerts.map((m) => (
+                {student.medicalAlerts.map((m: string) => (
                   <span key={m} className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] text-destructive">
                     <Pill className="h-3 w-3" />{m}
                   </span>
