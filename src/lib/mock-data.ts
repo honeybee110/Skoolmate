@@ -244,7 +244,15 @@ export const curriculumStrands = {
 
 export type IepStatus = "not-started" | "developing" | "working-towards" | "achieved";
 export type IepApproval = "draft" | "pending" | "approved";
-export type IepDomain = "Communication" | "Literacy" | "Numeracy" | "Social-Emotional" | "Self-care" | "Motor";
+export type IepDomain =
+  | "English"
+  | "Maths"
+  | "Personal & Social"
+  | "Science"
+  | "HASS"
+  | "Health & PE"
+  | "The Arts"
+  | "Self-care";
 export type VcLevel = "A" | "B" | "C" | "D" | "F" | "1" | "2";
 export type LearningArea =
   | "English · Phonics"
@@ -256,7 +264,14 @@ export type LearningArea =
   | "Maths · Space"
   | "Humanities · History"
   | "Humanities · Geography"
-  | "Science";
+  | "Science"
+  | "Personal & Social"
+  | "Health & PE"
+  | "The Arts · Music"
+  | "The Arts · Drama"
+  | "The Arts · Visual Arts"
+  | "Cooking / Kitchen Garden";
+
 
 export interface SuccessCriterion {
   step: string;
