@@ -139,6 +139,37 @@ function ParentPortal() {
           </div>
         </Card>
 
+        {/* Semester reports */}
+        <section>
+          <div className="mb-3 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold uppercase tracking-wide">Semester reports</h2>
+          </div>
+          {childReports.length === 0 ? (
+            <Card className="p-6 text-sm text-muted-foreground">
+              No reports have been published for {child.firstName} in {activeSemester === "all" ? "any semester" : activeSemester} yet.
+            </Card>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {childReports.map((r) => (
+                <Card key={r.id} className="flex items-center justify-between gap-3 p-4">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Badge variant="outline" className="font-normal text-[10px]">{r.semester}</Badge>
+                      <Badge className={cn("font-normal text-[10px] capitalize", reportStatusTone[r.status])}>{r.status === "in-review" ? "In review" : r.status}</Badge>
+                    </div>
+                    <p className="mt-1.5 text-sm font-medium leading-snug">{r.semester.startsWith("Semester 1") ? "Mid-year" : "End-of-year"} IEP report</p>
+                    <p className="text-[11px] text-muted-foreground">{r.goalsIncluded} goals · {r.evidenceCount} evidence pieces · updated {r.updatedAt}</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="h-8 shrink-0 text-xs">
+                    <FileDown className="h-3 w-3" /> PDF
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+
         {/* Goals */}
         <section>
           <div className="mb-3 flex items-center gap-2">
@@ -146,7 +177,9 @@ function ParentPortal() {
             <h2 className="text-sm font-semibold uppercase tracking-wide">Approved learning goals</h2>
           </div>
           {childGoals.length === 0 ? (
-            <Card className="p-6 text-sm text-muted-foreground">No goals have been approved yet — {child.firstName}'s teacher is preparing them. You'll see them here as soon as they're signed off.</Card>
+            <Card className="p-6 text-sm text-muted-foreground">
+              No approved goals for {child.firstName} in {activeSemester === "all" ? "any semester" : activeSemester} yet.
+            </Card>
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {childGoals.map((g) => {
@@ -154,8 +187,11 @@ function ParentPortal() {
                 const meta = stageMeta[g.status];
                 return (
                   <Card key={g.id} className="p-4">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="font-normal text-[10px]">{g.learningArea}</Badge>
+                    <div className="flex flex-wrap items-center justify-between gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline" className="font-normal text-[10px]">{g.learningArea}</Badge>
+                        <Badge variant="outline" className="font-normal text-[10px]">{g.semester}</Badge>
+                      </div>
                       <Badge className={cn("font-normal text-[10px]", meta.tone)}>{meta.label}</Badge>
                     </div>
                     <p className="mt-2 text-sm font-medium leading-snug">{g.smart}</p>
@@ -187,18 +223,27 @@ function ParentPortal() {
             <Camera className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase tracking-wide">Moments from the classroom</h2>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-            {childEvidence.map((e) => (
-              <Card key={e.id} className="overflow-hidden">
-                <div className="aspect-[4/3] w-full" style={{ background: `linear-gradient(135deg, oklch(0.85 0.08 ${e.thumbHue}) 0%, oklch(0.92 0.05 ${e.thumbHue + 30}) 100%)` }} />
-                <div className="space-y-1 p-3">
-                  <Badge variant="outline" className="font-normal text-[10px] capitalize">{e.medium}</Badge>
-                  <p className="text-xs leading-snug">{e.caption}</p>
-                  <p className="text-[10px] text-muted-foreground">{e.capturedAt} · {e.capturedBy}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
+          {childEvidence.length === 0 ? (
+            <Card className="p-6 text-sm text-muted-foreground">
+              No classroom moments captured in {activeSemester === "all" ? "any semester" : activeSemester} yet.
+            </Card>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {childEvidence.map((e) => (
+                <Card key={e.id} className="overflow-hidden">
+                  <div className="aspect-[4/3] w-full" style={{ background: `linear-gradient(135deg, oklch(0.85 0.08 ${e.thumbHue}) 0%, oklch(0.92 0.05 ${e.thumbHue + 30}) 100%)` }} />
+                  <div className="space-y-1 p-3">
+                    <div className="flex flex-wrap items-center gap-1">
+                      <Badge variant="outline" className="font-normal text-[10px] capitalize">{e.medium}</Badge>
+                      <Badge variant="outline" className="font-normal text-[10px]">{e.semester}</Badge>
+                    </div>
+                    <p className="text-xs leading-snug">{e.caption}</p>
+                    <p className="text-[10px] text-muted-foreground">{e.capturedAt} · {e.capturedBy}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
 
         <Card className="flex items-center justify-between gap-3 p-4">
