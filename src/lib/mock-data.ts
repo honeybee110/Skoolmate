@@ -58,15 +58,78 @@ export interface TimetableBlock {
   type: "literacy" | "numeracy" | "specialist" | "break" | "therapy";
 }
 
+// P7 — Term 3 SY 2026 · Teacher: Honey · ES: Sharifa
+export const classInfo = {
+  code: "P7",
+  term: "Term 3 · 2026",
+  teacher: "Honey",
+  educationSupport: "Sharifa",
+  room: "P7",
+  medicalAlerts: [{ student: "Kristian", plan: "Asthma Plan" }],
+};
+
 export const todayTimetable: TimetableBlock[] = [
-  { start: "9:00", end: "9:30", title: "Morning Circle", room: "Rosella", type: "literacy" },
-  { start: "9:30", end: "10:30", title: "Literacy — Reading & Viewing", room: "Rosella", type: "literacy" },
-  { start: "10:30", end: "11:00", title: "Recess", room: "Yard A", type: "break" },
-  { start: "11:00", end: "12:00", title: "Numeracy — Measurement", room: "Rosella", type: "numeracy" },
-  { start: "12:00", end: "12:30", title: "Speech Therapy (Mia, Jack)", room: "OT Room 2", type: "therapy" },
-  { start: "12:30", end: "1:15", title: "Lunch", room: "Yard A", type: "break" },
-  { start: "1:15", end: "2:15", title: "Visual Arts", room: "Art Studio", type: "specialist" },
-  { start: "2:15", end: "3:15", title: "Learn to Play", room: "Rosella", type: "literacy" },
+  { start: "9:00", end: "10:00", title: "Start the Day / Phonics", room: "P7", type: "literacy" },
+  { start: "10:00", end: "10:30", title: "Literacy — Writing", room: "P7", type: "literacy" },
+  { start: "10:30", end: "11:00", title: "Morning Tea", room: "Yard", type: "break" },
+  { start: "11:00", end: "11:30", title: "Morning Play", room: "Yard", type: "break" },
+  { start: "11:30", end: "12:30", title: "Maths — Numbers", room: "P7", type: "numeracy" },
+  { start: "12:30", end: "1:00", title: "Learn to Play", room: "P7", type: "literacy" },
+  { start: "1:00", end: "1:30", title: "Lunch", room: "Yard", type: "break" },
+  { start: "1:30", end: "2:00", title: "Lunch Play", room: "Yard", type: "break" },
+  { start: "2:00", end: "3:00", title: "Social Games", room: "P7", type: "specialist" },
+];
+
+export type WeekDay = "Mon" | "Tue" | "Wed" | "Thu" | "Fri";
+export interface WeekSession {
+  session: 1 | 2 | 3 | 4 | 5;
+  title: string;
+  type: TimetableBlock["type"];
+}
+export const weeklyTimetable: Record<WeekDay, WeekSession[]> = {
+  Mon: [
+    { session: 1, title: "Start the Day / Phonics", type: "literacy" },
+    { session: 2, title: "Literacy — Writing", type: "literacy" },
+    { session: 3, title: "Maths — Numbers", type: "numeracy" },
+    { session: 4, title: "Learn to Play", type: "literacy" },
+    { session: 5, title: "Social Games", type: "specialist" },
+  ],
+  Tue: [
+    { session: 1, title: "Start the Day / Phonics", type: "literacy" },
+    { session: 2, title: "Literacy — Reading", type: "literacy" },
+    { session: 3, title: "Activity — Art", type: "specialist" },
+    { session: 4, title: "Activity — PE", type: "specialist" },
+    { session: 5, title: "Geography", type: "specialist" },
+  ],
+  Wed: [
+    { session: 1, title: "Start the Day / Phonics", type: "literacy" },
+    { session: 2, title: "Sensory Story", type: "therapy" },
+    { session: 3, title: "Maths — Algebra", type: "numeracy" },
+    { session: 4, title: "Science", type: "specialist" },
+    { session: 5, title: "RRRR", type: "literacy" },
+  ],
+  Thu: [
+    { session: 1, title: "Start the Day / Phonics", type: "literacy" },
+    { session: 2, title: "Colourful Semantics", type: "literacy" },
+    { session: 3, title: "Swimming", type: "specialist" },
+    { session: 4, title: "Swimming", type: "specialist" },
+    { session: 5, title: "Personal Care", type: "therapy" },
+  ],
+  Fri: [
+    { session: 1, title: "Drama", type: "specialist" },
+    { session: 2, title: "Assembly / SWPBS", type: "specialist" },
+    { session: 3, title: "Cooking / Maths — Statistics", type: "numeracy" },
+    { session: 4, title: "Biking", type: "specialist" },
+    { session: 5, title: "Music / Games", type: "specialist" },
+  ],
+};
+
+export const sessionTimes = [
+  { session: 1 as const, start: "9:00", end: "10:00" },
+  { session: 2 as const, start: "10:00", end: "11:00" },
+  { session: 3 as const, start: "11:30", end: "12:30" },
+  { session: 4 as const, start: "12:30", end: "1:30" },
+  { session: 5 as const, start: "2:00", end: "3:00" },
 ];
 
 export interface ActionItem {
@@ -79,11 +142,11 @@ export interface ActionItem {
 }
 
 export const actionQueue: ActionItem[] = [
-  { id: "a1", kind: "medication", title: "Noah Williams — ADHD meds at 11:00", due: "in 35 min", urgent: true },
+  { id: "a1", kind: "medication", title: "Kristian — Asthma plan check before Swimming", due: "Thu 9:00", urgent: true },
   { id: "a2", kind: "behaviour", title: "Jack O'Brien — ABC incident form", due: "Today", urgent: true, studentId: "s2" },
-  { id: "a3", kind: "lesson", title: "Submit Friday Numeracy lesson plan", due: "Today", studentId: undefined },
+  { id: "a3", kind: "lesson", title: "Submit Wed 'Maths — Algebra' lesson plan", due: "Today" },
   { id: "a4", kind: "iep", title: "Aaliyah Tahir — IEP review meeting prep", due: "Tomorrow" },
-  { id: "a5", kind: "report", title: "Term 2 IEP reports draft (8 students)", due: "Fri 4 Jul" },
+  { id: "a5", kind: "report", title: "Term 3 IEP reports draft (8 students)", due: "Fri 4 Jul" },
 ];
 
 export interface NotificationItem {

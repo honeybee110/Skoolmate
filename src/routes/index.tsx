@@ -55,8 +55,9 @@ function Dashboard() {
     <AppShell>
       <div className="px-4 py-6 md:px-8">
         <div className="flex flex-col gap-1">
-          <p className="text-sm text-muted-foreground">Monday, 29 June 2026</p>
-          <h1 className="text-3xl font-semibold tracking-tight">Good morning, Sarah</h1>
+          <p className="text-sm text-muted-foreground">Monday, 29 June 2026 · Term 3</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Good morning, Honey</h1>
+          <p className="mt-1 text-xs text-muted-foreground">P7 · ES Sharifa · <span className="text-accent font-medium">Medical alert — Kristian: Asthma Plan</span></p>
         </div>
 
         {/* AI Daily Snapshot */}
@@ -180,7 +181,7 @@ function Dashboard() {
         <div className="mt-8">
           <div className="flex items-end justify-between">
             <div>
-              <h2 className="text-base font-semibold tracking-tight">Rosella — Year 3</h2>
+              <h2 className="text-base font-semibold tracking-tight">P7 — Term 3 2026</h2>
               <p className="text-xs text-muted-foreground">8 students · 7 present today</p>
             </div>
             <Button variant="outline" size="sm">Open class view</Button>

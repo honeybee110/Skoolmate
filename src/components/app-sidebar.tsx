@@ -107,11 +107,11 @@ export function AppSidebar() {
         </SidebarMenu>
         <div className="flex items-center gap-2.5 rounded-lg p-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent-foreground text-xs font-semibold">
-            SK
+            HO
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-xs font-medium">Sarah Kim</span>
-            <span className="text-[10px] text-muted-foreground">Teacher · Rosella</span>
+            <span className="text-xs font-medium">Honey</span>
+            <span className="text-[10px] text-muted-foreground">Teacher · P7</span>
           </div>
         </div>
       </SidebarFooter>
