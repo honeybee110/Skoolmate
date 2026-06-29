@@ -51,12 +51,12 @@ Teacher notes: ${data.notes || "—"}
 Align outcomes to Victorian Curriculum 2.0 (Towards Foundation Levels A–D where appropriate). Provide concrete, classroom-ready language. Include AAC, sensory and behaviour supports. Resources should be real (Twinkl, Topmarks, Starfall, Boardmaker, Canva, ABC Education).`;
 
     try {
-      const { experimental_output } = await generateText({
+      const { output } = await generateText({
         model: gateway("google/gemini-3-flash-preview"),
         prompt,
-        experimental_output: Output.object({ schema: LessonSchema }),
+        output: Output.object({ schema: LessonSchema }),
       });
-      return experimental_output;
+      return output;
     } catch (err) {
       const msg = err instanceof Error ? err.message : "AI request failed";
       if (msg.includes("429")) throw new Error("Rate limit reached — try again in a moment.");
