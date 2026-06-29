@@ -72,7 +72,8 @@ export function GlobalSearch() {
         id: g.id,
         title: `${g.learningArea} — ${g.studentName}`,
         subtitle: `${g.semester} · ${g.level} · ${g.status.replace("-", " ")}`,
-        to: "/ieps",
+        to: "/ieps" as const,
+        search: scopedSearch(activeSemester, { student: g.studentId, semester: g.semester, goal: g.id }),
       }));
 
     const evidenceResults: Result[] = evidenceItems
@@ -86,7 +87,8 @@ export function GlobalSearch() {
         id: e.id,
         title: e.caption,
         subtitle: `${e.studentName} · ${e.medium} · ${e.semester}`,
-        to: "/evidence",
+        to: "/evidence" as const,
+        search: scopedSearch(activeSemester, { student: e.studentId, semester: e.semester as Semester, goal: e.goalIds[0] }),
       }));
 
     const reportResults: Result[] = actionQueue
@@ -98,11 +100,12 @@ export function GlobalSearch() {
         id: a.id,
         title: a.title,
         subtitle: `${a.kind} · due ${a.due} · ${a.semester}`,
-        to: a.kind === "report" ? "/reports" : "/",
+        to: (a.kind === "report" ? "/reports" : "/") as DrillTarget,
+        search: scopedSearch(activeSemester, { semester: a.semester }),
       }));
 
     return [...studentResults, ...iepResults, ...evidenceResults, ...reportResults];
-  }, [query, matches]);
+  }, [query, matches, activeSemester]);
 
   const grouped = useMemo(() => {
     const map = new Map<Result["kind"], Result[]>();
