@@ -50,12 +50,14 @@ const approvalMeta: Record<IepApproval, { label: string; tone: string; icon: Rea
 };
 
 const domainTone: Record<IepDomain, string> = {
-  Communication: "bg-primary/10 text-primary",
-  Literacy: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
-  Numeracy: "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
-  "Social-Emotional": "bg-accent/15 text-accent",
+  English: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
+  Maths: "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
+  "Personal & Social": "bg-accent/15 text-accent",
+  Science: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+  HASS: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+  "Health & PE": "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
+  "The Arts": "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
   "Self-care": "bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300",
-  Motor: "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
 };
 
 function goalProgress(goal: IepGoal) {
