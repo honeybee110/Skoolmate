@@ -146,7 +146,7 @@ export const actionQueue: ActionItem[] = [
   { id: "a2", kind: "behaviour", title: "Jack O'Brien — ABC incident form", due: "Today", urgent: true, studentId: "s2" },
   { id: "a3", kind: "lesson", title: "Submit Wed 'Maths — Algebra' lesson plan", due: "Today" },
   { id: "a4", kind: "iep", title: "Aaliyah Tahir — IEP review meeting prep", due: "Tomorrow" },
-  { id: "a5", kind: "report", title: "Term 3 IEP reports draft (8 students)", due: "Fri 4 Jul" },
+  { id: "a5", kind: "report", title: "Semester 2 IEP reports draft (8 students)", due: "Fri 4 Jul" },
 ];
 
 export interface NotificationItem {
@@ -235,7 +235,7 @@ export const iepGoals: IepGoal[] = [
     id: "g1", studentId: "s1", studentName: "Mia Nguyen", domain: "Numeracy",
     learningArea: "Maths · Number", level: "F", vcLink: "VC2MFN01",
     learningIntention: "Name, represent and order numbers, including zero to at least 20, using physical and virtual materials and numerals.",
-    smart: "Mia will name, represent and order numbers 0–20 with 80% accuracy across 3 sessions by end of Term 3.",
+    smart: "Mia will name, represent and order numbers 0–20 with 80% accuracy across 3 sessions by end of Semester 2.",
     baseline: "Names and orders 0–10 with prompts", status: "developing",
     evidenceCount: 8, lastEvidence: "2 days ago", reviewDue: "Wk 8",
     successCriteria: [

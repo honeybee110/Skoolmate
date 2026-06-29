@@ -136,7 +136,7 @@ function StudentProfile() {
 
           <TabsContent value="iep" className="mt-4">
             <Card className="p-5">
-              <h3 className="text-sm font-semibold">Active IEP Goals — Term 2, 2026</h3>
+              <h3 className="text-sm font-semibold">Active IEP Goals — Semester 1, 2026</h3>
               <ul className="mt-4 space-y-4">
                 {["Request a break using AAC device independently", "Count and match groups of 1–10 objects", "Take turns in a 3-person game with verbal prompts", "Write own first name on lined paper"].map((g, i) => (
                   <li key={i} className="rounded-lg border p-4">
