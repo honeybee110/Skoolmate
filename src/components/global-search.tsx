@@ -24,6 +24,7 @@ const groupMeta: Record<Result["kind"], { label: string; Icon: typeof Users }> =
 
 export function GlobalSearch() {
   const { activeSemester, matches } = useActiveSemester();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
