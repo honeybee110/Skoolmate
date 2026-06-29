@@ -322,7 +322,7 @@ function CrossCheckPanel({
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <ListChecks className="h-3.5 w-3.5" />Cross-Check
           </div>
-          <span className="text-[10px] text-muted-foreground">Semester 1 2026 master</span>
+          <span className="text-[10px] text-muted-foreground">{goal.semester} master</span>
         </div>
         <div className="divide-y">
           {goal.successCriteria.map((c, i) => (
