@@ -184,14 +184,37 @@ export const curriculumStrands = {
   "Learn to Play": ["Turn-taking", "Social interaction", "Independent play"],
 };
 
-export type IepStatus = "not-started" | "emerging" | "working-towards" | "achieved";
+export type IepStatus = "not-started" | "working-towards" | "developing" | "achieved";
 export type IepDomain = "Communication" | "Literacy" | "Numeracy" | "Social-Emotional" | "Self-care" | "Motor";
+export type VcLevel = "A" | "B" | "C" | "D" | "F" | "1" | "2";
+export type LearningArea =
+  | "English · Phonics"
+  | "English · Reading & Viewing"
+  | "English · Speaking & Listening"
+  | "English · Writing"
+  | "Maths · Number"
+  | "Maths · Measurement"
+  | "Maths · Space"
+  | "Humanities · History"
+  | "Humanities · Geography"
+  | "Science";
+
+export interface SuccessCriterion {
+  step: string;
+  workingTowards: string;
+  developing: string;
+  achieved: string;
+  status: Exclude<IepStatus, "not-started">;
+}
 
 export interface IepGoal {
   id: string;
   studentId: string;
   studentName: string;
   domain: IepDomain;
+  learningArea: LearningArea;
+  level: VcLevel;
+  learningIntention: string;
   smart: string;
   baseline: string;
   status: IepStatus;
@@ -199,19 +222,141 @@ export interface IepGoal {
   lastEvidence: string;
   reviewDue: string;
   vcLink: string;
+  successCriteria: SuccessCriterion[];
 }
 
+// Goals scaffolded from the school's Scope & Sequence with Cross-Check descriptors.
 export const iepGoals: IepGoal[] = [
-  { id: "g1", studentId: "s1", studentName: "Mia Nguyen", domain: "Numeracy", smart: "Mia will rote count 1–20 with 80% accuracy across 3 sessions by end of Term 3.", baseline: "Counts 1–10 with prompts", status: "working-towards", evidenceCount: 8, lastEvidence: "2 days ago", reviewDue: "Wk 8", vcLink: "VC2M1N01" },
-  { id: "g2", studentId: "s1", studentName: "Mia Nguyen", domain: "Communication", smart: "Mia will use 3-word requests independently in 4/5 opportunities daily.", baseline: "1–2 word requests with prompts", status: "emerging", evidenceCount: 4, lastEvidence: "Yesterday", reviewDue: "Wk 9", vcLink: "VC2EAS-A" },
-  { id: "g3", studentId: "s2", studentName: "Jack O'Brien", domain: "Social-Emotional", smart: "Jack will request a break using his AAC device when escalated in 3/5 opportunities.", baseline: "Currently elopes when overwhelmed", status: "working-towards", evidenceCount: 12, lastEvidence: "Today", reviewDue: "Wk 7", vcLink: "VC2PSM-B" },
-  { id: "g4", studentId: "s2", studentName: "Jack O'Brien", domain: "Literacy", smart: "Jack will match 6 CVC pictures to words with 80% accuracy.", baseline: "Matches 2 CVC pictures", status: "emerging", evidenceCount: 3, lastEvidence: "3 days ago", reviewDue: "Wk 8", vcLink: "VC2E1LY09" },
-  { id: "g5", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Literacy", smart: "Aaliyah will trace her first name with a model present, 4 of 5 attempts.", baseline: "Traces 3 letters with hand-over-hand", status: "achieved", evidenceCount: 14, lastEvidence: "Today", reviewDue: "Wk 6", vcLink: "VC2EFLY10" },
-  { id: "g6", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Communication", smart: "Aaliyah will request help using her PECS card in 4/5 opportunities.", baseline: "Requests with adult prompt", status: "achieved", evidenceCount: 11, lastEvidence: "Yesterday", reviewDue: "Wk 6", vcLink: "VC2EAS-A" },
-  { id: "g7", studentId: "s4", studentName: "Noah Williams", domain: "Self-care", smart: "Noah will independently wash hands following 5-step visual sequence after toileting.", baseline: "Completes 2/5 steps", status: "working-towards", evidenceCount: 6, lastEvidence: "Today", reviewDue: "Wk 8", vcLink: "VC2HPEP-B" },
-  { id: "g8", studentId: "s4", studentName: "Noah Williams", domain: "Social-Emotional", smart: "Noah will use a sensory regulation chart to identify his state 3 times daily.", baseline: "Adult-led check-ins only", status: "emerging", evidenceCount: 5, lastEvidence: "Yesterday", reviewDue: "Wk 9", vcLink: "VC2PSM-A" },
-  { id: "g9", studentId: "s5", studentName: "Zara Patel", domain: "Communication", smart: "Zara will initiate AAC requests for 3 preferred items independently.", baseline: "Requests 1 item with model", status: "working-towards", evidenceCount: 9, lastEvidence: "2 days ago", reviewDue: "Wk 7", vcLink: "VC2EAS-A" },
-  { id: "g10", studentId: "s8", studentName: "Hamish Carter", domain: "Social-Emotional", smart: "Hamish will request a break with AAC in 4/5 escalation moments.", baseline: "Verbal protest only", status: "working-towards", evidenceCount: 7, lastEvidence: "Today", reviewDue: "Wk 8", vcLink: "VC2PSM-B" },
+  {
+    id: "g1", studentId: "s1", studentName: "Mia Nguyen", domain: "Numeracy",
+    learningArea: "Maths · Number", level: "F", vcLink: "VC2MFN01",
+    learningIntention: "Name, represent and order numbers, including zero to at least 20, using physical and virtual materials and numerals.",
+    smart: "Mia will name, represent and order numbers 0–20 with 80% accuracy across 3 sessions by end of Term 3.",
+    baseline: "Names and orders 0–10 with prompts", status: "developing",
+    evidenceCount: 8, lastEvidence: "2 days ago", reviewDue: "Wk 8",
+    successCriteria: [
+      { step: "Name numerals 0–20", workingTowards: "Names 0–10 inconsistently", developing: "Names 0–20 with cues", achieved: "Names numerals 0–20 independently", status: "developing" },
+      { step: "Represent quantities to 20 with materials", workingTowards: "Represents to 10 with support", developing: "Represents to 20 with guidance", achieved: "Represents 0–20 with materials independently", status: "developing" },
+      { step: "Order numbers 0–20 using materials or charts", workingTowards: "Orders inconsistently", developing: "Orders with guidance", achieved: "Orders numbers 0–20 using materials or charts", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g2", studentId: "s1", studentName: "Mia Nguyen", domain: "Communication",
+    learningArea: "English · Speaking & Listening", level: "D", vcLink: "VC2EFDLA02",
+    learningIntention: "Use phrases to communicate preferences, likes and dislikes.",
+    smart: "Mia will use 3-word phrases to indicate preferences independently in 4/5 opportunities daily.",
+    baseline: "1–2 word requests with prompts", status: "working-towards",
+    evidenceCount: 4, lastEvidence: "Yesterday", reviewDue: "Wk 9",
+    successCriteria: [
+      { step: "Choose between two options", workingTowards: "Chooses when heavily supported", developing: "Chooses between two options with prompts", achieved: "Indicates preference with no prompting", status: "developing" },
+      { step: "Use 3-word phrase for likes/dislikes", workingTowards: "Uses single word", developing: "Uses 2-word phrase with model", achieved: "Uses 3-word phrase independently", status: "working-towards" },
+      { step: "Generalise across activities", workingTowards: "Snack only", developing: "2 routines", achieved: "Across the school day", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g3", studentId: "s2", studentName: "Jack O'Brien", domain: "Social-Emotional",
+    learningArea: "English · Speaking & Listening", level: "C", vcLink: "VC2EFCLA01",
+    learningIntention: "Use short phrases to request, accept or reject an object, action or event.",
+    smart: "Jack will request a break using his AAC device when escalated in 3/5 opportunities.",
+    baseline: "Elopes when overwhelmed", status: "developing",
+    evidenceCount: 12, lastEvidence: "Today", reviewDue: "Wk 7",
+    successCriteria: [
+      { step: "Activate AAC 'break' symbol with model", workingTowards: "Activates rarely", developing: "Activates with model", achieved: "Activates independently", status: "achieved" },
+      { step: "Request break before escalation", workingTowards: "Requests after incident", developing: "Requests with prompts", achieved: "Requests before escalation", status: "developing" },
+      { step: "Accept offered regulation strategy", workingTowards: "Refuses", developing: "Accepts with support", achieved: "Accepts and uses strategy", status: "developing" },
+    ],
+  },
+  {
+    id: "g4", studentId: "s2", studentName: "Jack O'Brien", domain: "Literacy",
+    learningArea: "English · Phonics", level: "D", vcLink: "VC2EFDLY02",
+    learningIntention: "Blend and segment a small number of one-syllable words; read some CVC words.",
+    smart: "Jack will read 6 CVC words by blending sounds with 80% accuracy across 3 sessions.",
+    baseline: "Matches 2 CVC pictures to words", status: "working-towards",
+    evidenceCount: 3, lastEvidence: "3 days ago", reviewDue: "Wk 8",
+    successCriteria: [
+      { step: "Identify initial sound in CVC word", workingTowards: "Identifies inconsistently", developing: "Identifies with cues", achieved: "Identifies independently", status: "developing" },
+      { step: "Blend onset + rime", workingTowards: "Blends with hand-over-hand", developing: "Blends with prompts", achieved: "Blends independently", status: "working-towards" },
+      { step: "Read 6 CVC words", workingTowards: "Reads 2", developing: "Reads 4 with cues", achieved: "Reads 6 independently", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g5", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Literacy",
+    learningArea: "English · Writing", level: "F", vcLink: "VC2EFLY15",
+    learningIntention: "Form most lower-case and upper-case letters using learnt letter formations.",
+    smart: "Aaliyah will form the letters of her first name with a model present, 4 of 5 attempts.",
+    baseline: "Traces 3 letters with hand-over-hand", status: "achieved",
+    evidenceCount: 14, lastEvidence: "Today", reviewDue: "Wk 6",
+    successCriteria: [
+      { step: "Hold pencil with functional grip", workingTowards: "Palmar grip", developing: "Transitional grip", achieved: "Tripod grip sustained", status: "achieved" },
+      { step: "Trace letters with model", workingTowards: "Traces with HOH", developing: "Traces with verbal prompt", achieved: "Traces independently", status: "achieved" },
+      { step: "Form letters from memory", workingTowards: "1–2 letters", developing: "3–4 letters with model", achieved: "All letters of first name", status: "achieved" },
+    ],
+  },
+  {
+    id: "g6", studentId: "s3", studentName: "Aaliyah Tahir", domain: "Communication",
+    learningArea: "English · Speaking & Listening", level: "C", vcLink: "VC2EFCLA01",
+    learningIntention: "Use short phrases to request, accept or reject an object, action or event.",
+    smart: "Aaliyah will request help using her PECS card in 4/5 opportunities.",
+    baseline: "Requests with adult prompt", status: "achieved",
+    evidenceCount: 11, lastEvidence: "Yesterday", reviewDue: "Wk 6",
+    successCriteria: [
+      { step: "Discriminate 'help' card from others", workingTowards: "Selects with prompt", developing: "Selects with cue", achieved: "Discriminates independently", status: "achieved" },
+      { step: "Exchange card with adult", workingTowards: "Hand-over-hand", developing: "Approximates exchange", achieved: "Exchanges independently", status: "achieved" },
+      { step: "Use across activities", workingTowards: "1 activity", developing: "2–3 activities", achieved: "Across the school day", status: "developing" },
+    ],
+  },
+  {
+    id: "g7", studentId: "s4", studentName: "Noah Williams", domain: "Self-care",
+    learningArea: "Maths · Measurement", level: "D", vcLink: "VC2MFDM02",
+    learningIntention: "Sequence familiar routines and events using simple ordinal language.",
+    smart: "Noah will independently sequence the 5-step handwashing routine after toileting.",
+    baseline: "Completes 2/5 steps", status: "developing",
+    evidenceCount: 6, lastEvidence: "Today", reviewDue: "Wk 8",
+    successCriteria: [
+      { step: "Identify each step on a visual sequence", workingTowards: "Points with support", developing: "Points with cues", achieved: "Identifies all 5 steps", status: "developing" },
+      { step: "Order steps 1st–5th", workingTowards: "Orders 2 steps", developing: "Orders 3–4 steps", achieved: "Orders all 5 steps", status: "developing" },
+      { step: "Perform routine independently", workingTowards: "2/5 steps", developing: "3–4/5 steps", achieved: "Independent 5/5 steps", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g8", studentId: "s4", studentName: "Noah Williams", domain: "Social-Emotional",
+    learningArea: "English · Speaking & Listening", level: "D", vcLink: "VC2EFDLA02",
+    learningIntention: "Use phrases to communicate preferences, likes and dislikes.",
+    smart: "Noah will use a sensory regulation chart to label his state 3 times daily.",
+    baseline: "Adult-led check-ins only", status: "working-towards",
+    evidenceCount: 5, lastEvidence: "Yesterday", reviewDue: "Wk 9",
+    successCriteria: [
+      { step: "Point to current state on chart", workingTowards: "Points with model", developing: "Points with cue", achieved: "Points independently", status: "developing" },
+      { step: "Label state with phrase", workingTowards: "Single colour word", developing: "2-word phrase with cue", achieved: "Phrase independently", status: "working-towards" },
+      { step: "Initiate check-in 3× daily", workingTowards: "Adult-led only", developing: "1–2 self-initiated", achieved: "3 self-initiated", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g9", studentId: "s5", studentName: "Zara Patel", domain: "Communication",
+    learningArea: "English · Speaking & Listening", level: "B", vcLink: "VC2EFBLA01",
+    learningIntention: "Use preferred communication modality to indicate a preference.",
+    smart: "Zara will initiate AAC requests for 3 preferred items independently.",
+    baseline: "Requests 1 item with model", status: "developing",
+    evidenceCount: 9, lastEvidence: "2 days ago", reviewDue: "Wk 7",
+    successCriteria: [
+      { step: "Activate AAC for 1 preferred item", workingTowards: "With model", developing: "With cue", achieved: "Independently", status: "achieved" },
+      { step: "Discriminate between 3 symbols", workingTowards: "Selects 1 symbol", developing: "Selects 2 with cues", achieved: "Selects 3 independently", status: "developing" },
+      { step: "Initiate without prompt", workingTowards: "Responds only", developing: "Initiates with cue", achieved: "Initiates independently", status: "working-towards" },
+    ],
+  },
+  {
+    id: "g10", studentId: "s8", studentName: "Hamish Carter", domain: "Social-Emotional",
+    learningArea: "English · Speaking & Listening", level: "C", vcLink: "VC2EFCLA01",
+    learningIntention: "Use short phrases to request, accept or reject an object, action or event.",
+    smart: "Hamish will request a break with AAC in 4/5 escalation moments.",
+    baseline: "Verbal protest only", status: "developing",
+    evidenceCount: 7, lastEvidence: "Today", reviewDue: "Wk 8",
+    successCriteria: [
+      { step: "Recognise body signals of overwhelm", workingTowards: "Adult identifies", developing: "Identifies with cue", achieved: "Identifies independently", status: "developing" },
+      { step: "Locate AAC 'break' symbol", workingTowards: "With model", developing: "With cue", achieved: "Independently", status: "achieved" },
+      { step: "Request break before escalation", workingTowards: "After incident", developing: "Mid-escalation with prompt", achieved: "Before escalation", status: "working-towards" },
+    ],
+  },
 ];
 
 export type EvidenceMedium = "photo" | "video" | "work-sample" | "anecdotal" | "audio";
