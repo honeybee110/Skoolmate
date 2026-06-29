@@ -200,28 +200,34 @@ function Thumb({ item, className }: { item: EvidenceItem; className?: string }) 
   );
 }
 
-function EvidenceCard({ item }: { item: EvidenceItem }) {
+function EvidenceCard({ item, activeSemester }: { item: EvidenceItem; activeSemester: SemesterScope }) {
   const goals = iepGoals.filter((g) => item.goalIds.includes(g.id));
+  const primaryGoal = goals[0];
+  const openInContext = primaryGoal
+    ? { to: "/ieps" as const, search: scopedSearch(activeSemester, { student: item.studentId, semester: item.semester as Semester, goal: primaryGoal.id }) }
+    : { to: "/evidence" as const, search: scopedSearch(activeSemester, { student: item.studentId, semester: item.semester as Semester }) };
   return (
-    <Card className="group overflow-hidden transition hover:shadow-md hover:border-primary/30">
-      <Thumb item={item} className="aspect-[4/3] w-full" />
-      <div className="space-y-2 p-4">
-        <div className="flex items-center justify-between gap-2">
-          <Badge variant="outline" className={cn("font-normal text-[10px]", mediumMeta[item.medium].tone)}>{mediumMeta[item.medium].label}</Badge>
-          {item.aiTagged && <Badge className="bg-primary/10 text-primary text-[10px] hover:bg-primary/10 font-normal"><Sparkles className="h-2.5 w-2.5" />AI-linked</Badge>}
-        </div>
-        <p className="text-sm font-medium leading-snug line-clamp-2">{item.caption}</p>
-        <p className="text-xs text-muted-foreground">{item.studentName} · {item.capturedAt} · {item.capturedBy}</p>
-        {goals.length > 0 ? (
-          <div className="flex flex-wrap gap-1 border-t pt-2">
-            {goals.map((g) => (
-              <Badge key={g.id} variant="secondary" className="text-[10px] font-normal"><Link2 className="h-2.5 w-2.5" />{g.domain}</Badge>
-            ))}
+    <Link {...openInContext} className="group block">
+      <Card className="overflow-hidden transition hover:shadow-md hover:border-primary/30">
+        <Thumb item={item} className="aspect-[4/3] w-full" />
+        <div className="space-y-2 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <Badge variant="outline" className={cn("font-normal text-[10px]", mediumMeta[item.medium].tone)}>{mediumMeta[item.medium].label}</Badge>
+            {item.aiTagged && <Badge className="bg-primary/10 text-primary text-[10px] hover:bg-primary/10 font-normal"><Sparkles className="h-2.5 w-2.5" />AI-linked</Badge>}
           </div>
-        ) : (
-          <p className="border-t pt-2 text-xs italic text-muted-foreground">Not yet linked to a goal</p>
-        )}
-      </div>
-    </Card>
+          <p className="text-sm font-medium leading-snug line-clamp-2">{item.caption}</p>
+          <p className="text-xs text-muted-foreground">{item.studentName} · {item.capturedAt} · {item.capturedBy}</p>
+          {goals.length > 0 ? (
+            <div className="flex flex-wrap gap-1 border-t pt-2">
+              {goals.map((g) => (
+                <Badge key={g.id} variant="secondary" className="text-[10px] font-normal"><Link2 className="h-2.5 w-2.5" />{g.domain}</Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="border-t pt-2 text-xs italic text-muted-foreground">Not yet linked to a goal</p>
+          )}
+        </div>
+      </Card>
+    </Link>
   );
 }
