@@ -225,6 +225,7 @@ export interface IepGoal {
   smart: string;
   baseline: string;
   status: IepStatus;
+  semester: Semester;
   approval?: IepApproval;
   approvedBy?: string;
   approvedAt?: string;
@@ -236,7 +237,10 @@ export interface IepGoal {
 }
 
 // Goals scaffolded from the school's Scope & Sequence with Cross-Check descriptors.
-export const iepGoals: IepGoal[] = [
+// All goals belong to the current reporting semester unless otherwise specified.
+const seedSemester: Semester = currentSemester;
+export const iepGoals: IepGoal[] = ([
+
   {
     id: "g1", studentId: "s1", studentName: "Mia Nguyen", domain: "Numeracy",
     learningArea: "Maths · Number", level: "F", vcLink: "VC2MFN01",
