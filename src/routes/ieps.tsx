@@ -282,6 +282,7 @@ function CrossCheckPanel({
   onLinkEvidence: (evId: string) => void;
   onDismiss: (evId: string) => void;
 }) {
+  const { activeSemester } = useActiveSemester();
   const meta = statusMeta[goal.status];
   const pct = goalProgress(goal);
   const appr = approvalMeta[goal.approval ?? "draft"];
