@@ -127,14 +127,34 @@ function ReportsPage() {
                           {meta.label}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 tabular-nums">{r.goalsIncluded}</td>
-                      <td className="px-4 py-3 tabular-nums">{r.evidenceCount}</td>
+                      <td className="px-4 py-3">
+                        <Link
+                          to="/ieps"
+                          search={{ student: r.studentId, semester: r.semester }}
+                          className="inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-0.5 tabular-nums text-primary hover:border-primary/40 hover:bg-primary/5"
+                          title={`Open ${r.goalsIncluded} IEP goals for ${r.studentName} in ${r.semester}`}
+                        >
+                          <Target className="h-3 w-3" /> {r.goalsIncluded} goals
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Link
+                          to="/evidence"
+                          search={{ student: r.studentId, semester: r.semester }}
+                          className="inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-0.5 tabular-nums text-primary hover:border-primary/40 hover:bg-primary/5"
+                          title={`Open ${r.evidenceCount} evidence items`}
+                        >
+                          <Camera className="h-3 w-3" /> {r.evidenceCount} items
+                        </Link>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">{r.updatedAt}</td>
                       <td className="px-4 py-3 text-muted-foreground">{r.approver ?? "—"}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-1">
-                          <Button size="sm" variant="ghost" className="h-7 text-xs">
-                            <FileText className="h-3 w-3" /> Open
+                          <Button asChild size="sm" variant="ghost" className="h-7 text-xs">
+                            <Link to="/ieps" search={{ student: r.studentId, semester: r.semester }}>
+                              <FileText className="h-3 w-3" /> Open
+                            </Link>
                           </Button>
                           {(r.status === "approved" || r.status === "published") && (
                             <Button size="sm" variant="ghost" className="h-7 text-xs">
@@ -143,6 +163,7 @@ function ReportsPage() {
                           )}
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}
