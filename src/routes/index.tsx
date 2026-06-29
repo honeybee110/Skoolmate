@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useMemo } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,9 @@ import {
   actionQueue,
   notifications,
   aiSnapshot,
+  availableSemesters,
+  currentSemester,
+  type Semester,
 } from "@/lib/mock-data";
 import {
   Sparkles,
