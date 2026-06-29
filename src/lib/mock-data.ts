@@ -58,15 +58,19 @@ export interface TimetableBlock {
   type: "literacy" | "numeracy" | "specialist" | "break" | "therapy";
 }
 
-// P7 — Term 3 SY 2026 · Teacher: Honey · ES: Sharifa
+// P7 — Term 3 SY 2026 (Semester 2) · Teacher: Honey · ES: Sharifa
+export type Semester = "Semester 1 · 2026" | "Semester 2 · 2026";
+export const currentSemester: Semester = "Semester 2 · 2026";
 export const classInfo = {
   code: "P7",
   term: "Term 3 · 2026",
+  semester: currentSemester,
   teacher: "Honey",
   educationSupport: "Sharifa",
   room: "P7",
   medicalAlerts: [{ student: "Kristian", plan: "Asthma Plan" }],
 };
+
 
 export const todayTimetable: TimetableBlock[] = [
   { start: "9:00", end: "10:00", title: "Start the Day / Phonics", room: "P7", type: "literacy" },
@@ -137,17 +141,19 @@ export interface ActionItem {
   kind: "lesson" | "iep" | "behaviour" | "medication" | "report";
   title: string;
   due: string;
+  semester: Semester;
   urgent?: boolean;
   studentId?: string;
 }
 
 export const actionQueue: ActionItem[] = [
-  { id: "a1", kind: "medication", title: "Kristian — Asthma plan check before Swimming", due: "Thu 9:00", urgent: true },
-  { id: "a2", kind: "behaviour", title: "Jack O'Brien — ABC incident form", due: "Today", urgent: true, studentId: "s2" },
-  { id: "a3", kind: "lesson", title: "Submit Wed 'Maths — Algebra' lesson plan", due: "Today" },
-  { id: "a4", kind: "iep", title: "Aaliyah Tahir — IEP review meeting prep", due: "Tomorrow" },
-  { id: "a5", kind: "report", title: "Semester 2 IEP reports draft (8 students)", due: "Fri 4 Jul" },
+  { id: "a1", kind: "medication", title: "Kristian — Asthma plan check before Swimming", due: "Thu 9:00", semester: currentSemester, urgent: true },
+  { id: "a2", kind: "behaviour", title: "Jack O'Brien — ABC incident form", due: "Today", semester: currentSemester, urgent: true, studentId: "s2" },
+  { id: "a3", kind: "lesson", title: "Submit Wed 'Maths — Algebra' lesson plan", due: "Today", semester: currentSemester },
+  { id: "a4", kind: "iep", title: "Aaliyah Tahir — IEP review meeting prep", due: "Tomorrow", semester: currentSemester },
+  { id: "a5", kind: "report", title: "Semester 2 IEP reports draft (8 students)", due: "Fri 4 Jul", semester: "Semester 2 · 2026" },
 ];
+
 
 export interface NotificationItem {
   id: string;
@@ -219,6 +225,7 @@ export interface IepGoal {
   smart: string;
   baseline: string;
   status: IepStatus;
+  semester: Semester;
   approval?: IepApproval;
   approvedBy?: string;
   approvedAt?: string;
@@ -230,7 +237,10 @@ export interface IepGoal {
 }
 
 // Goals scaffolded from the school's Scope & Sequence with Cross-Check descriptors.
-export const iepGoals: IepGoal[] = [
+// All goals belong to the current reporting semester unless otherwise specified.
+const seedSemester: Semester = currentSemester;
+export const iepGoals: IepGoal[] = ([
+
   {
     id: "g1", studentId: "s1", studentName: "Mia Nguyen", domain: "Numeracy",
     learningArea: "Maths · Number", level: "F", vcLink: "VC2MFN01",
@@ -361,7 +371,8 @@ export const iepGoals: IepGoal[] = [
       { step: "Request break before escalation", workingTowards: "After incident", developing: "Mid-escalation with prompt", achieved: "Before escalation", status: "working-towards" },
     ],
   },
-];
+] as Omit<IepGoal, "semester">[]).map((g) => ({ ...g, semester: seedSemester }));
+
 
 export type EvidenceMedium = "photo" | "video" | "work-sample" | "anecdotal" | "audio";
 export interface EvidenceItem {
