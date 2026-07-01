@@ -443,11 +443,21 @@ function CrossCheckPanel({
           </div>
           <span className="text-[10px] text-muted-foreground">{goal.semester} master</span>
         </div>
-        <div className="divide-y">
-          {goal.successCriteria.map((c, i) => (
-            <CrossCheckRow key={i} index={i + 1} criterion={c} />
-          ))}
-        </div>
+        {outOfScope ? (
+          <div className="flex items-start gap-2 p-4 text-xs text-muted-foreground">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
+            <p>
+              Cross-Check descriptors are locked to the goal's own semester ({goal.semester}).
+              Switch the semester filter to <span className="font-medium text-foreground">{goal.semester.replace(" · 2026", "")}</span> or <span className="font-medium text-foreground">All sem.</span> to view and select these descriptors.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y">
+            {goal.successCriteria.map((c, i) => (
+              <CrossCheckRow key={i} index={i + 1} criterion={c} />
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* One-click evidence linking */}
