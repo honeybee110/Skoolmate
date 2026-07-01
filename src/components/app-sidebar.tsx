@@ -98,6 +98,7 @@ export function AppSidebar() {
         {renderGroup("Teach", teach)}
         {renderGroup("Plan", plan)}
         {renderGroup("Track", track)}
+        {renderGroup("Admin", admin)}
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
