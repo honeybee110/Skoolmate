@@ -61,33 +61,35 @@ function requireReason(reason: string) {
 // --- Cross-check override ---
 export const adminUpdateCrossCheckStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: {
-    goalId: string;
-    criterionIndex: number;
-    status: string;
-    activeSemester: string;
-    reason: string;
-  }) => {
-    if (!raw || typeof raw !== "object") throw new Error("Invalid payload");
-    const goalId = String(raw.goalId ?? "");
-    const criterionIndex = Number(raw.criterionIndex);
-    if (!goalId) throw new Error("goalId is required.");
-    if (!Number.isInteger(criterionIndex) || criterionIndex < 0) {
-      throw new Error("criterionIndex must be a non-negative integer.");
-    }
-    if (!(STATUSES as readonly string[]).includes(raw.status)) {
-      throw new Error(`Invalid status: ${raw.status}`);
-    }
-    const activeSemester =
-      raw.activeSemester === "all" ? "all" : assertSemester(raw.activeSemester);
-    return {
-      goalId,
-      criterionIndex,
-      status: raw.status as (typeof STATUSES)[number],
-      activeSemester,
-      reason: requireReason(raw.reason),
-    };
-  })
+  .inputValidator(
+    (raw: {
+      goalId: string;
+      criterionIndex: number;
+      status: string;
+      activeSemester: string;
+      reason: string;
+    }) => {
+      if (!raw || typeof raw !== "object") throw new Error("Invalid payload");
+      const goalId = String(raw.goalId ?? "");
+      const criterionIndex = Number(raw.criterionIndex);
+      if (!goalId) throw new Error("goalId is required.");
+      if (!Number.isInteger(criterionIndex) || criterionIndex < 0) {
+        throw new Error("criterionIndex must be a non-negative integer.");
+      }
+      if (!(STATUSES as readonly string[]).includes(raw.status)) {
+        throw new Error(`Invalid status: ${raw.status}`);
+      }
+      const activeSemester =
+        raw.activeSemester === "all" ? "all" : assertSemester(raw.activeSemester);
+      return {
+        goalId,
+        criterionIndex,
+        status: raw.status as (typeof STATUSES)[number],
+        activeSemester,
+        reason: requireReason(raw.reason),
+      };
+    },
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
@@ -97,20 +99,16 @@ export const adminUpdateCrossCheckStatus = createServerFn({ method: "POST" })
       return { ok: false as const, error: "invalid_index" };
     }
 
-    const semesterMismatch =
-      data.activeSemester !== "all" && data.activeSemester !== goal.semester;
+    const semesterMismatch = data.activeSemester !== "all" && data.activeSemester !== goal.semester;
 
     // Persist audit + apply to DB (best-effort; still mutate in-memory model for UI).
-    const { data: rpc, error } = await context.supabase.rpc(
-      "admin_update_cross_check_status",
-      {
-        p_goal_id: data.goalId,
-        p_criterion_index: data.criterionIndex,
-        p_status: data.status,
-        p_active_semester: data.activeSemester,
-        p_reason: data.reason,
-      },
-    );
+    const { data: rpc, error } = await context.supabase.rpc("admin_update_cross_check_status", {
+      p_goal_id: data.goalId,
+      p_criterion_index: data.criterionIndex,
+      p_status: data.status,
+      p_active_semester: data.activeSemester,
+      p_reason: data.reason,
+    });
     if (error) {
       return { ok: false as const, error: error.message };
     }
@@ -135,39 +133,41 @@ export const adminUpdateCrossCheckStatus = createServerFn({ method: "POST" })
 // --- Specialist note override ---
 export const adminSaveSpecialistNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: {
-    specialistName: string;
-    specialistRole: string;
-    studentId: string;
-    goalId: string;
-    comment: string;
-    withPhoto?: boolean;
-    activeSemester: string;
-    reason: string;
-  }) => {
-    if (!raw || typeof raw !== "object") throw new Error("Invalid payload");
-    const specialistName = String(raw.specialistName ?? "").trim();
-    const comment = String(raw.comment ?? "").trim();
-    const studentId = String(raw.studentId ?? "");
-    const goalId = String(raw.goalId ?? "");
-    if (!specialistName) throw new Error("Specialist name is required.");
-    if (!comment) throw new Error("Comment is required.");
-    if (!studentId) throw new Error("Student is required.");
-    if (!goalId) throw new Error("Goal is required.");
-    if (!SPECIALIST_ROLES.includes(raw.specialistRole as SpecialistSubject)) {
-      throw new Error(`Invalid specialist role: ${raw.specialistRole}`);
-    }
-    return {
-      specialistName,
-      specialistRole: raw.specialistRole as SpecialistSubject,
-      studentId,
-      goalId,
-      comment,
-      withPhoto: Boolean(raw.withPhoto),
-      activeSemester: assertSemester(raw.activeSemester),
-      reason: requireReason(raw.reason),
-    };
-  })
+  .inputValidator(
+    (raw: {
+      specialistName: string;
+      specialistRole: string;
+      studentId: string;
+      goalId: string;
+      comment: string;
+      withPhoto?: boolean;
+      activeSemester: string;
+      reason: string;
+    }) => {
+      if (!raw || typeof raw !== "object") throw new Error("Invalid payload");
+      const specialistName = String(raw.specialistName ?? "").trim();
+      const comment = String(raw.comment ?? "").trim();
+      const studentId = String(raw.studentId ?? "");
+      const goalId = String(raw.goalId ?? "");
+      if (!specialistName) throw new Error("Specialist name is required.");
+      if (!comment) throw new Error("Comment is required.");
+      if (!studentId) throw new Error("Student is required.");
+      if (!goalId) throw new Error("Goal is required.");
+      if (!SPECIALIST_ROLES.includes(raw.specialistRole as SpecialistSubject)) {
+        throw new Error(`Invalid specialist role: ${raw.specialistRole}`);
+      }
+      return {
+        specialistName,
+        specialistRole: raw.specialistRole as SpecialistSubject,
+        studentId,
+        goalId,
+        comment,
+        withPhoto: Boolean(raw.withPhoto),
+        activeSemester: assertSemester(raw.activeSemester),
+        reason: requireReason(raw.reason),
+      };
+    },
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
@@ -194,9 +194,7 @@ export const adminSaveSpecialistNote = createServerFn({ method: "POST" })
       p_comment: data.comment,
       p_photo_hue: data.withPhoto ? Math.floor(Math.random() * 360) : null,
       p_reason: data.reason,
-    } as unknown as Parameters<
-      typeof context.supabase.rpc<"admin_upsert_specialist_note">
-    >[1];
+    } as unknown as Parameters<typeof context.supabase.rpc<"admin_upsert_specialist_note">>[1];
     const { data: rpc, error } = await context.supabase.rpc(
       "admin_upsert_specialist_note",
       rpcArgs,
