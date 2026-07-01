@@ -265,8 +265,10 @@ function IepsPage() {
           <SpecialistsSection
             entries={specialists.filter((e) => semesterFilter === "all" || e.semester === semesterFilter)}
             goals={semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)}
+            allGoals={goals}
             onAdd={addSpecialistEntry}
             scopedStudentId={studentScope}
+            activeSemester={semesterFilter === "all" ? currentSemester : semesterFilter}
           />
         </div>
 
