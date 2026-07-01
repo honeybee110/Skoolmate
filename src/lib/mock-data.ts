@@ -524,6 +524,22 @@ export const iepGoals: IepGoal[] = ([
   },
 ] as Omit<IepGoal, "semester">[]).map((g) => ({ ...g, semester: seedSemester }));
 
+// Semester 2 goal: Geography replaces History in the HASS block during S2.
+iepGoals.push({
+  id: "g12b", studentId: "s1", studentName: "Mia Nguyen", domain: "Geography",
+  learningArea: "Humanities · Geography", level: "F", vcLink: "VC2HGFK01",
+  learningIntention: "Identify the places I belong to — home, classroom, school.",
+  smart: "Mia will match 4 place photos to labels (home, classroom, yard, hall) in 4/5 trials.",
+  baseline: "Matches 2 places with model", status: "developing",
+  evidenceCount: 0, lastEvidence: "—", reviewDue: "Wk 4 · S2",
+  successCriteria: [
+    { step: "Recognise own classroom photo", workingTowards: "With prompt", developing: "With cue", achieved: "Independently", status: "developing" },
+    { step: "Match 4 places to labels", workingTowards: "Matches 1", developing: "Matches 2–3", achieved: "Matches all 4", status: "developing" },
+    { step: "Name place during walk", workingTowards: "Imitates word", developing: "Single word with cue", achieved: "Names independently", status: "developing" },
+  ],
+  semester: "Semester 2 · 2026",
+});
+
 // Specialist teacher entries — comments and photo evidence attached to a student
 // by visiting specialists (PE, Music, Drama, Visual Arts, Learn to Play) who edit IEPs.
 export type SpecialistSubject =
