@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -123,6 +123,18 @@ function IepsPage() {
   }), [goals, semesterFilter, studentScope, subject]);
 
   const selected = goals.find((g) => g.id === selectedId) ?? scopedGoals[0] ?? goals[0];
+
+  // Enforce semester scope: if the selected goal falls outside the active
+  // semester filter, snap selection to the first in-scope goal so the
+  // Cross-Check panel can never display descriptors from another semester.
+  useEffect(() => {
+    if (semesterFilter === "all") return;
+    const current = goals.find((g) => g.id === selectedId);
+    if (!current || current.semester !== semesterFilter) {
+      const next = scopedGoals[0];
+      if (next && next.id !== selectedId) setSelectedId(next.id);
+    }
+  }, [semesterFilter, selectedId, goals, scopedGoals]);
 
   const stats = useMemo(() => {
     const xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
@@ -252,7 +264,7 @@ function IepsPage() {
           {/* Specialist teachers — comments + photos */}
           <SpecialistsSection
             entries={specialists.filter((e) => semesterFilter === "all" || e.semester === semesterFilter)}
-            goals={goals}
+            goals={semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)}
             onAdd={addSpecialistEntry}
             scopedStudentId={studentScope}
           />
@@ -261,6 +273,7 @@ function IepsPage() {
         <CrossCheckPanel
           goal={selected}
           evidence={evidence}
+          semesterFilter={semesterFilter}
           onApprovalChange={(a) => setApproval(selected.id, a)}
           onLinkEvidence={(evId) => linkEvidence(evId, selected.id)}
           onDismiss={dismissSuggestion}
@@ -317,10 +330,11 @@ function GoalRow({ goal, selected, onSelect }: { goal: IepGoal; selected: boolea
 }
 
 function CrossCheckPanel({
-  goal, evidence, onApprovalChange, onLinkEvidence, onDismiss,
+  goal, evidence, semesterFilter, onApprovalChange, onLinkEvidence, onDismiss,
 }: {
   goal: IepGoal;
   evidence: EvidenceItem[];
+  semesterFilter: Semester | "all";
   onApprovalChange: (a: IepApproval) => void;
   onLinkEvidence: (evId: string) => void;
   onDismiss: (evId: string) => void;
@@ -330,6 +344,7 @@ function CrossCheckPanel({
   const pct = goalProgress(goal);
   const appr = approvalMeta[goal.approval ?? "draft"];
   const ApprIcon = appr.icon;
+  const outOfScope = semesterFilter !== "all" && goal.semester !== semesterFilter;
 
   const suggestions = evidence.filter(
     (e) => e.studentId === goal.studentId && !e.goalIds.includes(goal.id) && (e.aiSuggestedGoal === goal.id || !e.aiTagged),
@@ -428,11 +443,21 @@ function CrossCheckPanel({
           </div>
           <span className="text-[10px] text-muted-foreground">{goal.semester} master</span>
         </div>
-        <div className="divide-y">
-          {goal.successCriteria.map((c, i) => (
-            <CrossCheckRow key={i} index={i + 1} criterion={c} />
-          ))}
-        </div>
+        {outOfScope ? (
+          <div className="flex items-start gap-2 p-4 text-xs text-muted-foreground">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
+            <p>
+              Cross-Check descriptors are locked to the goal's own semester ({goal.semester}).
+              Switch the semester filter to <span className="font-medium text-foreground">{goal.semester.replace(" · 2026", "")}</span> or <span className="font-medium text-foreground">All sem.</span> to view and select these descriptors.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y">
+            {goal.successCriteria.map((c, i) => (
+              <CrossCheckRow key={i} index={i + 1} criterion={c} />
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* One-click evidence linking */}
