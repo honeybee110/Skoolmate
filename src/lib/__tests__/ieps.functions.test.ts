@@ -1,41 +1,37 @@
-// Integration tests for the IEP server functions.
-// These exercise the full createServerFn pipeline (input validator + handler +
-// shared rule validation) to prove cross-semester mismatches are rejected
-// authoritatively — not just at the UI layer.
+// Integration tests for the IEP server-function pipeline.
+//
+// createServerFn's client stub relies on the Vite plugin's runtime resolver,
+// which isn't wired up in Vitest. So we invoke the *same* input validator
+// and handler that createServerFn wraps — this is the full server-side
+// pipeline (validate raw input -> enforce shared IEP rules -> persist),
+// just without the RPC transport in between.
 import { describe, it, expect, beforeEach } from "vitest";
-import { runWithStartContext } from "@tanstack/start-storage-context";
 import {
-  saveSpecialistNote as _saveSpecialistNote,
-  updateCrossCheckStatus as _updateCrossCheckStatus,
+  validateSpecialistNoteInput,
+  saveSpecialistNoteHandler,
+  validateCrossCheckInput,
+  updateCrossCheckStatusHandler,
 } from "../ieps.functions";
-import { iepGoals, specialistEntries, type IepGoal, type SpecialistEntry } from "../mock-data";
+import {
+  iepGoals,
+  specialistEntries,
+  type IepGoal,
+  type SpecialistEntry,
+} from "../mock-data";
 
-// Server functions read from AsyncLocalStorage via getStartContext().
-// Wrap invocations in a minimal Start context so the middleware pipeline runs
-// without needing the full HTTP handler.
-function withStartCtx<T>(fn: () => Promise<T>): Promise<T> {
-  return runWithStartContext(
-    {
-      getRouter: () => ({}) as never,
-      request: new Request("http://localhost/_test"),
-      startOptions: {},
-      contextAfterGlobalMiddlewares: {},
-      executedRequestMiddlewares: new Set(),
-      handlerType: "serverFn",
-    },
-    fn,
-  );
+const SEM1 = "Semester 1 · 2026" as const;
+const SEM2 = "Semester 2 · 2026" as const;
+
+async function saveSpecialistNote(raw: Parameters<typeof validateSpecialistNoteInput>[0]) {
+  return saveSpecialistNoteHandler(validateSpecialistNoteInput(raw));
+}
+async function updateCrossCheckStatus(raw: Parameters<typeof validateCrossCheckInput>[0]) {
+  return updateCrossCheckStatusHandler(validateCrossCheckInput(raw));
 }
 
-const saveSpecialistNote = (args: Parameters<typeof _saveSpecialistNote>[0]) =>
-  withStartCtx(() => _saveSpecialistNote(args));
-const updateCrossCheckStatus = (args: Parameters<typeof _updateCrossCheckStatus>[0]) =>
-  withStartCtx(() => _updateCrossCheckStatus(args));
-
-// Snapshot + restore the shared mock stores so tests don't leak into each other.
+// Snapshot + restore shared mock stores so tests never leak into each other.
 let goalsSnapshot: IepGoal[];
 let entriesSnapshot: SpecialistEntry[];
-
 beforeEach(() => {
   goalsSnapshot = iepGoals.map((g) => ({
     ...g,
@@ -48,33 +44,19 @@ beforeEach(() => {
   };
 });
 
-// Helpers
-const SEM1 = "Semester 1 · 2026" as const;
-const SEM2 = "Semester 2 · 2026" as const;
-
-function findGoalInSemester(sem: typeof SEM1 | typeof SEM2, role?: string) {
-  return iepGoals.find(
-    (g) => g.semester === sem && (role ? g.learningArea === role : true),
-  );
-}
-
 describe("saveSpecialistNote", () => {
   it("persists a note when student, domain and semester all match", async () => {
-    // Pick a PE-eligible goal if any; otherwise fabricate by aligning fields.
     const goal = iepGoals.find((g) => g.semester === SEM1) as IepGoal;
-    // Force the goal's learningArea to a specialist domain for a positive-path test.
-    goal.learningArea = "PE";
-
+    goal.learningArea = "PE"; // align with specialist role for happy-path
     const before = specialistEntries.length;
+
     const result = await saveSpecialistNote({
-      data: {
-        specialistName: "Ms Kate",
-        specialistRole: "PE",
-        studentId: goal.studentId,
-        goalId: goal.id,
-        comment: "Completed warm-up circuit independently.",
-        activeSemester: SEM1,
-      },
+      specialistName: "Ms Kate",
+      specialistRole: "PE",
+      studentId: goal.studentId,
+      goalId: goal.id,
+      comment: "Completed warm-up circuit independently.",
+      activeSemester: SEM1,
     });
 
     expect(result.ok).toBe(true);
@@ -88,29 +70,43 @@ describe("saveSpecialistNote", () => {
   it("rejects a note when the goal is from a different semester than the active one", async () => {
     const goal = iepGoals.find((g) => g.semester === SEM1) as IepGoal;
     goal.learningArea = "PE";
-
     const before = specialistEntries.length;
+
     const result = await saveSpecialistNote({
-      data: {
-        specialistName: "Ms Kate",
-        specialistRole: "PE",
-        studentId: goal.studentId,
-        goalId: goal.id,
-        comment: "Should be rejected.",
-        activeSemester: SEM2, // mismatched
-      },
+      specialistName: "Ms Kate",
+      specialistRole: "PE",
+      studentId: goal.studentId,
+      goalId: goal.id,
+      comment: "Should be rejected.",
+      activeSemester: SEM2,
     });
 
     expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.code).toBe("semester_mismatch");
-      if (result.error.code === "semester_mismatch") {
-        expect(result.error.goalSemester).toBe(SEM1);
-        expect(result.error.activeSemester).toBe(SEM2);
-      }
+    if (!result.ok && result.error.code === "semester_mismatch") {
+      expect(result.error.goalSemester).toBe(SEM1);
+      expect(result.error.activeSemester).toBe(SEM2);
+    } else {
+      throw new Error(`expected semester_mismatch, got ${JSON.stringify(result)}`);
     }
-    // No write should occur.
     expect(specialistEntries.length).toBe(before);
+  });
+
+  it("rejects the reverse mismatch: Sem2 goal saved under active Sem1", async () => {
+    // Move an existing goal to Semester 2 so the mismatch is real, not synthetic.
+    const goal = iepGoals.find((g) => g.semester === SEM1) as IepGoal;
+    goal.semester = SEM2;
+    goal.learningArea = "Music";
+
+    const result = await saveSpecialistNote({
+      specialistName: "Mr Dan",
+      specialistRole: "Music",
+      studentId: goal.studentId,
+      goalId: goal.id,
+      comment: "Rejected due to semester scope.",
+      activeSemester: SEM1,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe("semester_mismatch");
   });
 
   it("rejects a note when the linked goal belongs to a different student", async () => {
@@ -118,14 +114,12 @@ describe("saveSpecialistNote", () => {
     goal.learningArea = "PE";
 
     const result = await saveSpecialistNote({
-      data: {
-        specialistName: "Ms Kate",
-        specialistRole: "PE",
-        studentId: "s-does-not-match",
-        goalId: goal.id,
-        comment: "Should be rejected.",
-        activeSemester: SEM1,
-      },
+      specialistName: "Ms Kate",
+      specialistRole: "PE",
+      studentId: "not-the-owner",
+      goalId: goal.id,
+      comment: "Should be rejected.",
+      activeSemester: SEM1,
     });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe("student_mismatch");
@@ -136,14 +130,12 @@ describe("saveSpecialistNote", () => {
     goal.learningArea = "PE";
 
     const result = await saveSpecialistNote({
-      data: {
-        specialistName: "Ms Kate",
-        specialistRole: "Music", // mismatch vs PE
-        studentId: goal.studentId,
-        goalId: goal.id,
-        comment: "Should be rejected.",
-        activeSemester: SEM1,
-      },
+      specialistName: "Ms Kate",
+      specialistRole: "Music",
+      studentId: goal.studentId,
+      goalId: goal.id,
+      comment: "Should be rejected.",
+      activeSemester: SEM1,
     });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe("domain_mismatch");
@@ -151,33 +143,55 @@ describe("saveSpecialistNote", () => {
 
   it("rejects a note with no goalId", async () => {
     const result = await saveSpecialistNote({
-      data: {
-        specialistName: "Ms Kate",
-        specialistRole: "PE",
-        studentId: "s1",
-        goalId: "",
-        comment: "Missing goal.",
-        activeSemester: SEM1,
-      },
+      specialistName: "Ms Kate",
+      specialistRole: "PE",
+      studentId: "s1",
+      goalId: "",
+      comment: "Missing goal.",
+      activeSemester: SEM1,
     });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe("goal_required");
+  });
+
+  it("input validator throws on an unknown specialist role", () => {
+    expect(() =>
+      validateSpecialistNoteInput({
+        specialistName: "X",
+        specialistRole: "SLP", // removed role
+        studentId: "s1",
+        goalId: "g1",
+        comment: "x",
+        activeSemester: SEM1,
+      }),
+    ).toThrow(/Invalid specialist role/);
+  });
+
+  it("input validator throws on an unknown semester", () => {
+    expect(() =>
+      validateSpecialistNoteInput({
+        specialistName: "X",
+        specialistRole: "PE",
+        studentId: "s1",
+        goalId: "g1",
+        comment: "x",
+        activeSemester: "Semester 3 · 2099",
+      }),
+    ).toThrow(/Invalid semester/);
   });
 });
 
 describe("updateCrossCheckStatus", () => {
   it("updates a criterion when the active semester matches the goal", async () => {
-    const goal = findGoalInSemester(SEM1) as IepGoal;
+    const goal = iepGoals.find((g) => g.semester === SEM1) as IepGoal;
     const originalStatus = goal.successCriteria[0].status;
     const targetStatus = originalStatus === "achieved" ? "developing" : "achieved";
 
     const result = await updateCrossCheckStatus({
-      data: {
-        goalId: goal.id,
-        criterionIndex: 0,
-        status: targetStatus,
-        activeSemester: SEM1,
-      },
+      goalId: goal.id,
+      criterionIndex: 0,
+      status: targetStatus,
+      activeSemester: SEM1,
     });
 
     expect(result.ok).toBe(true);
@@ -185,67 +199,95 @@ describe("updateCrossCheckStatus", () => {
   });
 
   it("allows updates when active semester is 'all'", async () => {
-    const goal = findGoalInSemester(SEM1) as IepGoal;
+    const goal = iepGoals.find((g) => g.semester === SEM1) as IepGoal;
     const result = await updateCrossCheckStatus({
-      data: {
-        goalId: goal.id,
-        criterionIndex: 0,
-        status: "working-towards",
-        activeSemester: "all",
-      },
+      goalId: goal.id,
+      criterionIndex: 0,
+      status: "working-towards",
+      activeSemester: "all",
     });
     expect(result.ok).toBe(true);
   });
 
-  it("rejects an update when active semester does not match the goal's semester", async () => {
-    const goal = findGoalInSemester(SEM1) as IepGoal;
+  it("rejects when active semester does not match the goal's semester (Sem2 active, Sem1 goal)", async () => {
+    const goal = iepGoals.find((g) => g.semester === SEM1) as IepGoal;
     const before = goal.successCriteria[0].status;
 
     const result = await updateCrossCheckStatus({
-      data: {
-        goalId: goal.id,
-        criterionIndex: 0,
-        status: "achieved",
-        activeSemester: SEM2, // mismatched
-      },
+      goalId: goal.id,
+      criterionIndex: 0,
+      status: "achieved",
+      activeSemester: SEM2,
     });
 
     expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.code).toBe("semester_mismatch");
-      if (result.error.code === "semester_mismatch") {
-        expect(result.error.goalSemester).toBe(SEM1);
-        expect(result.error.activeSemester).toBe(SEM2);
-      }
+    if (!result.ok && result.error.code === "semester_mismatch") {
+      expect(result.error.goalSemester).toBe(SEM1);
+      expect(result.error.activeSemester).toBe(SEM2);
+    } else {
+      throw new Error(`expected semester_mismatch, got ${JSON.stringify(result)}`);
     }
-    // Criterion must be unchanged.
+    expect(goal.successCriteria[0].status).toBe(before);
+  });
+
+  it("rejects the reverse mismatch: Sem1 active, Sem2 goal", async () => {
+    const goal = iepGoals.find((g) => g.semester === SEM1) as IepGoal;
+    goal.semester = SEM2;
+    const before = goal.successCriteria[0].status;
+
+    const result = await updateCrossCheckStatus({
+      goalId: goal.id,
+      criterionIndex: 0,
+      status: "achieved",
+      activeSemester: SEM1,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe("semester_mismatch");
     expect(goal.successCriteria[0].status).toBe(before);
   });
 
   it("rejects an update to an unknown goal id", async () => {
     const result = await updateCrossCheckStatus({
-      data: {
-        goalId: "no-such-goal",
-        criterionIndex: 0,
-        status: "achieved",
-        activeSemester: SEM1,
-      },
+      goalId: "no-such-goal",
+      criterionIndex: 0,
+      status: "achieved",
+      activeSemester: SEM1,
     });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe("goal_not_found");
   });
 
-  it("throws at the input validator on an invalid status string", async () => {
-    const goal = findGoalInSemester(SEM1) as IepGoal;
-    await expect(
-      updateCrossCheckStatus({
-        data: {
-          goalId: goal.id,
-          criterionIndex: 0,
-          status: "bogus" as unknown as "achieved",
-          activeSemester: SEM1,
-        },
+  it("rejects an out-of-range criterion index", async () => {
+    const goal = iepGoals.find((g) => g.semester === SEM1) as IepGoal;
+    const result = await updateCrossCheckStatus({
+      goalId: goal.id,
+      criterionIndex: 999,
+      status: "achieved",
+      activeSemester: SEM1,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe("invalid_status");
+  });
+
+  it("input validator throws on an invalid status string", () => {
+    expect(() =>
+      validateCrossCheckInput({
+        goalId: "g1",
+        criterionIndex: 0,
+        status: "bogus",
+        activeSemester: SEM1,
       }),
-    ).rejects.toThrow(/Invalid status/);
+    ).toThrow(/Invalid status/);
+  });
+
+  it("input validator throws on an invalid semester", () => {
+    expect(() =>
+      validateCrossCheckInput({
+        goalId: "g1",
+        criterionIndex: 0,
+        status: "achieved",
+        activeSemester: "Semester 9 · 3000",
+      }),
+    ).toThrow(/Invalid semester/);
   });
 });
