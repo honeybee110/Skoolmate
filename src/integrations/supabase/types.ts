@@ -122,12 +122,67 @@ export type Database = {
         }
         Relationships: []
       }
+      specialist_notes: {
+        Row: {
+          comment: string
+          created_at: string
+          goal_id: string
+          id: string
+          photo_hue: number | null
+          semester: Database["public"]["Enums"]["semester"]
+          specialist_name: string
+          specialist_role: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          goal_id: string
+          id?: string
+          photo_hue?: number | null
+          semester: Database["public"]["Enums"]["semester"]
+          specialist_name: string
+          specialist_role: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          goal_id?: string
+          id?: string
+          photo_hue?: number | null
+          semester?: Database["public"]["Enums"]["semester"]
+          specialist_name?: string
+          specialist_role?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specialist_notes_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "iep_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_cross_check_status: {
+        Args: {
+          p_active_semester: string
+          p_criterion_index: number
+          p_goal_id: string
+          p_status: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       semester: "Semester 1 · 2026" | "Semester 2 · 2026"
