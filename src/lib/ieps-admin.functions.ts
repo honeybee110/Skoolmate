@@ -173,19 +173,25 @@ export const adminSaveSpecialistNote = createServerFn({ method: "POST" })
     };
     const anyMismatch = mismatch.student || mismatch.domain || mismatch.semester;
 
+    // p_note_id and p_photo_hue accept NULL server-side (SQL function branches
+    // on IS NULL), but the generated RPC types mark them non-nullable. Cast
+    // the args object rather than each field.
+    const rpcArgs = {
+      p_note_id: null,
+      p_goal_id: data.goalId,
+      p_student_id: data.studentId,
+      p_specialist_role: data.specialistRole,
+      p_specialist_name: data.specialistName,
+      p_semester: data.activeSemester,
+      p_comment: data.comment,
+      p_photo_hue: data.withPhoto ? Math.floor(Math.random() * 360) : null,
+      p_reason: data.reason,
+    } as unknown as Parameters<
+      typeof context.supabase.rpc<"admin_upsert_specialist_note">
+    >[1];
     const { data: rpc, error } = await context.supabase.rpc(
       "admin_upsert_specialist_note",
-      {
-        p_note_id: null as unknown as string,
-        p_goal_id: data.goalId,
-        p_student_id: data.studentId,
-        p_specialist_role: data.specialistRole,
-        p_specialist_name: data.specialistName,
-        p_semester: data.activeSemester,
-        p_comment: data.comment,
-        p_photo_hue: (data.withPhoto ? Math.floor(Math.random() * 360) : null) as unknown as number,
-        p_reason: data.reason,
-      },
+      rpcArgs,
     );
     if (error) {
       return { ok: false as const, error: error.message };
