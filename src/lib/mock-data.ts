@@ -217,7 +217,7 @@ export interface NotificationItem {
 
 export const notifications: NotificationItem[] = [
   { id: "n1", title: "Lesson approved", body: "Learning Specialist approved 'Measurement with non-standard units'", time: "12 min ago", unread: true },
-  { id: "n2", title: "New therapy note", body: "Speech Therapist added a note for Jack O'Brien", time: "1 hr ago", unread: true },
+  { id: "n2", title: "New specialist note", body: "Music specialist added a note for Zara Patel", time: "1 hr ago", unread: true },
   { id: "n3", title: "Evidence linked", body: "AI linked 3 new photos to Mia's IEP Goal 2", time: "Yesterday" },
 ];
 
@@ -580,7 +580,7 @@ const evidenceSeed: Omit<EvidenceItem, "semester">[] = [
   { id: "e6", studentId: "s5", studentName: "Zara Patel", studentInitials: "ZP", medium: "audio", caption: "Initiated 'more iPad please' using AAC without model.", goalIds: ["g9"], vcStrand: "English · Speaking", capturedBy: "Honey", capturedAt: "2 days ago", aiTagged: true, thumbHue: 280 },
   { id: "e7", studentId: "s1", studentName: "Mia Nguyen", studentInitials: "MN", medium: "photo", caption: "Three-word phrase 'I want red' during snack choice.", goalIds: [], vcStrand: "English · Speaking", capturedBy: "Sharifa", capturedAt: "Today 10:35", aiTagged: false, aiSuggestedGoal: "g2", thumbHue: 192 },
   { id: "e8", studentId: "s3", studentName: "Aaliyah Tahir", studentInitials: "AT", medium: "photo", caption: "Used PECS 'help' card during shoelace task.", goalIds: ["g6"], vcStrand: "English · Speaking", capturedBy: "Honey", capturedAt: "Yesterday 13:20", aiTagged: true, thumbHue: 25 },
-  { id: "e9", studentId: "s4", studentName: "Noah Williams", studentInitials: "NW", medium: "work-sample", caption: "Followed 3/5 handwashing steps with visual sequence.", goalIds: ["g7"], vcStrand: "Health & PE", capturedBy: "Sharifa", capturedAt: "Today 12:30", aiTagged: true, thumbHue: 60 },
+  { id: "e9", studentId: "s4", studentName: "Noah Williams", studentInitials: "NW", medium: "work-sample", caption: "Followed 3/5 handwashing steps with visual sequence.", goalIds: ["g7"], vcStrand: "PE", capturedBy: "Sharifa", capturedAt: "Today 12:30", aiTagged: true, thumbHue: 60 },
   { id: "e10", studentId: "s2", studentName: "Jack O'Brien", studentInitials: "JO", medium: "work-sample", caption: "Matched 4 CVC picture-to-word pairs (cat, dog, hat, pig).", goalIds: [], vcStrand: "English · Reading", capturedBy: "Honey", capturedAt: "3 days ago", aiTagged: false, aiSuggestedGoal: "g4", thumbHue: 220 },
 ];
 
