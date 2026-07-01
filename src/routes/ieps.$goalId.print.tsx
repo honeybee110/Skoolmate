@@ -258,7 +258,7 @@ function IepPrintPage() {
                 </div>
               ) : section.key === "Specialist" ? (
                 <div className="mt-5 space-y-3 text-[12px]">
-                  {["Physical Education", "Visual Arts", "Performing Arts", "Drama", "Kitchen and Garden / Learn to Play"].map((sub) => (
+                  {["PE", "Visual Arts", "Music", "Drama", "Learn to Play"].map((sub) => (
                     <div key={sub} className="border border-foreground/15 px-3 py-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-foreground">{sub}</p>
                       <p className="mt-1"><span className="text-muted-foreground">Learning Goal: </span>Participate with adapted equipment and adult support.</p>
