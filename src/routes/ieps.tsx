@@ -273,6 +273,7 @@ function IepsPage() {
         <CrossCheckPanel
           goal={selected}
           evidence={evidence}
+          semesterFilter={semesterFilter}
           onApprovalChange={(a) => setApproval(selected.id, a)}
           onLinkEvidence={(evId) => linkEvidence(evId, selected.id)}
           onDismiss={dismissSuggestion}
