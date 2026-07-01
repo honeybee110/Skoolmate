@@ -176,14 +176,14 @@ export const adminSaveSpecialistNote = createServerFn({ method: "POST" })
     const { data: rpc, error } = await context.supabase.rpc(
       "admin_upsert_specialist_note",
       {
-        p_note_id: null,
+        p_note_id: null as unknown as string,
         p_goal_id: data.goalId,
         p_student_id: data.studentId,
         p_specialist_role: data.specialistRole,
         p_specialist_name: data.specialistName,
         p_semester: data.activeSemester,
         p_comment: data.comment,
-        p_photo_hue: data.withPhoto ? Math.floor(Math.random() * 360) : null,
+        p_photo_hue: (data.withPhoto ? Math.floor(Math.random() * 360) : null) as unknown as number,
         p_reason: data.reason,
       },
     );
