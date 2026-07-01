@@ -842,8 +842,8 @@ function SpecialistsSection({
               <input type="checkbox" checked={form.withPhoto} onChange={(e) => setForm((f) => ({ ...f, withPhoto: e.target.checked }))} />
               <Camera className="h-3.5 w-3.5" />Attach session photo
             </label>
-            <Button size="sm" className="h-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={submit}>
-              <Send className="h-3.5 w-3.5" />Post to IEP
+            <Button size="sm" disabled={saving} className="h-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={submit}>
+              <Send className="h-3.5 w-3.5" />{saving ? "Saving…" : "Post to IEP"}
             </Button>
           </div>
         </div>
