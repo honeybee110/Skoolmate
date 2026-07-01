@@ -84,45 +84,59 @@ export const saveSpecialistNote = createServerFn({ method: "POST" })
   .inputValidator(validateSpecialistNoteInput)
   .handler(async ({ data }) => saveSpecialistNoteHandler(data));
 
-export const updateCrossCheckStatus = createServerFn({ method: "POST" })
-  .inputValidator((raw: {
-    goalId: string;
-    criterionIndex: number;
-    status: string;
-    activeSemester: string;
-  }) => {
-    if (!raw || typeof raw !== "object") throw new Error("Invalid payload");
-    const goalId = String(raw.goalId ?? "");
-    const criterionIndex = Number(raw.criterionIndex);
-    if (!Number.isInteger(criterionIndex) || criterionIndex < 0) {
-      throw new Error("criterionIndex must be a non-negative integer.");
-    }
-    if (!(STATUSES as readonly string[]).includes(raw.status)) {
-      throw new Error(`Invalid status: ${raw.status}`);
-    }
-    const activeSemester =
-      raw.activeSemester === "all" ? ("all" as const) : assertSemester(raw.activeSemester);
-    return {
-      goalId,
-      criterionIndex,
-      status: raw.status as (typeof STATUSES)[number],
-      activeSemester,
-    };
-  })
-  .handler(async ({ data }) => {
-    const err = validateCrossCheckSelection(
-      {
-        goalId: data.goalId,
-        criterionIndex: data.criterionIndex,
-        status: data.status,
-        activeSemester: data.activeSemester,
-      },
-      iepGoals,
-    );
-    if (err) return { ok: false as const, error: err };
+export function validateCrossCheckInput(raw: {
+  goalId: string;
+  criterionIndex: number;
+  status: string;
+  activeSemester: string;
+}) {
+  if (!raw || typeof raw !== "object") throw new Error("Invalid payload");
+  const goalId = String(raw.goalId ?? "");
+  const criterionIndex = Number(raw.criterionIndex);
+  if (!Number.isInteger(criterionIndex) || criterionIndex < 0) {
+    throw new Error("criterionIndex must be a non-negative integer.");
+  }
+  if (!(STATUSES as readonly string[]).includes(raw.status)) {
+    throw new Error(`Invalid status: ${raw.status}`);
+  }
+  const activeSemester =
+    raw.activeSemester === "all" ? ("all" as const) : assertSemester(raw.activeSemester);
+  return {
+    goalId,
+    criterionIndex,
+    status: raw.status as (typeof STATUSES)[number],
+    activeSemester,
+  };
+}
 
-    const goal = iepGoals.find((g) => g.id === data.goalId)!;
-    const updated: SuccessCriterion = { ...goal.successCriteria[data.criterionIndex], status: data.status };
-    goal.successCriteria[data.criterionIndex] = updated;
-    return { ok: true as const, goalId: goal.id, criterionIndex: data.criterionIndex, status: data.status };
-  });
+export async function updateCrossCheckStatusHandler(
+  data: ReturnType<typeof validateCrossCheckInput>,
+) {
+  const err = validateCrossCheckSelection(
+    {
+      goalId: data.goalId,
+      criterionIndex: data.criterionIndex,
+      status: data.status,
+      activeSemester: data.activeSemester,
+    },
+    iepGoals,
+  );
+  if (err) return { ok: false as const, error: err };
+
+  const goal = iepGoals.find((g) => g.id === data.goalId)!;
+  const updated: SuccessCriterion = {
+    ...goal.successCriteria[data.criterionIndex],
+    status: data.status,
+  };
+  goal.successCriteria[data.criterionIndex] = updated;
+  return {
+    ok: true as const,
+    goalId: goal.id,
+    criterionIndex: data.criterionIndex,
+    status: data.status,
+  };
+}
+
+export const updateCrossCheckStatus = createServerFn({ method: "POST" })
+  .inputValidator(validateCrossCheckInput)
+  .handler(async ({ data }) => updateCrossCheckStatusHandler(data));
