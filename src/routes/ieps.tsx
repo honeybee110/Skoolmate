@@ -809,7 +809,7 @@ function SpecialistsSection({
                 goalError && "border-red-500 ring-1 ring-red-500/30"
               )}
               value={form.goalId}
-              onChange={(e) => { setForm((f) => ({ ...f, goalId: e.target.value })); setGoalError(false); }}
+              onChange={(e) => { setForm((f) => ({ ...f, goalId: e.target.value })); setGoalError(null); }}
             >
               <option value="">— Select a goal —</option>
               {matchingGoals.map((g) => (
@@ -822,9 +822,8 @@ function SpecialistsSection({
             {goalError && (
               <p className="flex items-center gap-1 text-[11px] text-red-500">
                 <AlertTriangle className="h-3 w-3" />
-                {hasMatchingGoals
-                  ? "Please select a matching IEP goal for this domain before saving."
-                  : `No ${form.specialistRole} IEP goals exist for this student. Create one in the tracker first.`}
+                {goalError}
+                {!hasMatchingGoals && ` No ${form.specialistRole} IEP goals exist for this student in ${activeSemester}. Create one in the tracker first.`}
               </p>
             )}
           </label>
