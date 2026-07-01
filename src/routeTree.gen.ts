@@ -21,6 +21,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ClassesRouteImport } from './routes/classes'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BehaviourRouteImport } from './routes/behaviour'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as IepsGoalIdPrintRouteImport } from './routes/ieps.$goalId.print'
@@ -85,6 +86,11 @@ const BehaviourRoute = BehaviourRouteImport.update({
   path: '/behaviour',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudentsStudentIdRoute = StudentsStudentIdRouteImport.update({
   id: '/$studentId',
   path: '/$studentId',
@@ -102,6 +108,7 @@ const IepsGoalIdPrintRoute = IepsGoalIdPrintRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
@@ -137,6 +145,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
@@ -156,6 +165,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/behaviour'
     | '/calendar'
     | '/classes'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/ieps/$goalId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/behaviour'
     | '/calendar'
     | '/classes'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/ieps/$goalId/print'
   id:
     | '__root__'
+    | '/'
     | '/behaviour'
     | '/calendar'
     | '/classes'
@@ -208,6 +220,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   BehaviourRoute: typeof BehaviourRoute
   CalendarRoute: typeof CalendarRoute
   ClassesRoute: typeof ClassesRoute
@@ -309,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BehaviourRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/students/$studentId': {
       id: '/students/$studentId'
       path: '/$studentId'
@@ -356,6 +376,7 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   BehaviourRoute: BehaviourRoute,
   CalendarRoute: CalendarRoute,
   ClassesRoute: ClassesRoute,
