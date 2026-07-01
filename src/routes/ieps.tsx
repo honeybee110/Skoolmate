@@ -124,6 +124,18 @@ function IepsPage() {
 
   const selected = goals.find((g) => g.id === selectedId) ?? scopedGoals[0] ?? goals[0];
 
+  // Enforce semester scope: if the selected goal falls outside the active
+  // semester filter, snap selection to the first in-scope goal so the
+  // Cross-Check panel can never display descriptors from another semester.
+  useEffect(() => {
+    if (semesterFilter === "all") return;
+    const current = goals.find((g) => g.id === selectedId);
+    if (!current || current.semester !== semesterFilter) {
+      const next = scopedGoals[0];
+      if (next && next.id !== selectedId) setSelectedId(next.id);
+    }
+  }, [semesterFilter, selectedId, goals, scopedGoals]);
+
   const stats = useMemo(() => {
     const xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
     const scope = studentScope ? xs.filter((g) => g.studentId === studentScope) : xs;
