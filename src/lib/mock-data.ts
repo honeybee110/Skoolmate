@@ -524,7 +524,7 @@ export const iepGoals: IepGoal[] = ([
   },
 ] as Omit<IepGoal, "semester">[]).map((g) => ({ ...g, semester: seedSemester }));
 
-// Semester 2 goal: Geography replaces History in the HASS block during S2.
+// Semester 2 goal: Humanities rotates from History (S1) to Geography (S2).
 iepGoals.push({
   id: "g12b", studentId: "s1", studentName: "Mia Nguyen", domain: "Geography",
   learningArea: "Humanities · Geography", level: "F", vcLink: "VC2HGFK01",
