@@ -3,8 +3,34 @@
 // shared rule validation) to prove cross-semester mismatches are rejected
 // authoritatively — not just at the UI layer.
 import { describe, it, expect, beforeEach } from "vitest";
-import { saveSpecialistNote, updateCrossCheckStatus } from "../ieps.functions";
+import { runWithStartContext } from "@tanstack/start-storage-context";
+import {
+  saveSpecialistNote as _saveSpecialistNote,
+  updateCrossCheckStatus as _updateCrossCheckStatus,
+} from "../ieps.functions";
 import { iepGoals, specialistEntries, type IepGoal, type SpecialistEntry } from "../mock-data";
+
+// Server functions read from AsyncLocalStorage via getStartContext().
+// Wrap invocations in a minimal Start context so the middleware pipeline runs
+// without needing the full HTTP handler.
+function withStartCtx<T>(fn: () => Promise<T>): Promise<T> {
+  return runWithStartContext(
+    {
+      getRouter: () => ({}) as never,
+      request: new Request("http://localhost/_test"),
+      startOptions: {},
+      contextAfterGlobalMiddlewares: {},
+      executedRequestMiddlewares: new Set(),
+      handlerType: "serverFn",
+    },
+    fn,
+  );
+}
+
+const saveSpecialistNote = (args: Parameters<typeof _saveSpecialistNote>[0]) =>
+  withStartCtx(() => _saveSpecialistNote(args));
+const updateCrossCheckStatus = (args: Parameters<typeof _updateCrossCheckStatus>[0]) =>
+  withStartCtx(() => _updateCrossCheckStatus(args));
 
 // Snapshot + restore the shared mock stores so tests don't leak into each other.
 let goalsSnapshot: IepGoal[];
