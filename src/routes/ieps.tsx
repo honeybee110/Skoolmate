@@ -58,8 +58,11 @@ const domainTone: Record<IepDomain, string> = {
   "Personal & Social": "bg-accent/15 text-accent",
   Science: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
   HASS: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
-  "Health & PE": "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
-  "The Arts": "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
+  PE: "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
+  "Visual Arts": "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
+  Music: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
+  Drama: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/15 dark:text-fuchsia-300",
+  "Learn to Play": "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300",
   "Self-care": "bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300",
 };
 
@@ -86,8 +89,11 @@ const SUBJECTS: IepDomain[] = [
   "Personal & Social",
   "Science",
   "HASS",
-  "Health & PE",
-  "The Arts",
+  "PE",
+  "Visual Arts",
+  "Music",
+  "Drama",
+  "Learn to Play",
   "Self-care",
 ];
 
@@ -655,13 +661,11 @@ function SubjectCell({ goals, selectedId, onSelect }: { goals: IepGoal[]; select
 // ---------- Specialists ----------
 
 const SPECIALIST_ROLES: SpecialistSubject[] = [
-  "Health & PE",
-  "The Arts · Music",
-  "The Arts · Drama",
-  "The Arts · Visual Arts",
-  "Cooking / Kitchen Garden",
-  "Speech Therapy",
-  "Occupational Therapy",
+  "PE",
+  "Music",
+  "Drama",
+  "Visual Arts",
+  "Learn to Play",
 ];
 
 function SpecialistsSection({
@@ -676,7 +680,7 @@ function SpecialistsSection({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     specialistName: "",
-    specialistRole: "Health & PE" as SpecialistSubject,
+    specialistRole: "PE" as SpecialistSubject,
     studentId: scopedStudentId ?? students[0].id,
     goalId: "",
     comment: "",

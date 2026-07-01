@@ -524,15 +524,13 @@ export const iepGoals: IepGoal[] = ([
 ] as Omit<IepGoal, "semester">[]).map((g) => ({ ...g, semester: seedSemester }));
 
 // Specialist teacher entries — comments and photo evidence attached to a student
-// by visiting specialists (PE, Music, Drama, Cooking, OT, SLP) who edit IEPs.
+// by visiting specialists (PE, Music, Drama, Visual Arts, Learn to Play) who edit IEPs.
 export type SpecialistSubject =
-  | "Health & PE"
-  | "The Arts · Music"
-  | "The Arts · Drama"
-  | "The Arts · Visual Arts"
-  | "Cooking / Kitchen Garden"
-  | "Speech Therapy"
-  | "Occupational Therapy";
+  | "PE"
+  | "Music"
+  | "Drama"
+  | "Visual Arts"
+  | "Learn to Play";
 
 export interface SpecialistEntry {
   id: string;
@@ -547,12 +545,10 @@ export interface SpecialistEntry {
 }
 
 export const specialistEntries: SpecialistEntry[] = [
-  { id: "sp1", specialistName: "Coach Tom",   specialistRole: "Health & PE",             studentId: "s4", goalId: "g13", comment: "Noah caught the ball 3/5 today — best result yet. Trying a yellow ball next week for higher contrast.", photoHue: 60,  addedAt: "Today 11:20",   semester: currentSemester },
-  { id: "sp2", specialistName: "Ms Aria",     specialistRole: "The Arts · Music",        studentId: "s5", goalId: "g14", comment: "Zara held the mallet independently and tapped 6 even beats. Adding visual count cards for 8-beat target.", photoHue: 280, addedAt: "Yesterday 14:05", semester: currentSemester },
-  { id: "sp3", specialistName: "Mr Davies",   specialistRole: "The Arts · Drama",        studentId: "s8", goalId: "g15", comment: "Hamish held the hat for full 30s and copied 1 action. Will pair him with Aaliyah for next role-play.", photoHue: 330, addedAt: "2 days ago",    semester: currentSemester },
-  { id: "sp4", specialistName: "Chef Bea",    specialistRole: "Cooking / Kitchen Garden", studentId: "s7", goalId: "g16", comment: "Charlotte completed spread → top with one verbal prompt. Folding needs hand-over-hand still.",            photoHue: 25,  addedAt: "Friday 13:40",  semester: currentSemester },
-  { id: "sp5", specialistName: "Lana (SLP)",  specialistRole: "Speech Therapy",          studentId: "s2", goalId: "g3",  comment: "Jack initiated 'break please' once unprompted. Visual scripts working — recommend continuing in class.",   photoHue: 220, addedAt: "Today 09:50",   semester: currentSemester },
-  { id: "sp6", specialistName: "Priya (OT)",  specialistRole: "Occupational Therapy",    studentId: "s1",                comment: "Mia tolerated 8 minutes of seated table work today (up from 5). Suggest wobble cushion trial next week.",   photoHue: 192, addedAt: "Today 10:30",   semester: currentSemester },
+  { id: "sp1", specialistName: "Coach Tom",   specialistRole: "PE",             studentId: "s4", goalId: "g13", comment: "Noah caught the ball 3/5 today — best result yet. Trying a yellow ball next week for higher contrast.", photoHue: 60,  addedAt: "Today 11:20",   semester: currentSemester },
+  { id: "sp2", specialistName: "Ms Aria",     specialistRole: "Music",        studentId: "s5", goalId: "g14", comment: "Zara held the mallet independently and tapped 6 even beats. Adding visual count cards for 8-beat target.", photoHue: 280, addedAt: "Yesterday 14:05", semester: currentSemester },
+  { id: "sp3", specialistName: "Mr Davies",   specialistRole: "Drama",        studentId: "s8", goalId: "g15", comment: "Hamish held the hat for full 30s and copied 1 action. Will pair him with Aaliyah for next role-play.", photoHue: 330, addedAt: "2 days ago",    semester: currentSemester },
+  { id: "sp4", specialistName: "Sam",         specialistRole: "Learn to Play", studentId: "s7", goalId: "g16", comment: "Charlotte completed choose → engage with one verbal prompt. Tidy-up needs hand-over-hand still.",            photoHue: 25,  addedAt: "Friday 13:40",  semester: currentSemester },
 ];
 
 
