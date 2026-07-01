@@ -309,8 +309,8 @@ export interface IepGoal {
 }
 
 // Goals scaffolded from the school's Scope & Sequence with Cross-Check descriptors.
-// All goals belong to the current reporting semester unless otherwise specified.
-const seedSemester: Semester = currentSemester;
+// The uploaded Scope & Sequence documents cover Semester 1, so goals are seeded there.
+const seedSemester: Semester = "Semester 1 · 2026";
 export const iepGoals: IepGoal[] = ([
 
   {
