@@ -264,7 +264,7 @@ function IepsPage() {
           {/* Specialist teachers — comments + photos */}
           <SpecialistsSection
             entries={specialists.filter((e) => semesterFilter === "all" || e.semester === semesterFilter)}
-            goals={goals}
+            goals={semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)}
             onAdd={addSpecialistEntry}
             scopedStudentId={studentScope}
           />
