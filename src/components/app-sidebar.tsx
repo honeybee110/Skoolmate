@@ -47,6 +47,10 @@ const track = [
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 
+const admin = [
+  { title: "Override Audit", url: "/admin/audit", icon: ShieldCheck },
+];
+
 export function AppSidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const isActive = (url: string) => (url === "/" ? pathname === "/" : pathname.startsWith(url));
