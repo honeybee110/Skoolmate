@@ -12,6 +12,7 @@ import {
   Calendar,
   Sparkles,
   Settings,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
