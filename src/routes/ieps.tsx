@@ -686,17 +686,28 @@ function SpecialistsSection({
     comment: "",
     withPhoto: true,
   });
+  const [goalError, setGoalError] = useState(false);
+
+  const matchingGoals = goals.filter(
+    (g) => g.studentId === form.studentId && g.learningArea === form.specialistRole,
+  );
+  const hasMatchingGoals = matchingGoals.length > 0;
 
   function submit() {
     if (!form.specialistName.trim() || !form.comment.trim()) {
       toast.error("Add your name and a comment.");
       return;
     }
+    if (!form.goalId) {
+      setGoalError(true);
+      return;
+    }
+    setGoalError(false);
     onAdd({
       specialistName: form.specialistName.trim(),
       specialistRole: form.specialistRole,
       studentId: form.studentId,
-      goalId: form.goalId || undefined,
+      goalId: form.goalId,
       comment: form.comment.trim(),
       photoHue: form.withPhoto ? Math.floor(Math.random() * 360) : undefined,
     });
@@ -734,18 +745,31 @@ function SpecialistsSection({
             </select>
           </label>
           <label className="space-y-1">
-            <span className="font-medium text-muted-foreground">Link to IEP goal ({form.specialistRole} only)</span>
-            <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.goalId} onChange={(e) => setForm((f) => ({ ...f, goalId: e.target.value }))}>
-              <option value="">— None —</option>
-              {goals
-                .filter((g) => g.studentId === form.studentId && g.learningArea === form.specialistRole)
-                .map((g) => (
-                  <option key={g.id} value={g.id}>{g.learningArea} — {g.smart.slice(0, 60)}…</option>
-                ))}
-              {goals.filter((g) => g.studentId === form.studentId && g.learningArea === form.specialistRole).length === 0 && (
+            <span className="font-medium text-muted-foreground">Link to IEP goal ({form.specialistRole} only) <span className="text-red-500">*</span></span>
+            <select
+              className={cn(
+                "h-8 w-full rounded-md border bg-card px-2 text-xs",
+                goalError && "border-red-500 ring-1 ring-red-500/30"
+              )}
+              value={form.goalId}
+              onChange={(e) => { setForm((f) => ({ ...f, goalId: e.target.value })); setGoalError(false); }}
+            >
+              <option value="">— Select a goal —</option>
+              {matchingGoals.map((g) => (
+                <option key={g.id} value={g.id}>{g.learningArea} — {g.smart.slice(0, 60)}…</option>
+              ))}
+              {matchingGoals.length === 0 && (
                 <option value="" disabled>No {form.specialistRole} goals for this student yet</option>
               )}
             </select>
+            {goalError && (
+              <p className="flex items-center gap-1 text-[11px] text-red-500">
+                <AlertTriangle className="h-3 w-3" />
+                {hasMatchingGoals
+                  ? "Please select a matching IEP goal for this domain before saving."
+                  : `No ${form.specialistRole} IEP goals exist for this student. Create one in the tracker first.`}
+              </p>
+            )}
           </label>
 
           <label className="space-y-1 md:col-span-2">
