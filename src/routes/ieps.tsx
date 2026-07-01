@@ -265,8 +265,10 @@ function IepsPage() {
           <SpecialistsSection
             entries={specialists.filter((e) => semesterFilter === "all" || e.semester === semesterFilter)}
             goals={semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)}
+            allGoals={goals}
             onAdd={addSpecialistEntry}
             scopedStudentId={studentScope}
+            activeSemester={semesterFilter === "all" ? currentSemester : semesterFilter}
           />
         </div>
 
@@ -694,12 +696,14 @@ const SPECIALIST_ROLES: SpecialistSubject[] = [
 ];
 
 function SpecialistsSection({
-  entries, goals, onAdd, scopedStudentId,
+  entries, goals, allGoals, onAdd, scopedStudentId, activeSemester,
 }: {
   entries: SpecialistEntry[];
   goals: IepGoal[];
+  allGoals: IepGoal[];
   onAdd: (entry: Omit<SpecialistEntry, "id" | "addedAt" | "semester">) => void;
   scopedStudentId?: string;
+  activeSemester: Semester;
 }) {
   const visible = scopedStudentId ? entries.filter((e) => e.studentId === scopedStudentId) : entries;
   const [open, setOpen] = useState(false);
@@ -711,34 +715,62 @@ function SpecialistsSection({
     comment: "",
     withPhoto: true,
   });
-  const [goalError, setGoalError] = useState(false);
+  const [goalError, setGoalError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const matchingGoals = goals.filter(
     (g) => g.studentId === form.studentId && g.learningArea === form.specialistRole,
   );
   const hasMatchingGoals = matchingGoals.length > 0;
 
-  function submit() {
+  async function submit() {
     if (!form.specialistName.trim() || !form.comment.trim()) {
       toast.error("Add your name and a comment.");
       return;
     }
     if (!form.goalId) {
-      setGoalError(true);
+      setGoalError("Please select a matching IEP goal for this domain before saving.");
       return;
     }
-    setGoalError(false);
-    onAdd({
-      specialistName: form.specialistName.trim(),
-      specialistRole: form.specialistRole,
-      studentId: form.studentId,
-      goalId: form.goalId,
-      comment: form.comment.trim(),
-      photoHue: form.withPhoto ? Math.floor(Math.random() * 360) : undefined,
-    });
-    setForm((f) => ({ ...f, specialistName: "", comment: "", goalId: "" }));
-    setOpen(false);
+    setGoalError(null);
+    setSaving(true);
+    try {
+      const { saveSpecialistNote } = await import("@/lib/ieps.functions");
+      const result = await saveSpecialistNote({
+        data: {
+          specialistName: form.specialistName.trim(),
+          specialistRole: form.specialistRole,
+          studentId: form.studentId,
+          goalId: form.goalId,
+          comment: form.comment.trim(),
+          withPhoto: form.withPhoto,
+          activeSemester,
+        },
+      });
+      if (!result.ok) {
+        setGoalError(result.error.message);
+        toast.error(result.error.message);
+        return;
+      }
+      onAdd({
+        specialistName: result.entry.specialistName,
+        specialistRole: result.entry.specialistRole,
+        studentId: result.entry.studentId,
+        goalId: result.entry.goalId,
+        comment: result.entry.comment,
+        photoHue: result.entry.photoHue,
+      });
+      setForm((f) => ({ ...f, specialistName: "", comment: "", goalId: "" }));
+      setOpen(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save note.");
+    } finally {
+      setSaving(false);
+    }
   }
+  // Silence unused param warning — allGoals is threaded for parity with server view.
+  void allGoals;
+
 
   return (
     <Card className="overflow-hidden">
@@ -777,7 +809,7 @@ function SpecialistsSection({
                 goalError && "border-red-500 ring-1 ring-red-500/30"
               )}
               value={form.goalId}
-              onChange={(e) => { setForm((f) => ({ ...f, goalId: e.target.value })); setGoalError(false); }}
+              onChange={(e) => { setForm((f) => ({ ...f, goalId: e.target.value })); setGoalError(null); }}
             >
               <option value="">— Select a goal —</option>
               {matchingGoals.map((g) => (
@@ -790,9 +822,8 @@ function SpecialistsSection({
             {goalError && (
               <p className="flex items-center gap-1 text-[11px] text-red-500">
                 <AlertTriangle className="h-3 w-3" />
-                {hasMatchingGoals
-                  ? "Please select a matching IEP goal for this domain before saving."
-                  : `No ${form.specialistRole} IEP goals exist for this student. Create one in the tracker first.`}
+                {goalError}
+                {!hasMatchingGoals && ` No ${form.specialistRole} IEP goals exist for this student in ${activeSemester}. Create one in the tracker first.`}
               </p>
             )}
           </label>
@@ -811,8 +842,8 @@ function SpecialistsSection({
               <input type="checkbox" checked={form.withPhoto} onChange={(e) => setForm((f) => ({ ...f, withPhoto: e.target.checked }))} />
               <Camera className="h-3.5 w-3.5" />Attach session photo
             </label>
-            <Button size="sm" className="h-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={submit}>
-              <Send className="h-3.5 w-3.5" />Post to IEP
+            <Button size="sm" disabled={saving} className="h-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={submit}>
+              <Send className="h-3.5 w-3.5" />{saving ? "Saving…" : "Post to IEP"}
             </Button>
           </div>
         </div>
