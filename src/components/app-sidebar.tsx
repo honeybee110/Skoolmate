@@ -12,6 +12,7 @@ import {
   Calendar,
   Sparkles,
   Settings,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -44,6 +45,10 @@ const track = [
   { title: "Evidence Hub", url: "/evidence", icon: Camera },
   { title: "Behaviour", url: "/behaviour", icon: Activity },
   { title: "Reports", url: "/reports", icon: FileText },
+];
+
+const admin = [
+  { title: "Override Audit", url: "/admin/audit", icon: ShieldCheck },
 ];
 
 export function AppSidebar() {
@@ -93,6 +98,7 @@ export function AppSidebar() {
         {renderGroup("Teach", teach)}
         {renderGroup("Plan", plan)}
         {renderGroup("Track", track)}
+        {renderGroup("Admin", admin)}
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
