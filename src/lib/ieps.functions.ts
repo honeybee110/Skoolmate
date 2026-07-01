@@ -15,67 +15,74 @@ function assertSemester(v: unknown): Semester {
   return v as Semester;
 }
 
-export const saveSpecialistNote = createServerFn({ method: "POST" })
-  .inputValidator((raw: {
-    specialistName: string;
-    specialistRole: string;
-    studentId: string;
-    goalId: string;
-    comment: string;
-    withPhoto?: boolean;
-    activeSemester: string;
-  }) => {
-    if (!raw || typeof raw !== "object") throw new Error("Invalid payload");
-    const specialistName = String(raw.specialistName ?? "").trim();
-    const comment = String(raw.comment ?? "").trim();
-    const studentId = String(raw.studentId ?? "");
-    const goalId = String(raw.goalId ?? "");
-    const withPhoto = Boolean(raw.withPhoto);
-    if (!specialistName) throw new Error("Specialist name is required.");
-    if (!comment) throw new Error("Comment is required.");
-    if (!studentId) throw new Error("Student is required.");
-    if (!SPECIALIST_ROLES.includes(raw.specialistRole as SpecialistSubject)) {
-      throw new Error(`Invalid specialist role: ${raw.specialistRole}`);
-    }
-    return {
-      specialistName,
-      specialistRole: raw.specialistRole as SpecialistSubject,
-      studentId,
-      goalId,
-      comment,
-      withPhoto,
-      activeSemester: assertSemester(raw.activeSemester),
-    };
-  })
-  .handler(async ({ data }) => {
-    const err = validateSpecialistNote(
-      {
-        studentId: data.studentId,
-        goalId: data.goalId,
-        specialistRole: data.specialistRole,
-        activeSemester: data.activeSemester,
-      },
-      iepGoals,
-    );
-    if (err) {
-      // Return a structured error so the client can render inline messages.
-      return { ok: false as const, error: err };
-    }
-    const entry: SpecialistEntry = {
-      id: `sp-${Date.now()}`,
-      specialistName: data.specialistName,
-      specialistRole: data.specialistRole,
+// Exported so integration tests can exercise validator + handler together
+// without bundler-specific server-fn dispatch. createServerFn below wraps
+// exactly these same functions, so tests remain authoritative.
+export function validateSpecialistNoteInput(raw: {
+  specialistName: string;
+  specialistRole: string;
+  studentId: string;
+  goalId: string;
+  comment: string;
+  withPhoto?: boolean;
+  activeSemester: string;
+}) {
+  if (!raw || typeof raw !== "object") throw new Error("Invalid payload");
+  const specialistName = String(raw.specialistName ?? "").trim();
+  const comment = String(raw.comment ?? "").trim();
+  const studentId = String(raw.studentId ?? "");
+  const goalId = String(raw.goalId ?? "");
+  const withPhoto = Boolean(raw.withPhoto);
+  if (!specialistName) throw new Error("Specialist name is required.");
+  if (!comment) throw new Error("Comment is required.");
+  if (!studentId) throw new Error("Student is required.");
+  if (!SPECIALIST_ROLES.includes(raw.specialistRole as SpecialistSubject)) {
+    throw new Error(`Invalid specialist role: ${raw.specialistRole}`);
+  }
+  return {
+    specialistName,
+    specialistRole: raw.specialistRole as SpecialistSubject,
+    studentId,
+    goalId,
+    comment,
+    withPhoto,
+    activeSemester: assertSemester(raw.activeSemester),
+  };
+}
+
+export async function saveSpecialistNoteHandler(
+  data: ReturnType<typeof validateSpecialistNoteInput>,
+) {
+  const err = validateSpecialistNote(
+    {
       studentId: data.studentId,
       goalId: data.goalId,
-      comment: data.comment,
-      photoHue: data.withPhoto ? Math.floor(Math.random() * 360) : undefined,
-      addedAt: "Just now",
-      semester: data.activeSemester,
-    };
-    // Mock store — real backend would insert into specialist_notes here.
-    specialistEntries.unshift(entry);
-    return { ok: true as const, entry };
-  });
+      specialistRole: data.specialistRole,
+      activeSemester: data.activeSemester,
+    },
+    iepGoals,
+  );
+  if (err) {
+    return { ok: false as const, error: err };
+  }
+  const entry: SpecialistEntry = {
+    id: `sp-${Date.now()}`,
+    specialistName: data.specialistName,
+    specialistRole: data.specialistRole,
+    studentId: data.studentId,
+    goalId: data.goalId,
+    comment: data.comment,
+    photoHue: data.withPhoto ? Math.floor(Math.random() * 360) : undefined,
+    addedAt: "Just now",
+    semester: data.activeSemester,
+  };
+  specialistEntries.unshift(entry);
+  return { ok: true as const, entry };
+}
+
+export const saveSpecialistNote = createServerFn({ method: "POST" })
+  .inputValidator(validateSpecialistNoteInput)
+  .handler(async ({ data }) => saveSpecialistNoteHandler(data));
 
 export const updateCrossCheckStatus = createServerFn({ method: "POST" })
   .inputValidator((raw: {
