@@ -330,10 +330,11 @@ function GoalRow({ goal, selected, onSelect }: { goal: IepGoal; selected: boolea
 }
 
 function CrossCheckPanel({
-  goal, evidence, onApprovalChange, onLinkEvidence, onDismiss,
+  goal, evidence, semesterFilter, onApprovalChange, onLinkEvidence, onDismiss,
 }: {
   goal: IepGoal;
   evidence: EvidenceItem[];
+  semesterFilter: Semester | "all";
   onApprovalChange: (a: IepApproval) => void;
   onLinkEvidence: (evId: string) => void;
   onDismiss: (evId: string) => void;
@@ -343,6 +344,7 @@ function CrossCheckPanel({
   const pct = goalProgress(goal);
   const appr = approvalMeta[goal.approval ?? "draft"];
   const ApprIcon = appr.icon;
+  const outOfScope = semesterFilter !== "all" && goal.semester !== semesterFilter;
 
   const suggestions = evidence.filter(
     (e) => e.studentId === goal.studentId && !e.goalIds.includes(goal.id) && (e.aiSuggestedGoal === goal.id || !e.aiTagged),
