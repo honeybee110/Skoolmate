@@ -122,6 +122,48 @@ export type Database = {
         }
         Relationships: []
       }
+      iep_override_audit: {
+        Row: {
+          action: string
+          active_semester: string | null
+          actor_id: string
+          created_at: string
+          goal_id: string | null
+          goal_semester: Database["public"]["Enums"]["semester"] | null
+          id: string
+          note_semester: Database["public"]["Enums"]["semester"] | null
+          payload: Json
+          reason: string
+          student_id: string | null
+        }
+        Insert: {
+          action: string
+          active_semester?: string | null
+          actor_id: string
+          created_at?: string
+          goal_id?: string | null
+          goal_semester?: Database["public"]["Enums"]["semester"] | null
+          id?: string
+          note_semester?: Database["public"]["Enums"]["semester"] | null
+          payload?: Json
+          reason: string
+          student_id?: string | null
+        }
+        Update: {
+          action?: string
+          active_semester?: string | null
+          actor_id?: string
+          created_at?: string
+          goal_id?: string | null
+          goal_semester?: Database["public"]["Enums"]["semester"] | null
+          id?: string
+          note_semester?: Database["public"]["Enums"]["semester"] | null
+          payload?: Json
+          reason?: string
+          student_id?: string | null
+        }
+        Relationships: []
+      }
       specialist_notes: {
         Row: {
           comment: string
@@ -169,11 +211,63 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_update_cross_check_status: {
+        Args: {
+          p_active_semester: string
+          p_criterion_index: number
+          p_goal_id: string
+          p_reason: string
+          p_status: string
+        }
+        Returns: Json
+      }
+      admin_upsert_specialist_note: {
+        Args: {
+          p_comment: string
+          p_goal_id: string
+          p_note_id: string
+          p_photo_hue: number
+          p_reason: string
+          p_semester: Database["public"]["Enums"]["semester"]
+          p_specialist_name: string
+          p_specialist_role: string
+          p_student_id: string
+        }
+        Returns: Json
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       update_cross_check_status: {
         Args: {
           p_active_semester: string
@@ -185,6 +279,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "teacher"
       semester: "Semester 1 · 2026" | "Semester 2 · 2026"
     }
     CompositeTypes: {
@@ -313,6 +408,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "teacher"],
       semester: ["Semester 1 · 2026", "Semester 2 · 2026"],
     },
   },
