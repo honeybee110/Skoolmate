@@ -238,7 +238,9 @@ export const curriculumStrands = {
   "Personal & Social": ["Self-awareness", "Self-management", "Social awareness", "Social management"],
   Science: ["Biological", "Physical", "Earth & Space", "Chemical"],
   PE: ["Movement", "Health", "Teamwork"],
-  Arts: ["Drama", "Visual Arts"],
+  "Visual Arts": ["Drawing", "Painting", "Craft"],
+  Music: ["Listening", "Performance", "Instruments"],
+  Drama: ["Role-play", "Movement", "Expression"],
   "Learn to Play": ["Turn-taking", "Social interaction", "Independent play"],
 };
 
@@ -250,8 +252,11 @@ export type IepDomain =
   | "Personal & Social"
   | "Science"
   | "HASS"
-  | "Health & PE"
-  | "The Arts"
+  | "PE"
+  | "Visual Arts"
+  | "Music"
+  | "Drama"
+  | "Learn to Play"
   | "Self-care";
 export type VcLevel = "A" | "B" | "C" | "D" | "F" | "1" | "2";
 export type LearningArea =
@@ -266,11 +271,11 @@ export type LearningArea =
   | "Humanities · Geography"
   | "Science"
   | "Personal & Social"
-  | "Health & PE"
-  | "The Arts · Music"
-  | "The Arts · Drama"
-  | "The Arts · Visual Arts"
-  | "Cooking / Kitchen Garden";
+  | "PE"
+  | "Music"
+  | "Drama"
+  | "Visual Arts"
+  | "Learn to Play";
 
 
 export interface SuccessCriterion {
@@ -465,8 +470,8 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g13", studentId: "s4", studentName: "Noah Williams", domain: "Health & PE",
-    learningArea: "Health & PE", level: "D", vcLink: "VC2HPFM02",
+    id: "g13", studentId: "s4", studentName: "Noah Williams", domain: "PE",
+    learningArea: "PE", level: "D", vcLink: "VC2HPFM02",
     learningIntention: "Perform fundamental movement skills with growing control.",
     smart: "Noah will catch a large soft ball from 1m in 4/5 attempts during PE.",
     baseline: "Traps ball against chest occasionally", status: "developing",
@@ -478,8 +483,8 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g14", studentId: "s5", studentName: "Zara Patel", domain: "The Arts",
-    learningArea: "The Arts · Music", level: "C", vcLink: "VC2AMUFE01",
+    id: "g14", studentId: "s5", studentName: "Zara Patel", domain: "Music",
+    learningArea: "Music", level: "C", vcLink: "VC2AMUFE01",
     learningIntention: "Respond to music using voice, body and instruments.",
     smart: "Zara will tap a steady beat on a drum for 8 counts in 3/4 sessions.",
     baseline: "Taps inconsistently with model", status: "developing",
@@ -491,8 +496,8 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g15", studentId: "s8", studentName: "Hamish Carter", domain: "The Arts",
-    learningArea: "The Arts · Drama", level: "C", vcLink: "VC2ADRFE01",
+    id: "g15", studentId: "s8", studentName: "Hamish Carter", domain: "Drama",
+    learningArea: "Drama", level: "C", vcLink: "VC2ADRFE01",
     learningIntention: "Take on a role using voice, movement and props.",
     smart: "Hamish will hold a prop and copy 3 actions in role during Drama.",
     baseline: "Watches peers, joins briefly", status: "developing",
@@ -504,10 +509,10 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g16", studentId: "s7", studentName: "Charlotte Reid", domain: "The Arts",
-    learningArea: "Cooking / Kitchen Garden", level: "D", vcLink: "VC2DTFK01",
-    learningIntention: "Follow a 3-step picture recipe with support.",
-    smart: "Charlotte will follow a 3-step recipe sequence (spread, top, fold) in Cooking with 1 prompt.",
+    id: "g16", studentId: "s7", studentName: "Charlotte Reid", domain: "Learn to Play",
+    learningArea: "Learn to Play", level: "D", vcLink: "VC2DTFK01",
+    learningIntention: "Follow a 3-step play routine with support.",
+    smart: "Charlotte will follow a 3-step play sequence (choose, engage, tidy) in Learn to Play with 1 prompt.",
     baseline: "Completes 1 step", status: "developing",
     evidenceCount: 2, lastEvidence: "Friday", reviewDue: "Wk 9",
     successCriteria: [
