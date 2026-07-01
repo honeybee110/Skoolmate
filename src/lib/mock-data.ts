@@ -251,7 +251,8 @@ export type IepDomain =
   | "Maths"
   | "Personal & Social"
   | "Science"
-  | "HASS"
+  | "History"
+  | "Geography"
   | "PE"
   | "Visual Arts"
   | "Music"
@@ -457,16 +458,16 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
   {
-    id: "g12", studentId: "s1", studentName: "Mia Nguyen", domain: "HASS",
-    learningArea: "Humanities · Geography", level: "F", vcLink: "VC2HGFK01",
-    learningIntention: "Identify the places I belong to — home, classroom, school.",
-    smart: "Mia will match 4 place photos to labels (home, classroom, yard, hall) in 4/5 trials.",
-    baseline: "Matches 2 places with model", status: "developing",
+    id: "g12", studentId: "s1", studentName: "Mia Nguyen", domain: "History",
+    learningArea: "Humanities · History", level: "F", vcLink: "VC2HHFK01",
+    learningIntention: "Recognise significant people and events in my own past.",
+    smart: "Mia will sequence 3 personal history photos (baby, toddler, now) in order in 4/5 trials.",
+    baseline: "Sequences 2 with model", status: "developing",
     evidenceCount: 2, lastEvidence: "Yesterday", reviewDue: "Wk 10",
     successCriteria: [
-      { step: "Recognise own classroom photo", workingTowards: "With prompt", developing: "With cue", achieved: "Independently", status: "achieved" },
-      { step: "Match 4 places to labels", workingTowards: "Matches 1", developing: "Matches 2–3", achieved: "Matches all 4", status: "developing" },
-      { step: "Name place during walk", workingTowards: "Imitates word", developing: "Single word with cue", achieved: "Names independently", status: "working-towards" },
+      { step: "Identify self in baby photo", workingTowards: "With prompt", developing: "With cue", achieved: "Independently", status: "achieved" },
+      { step: "Sequence 3 photos in order", workingTowards: "Sequences 1", developing: "Sequences 2 with cue", achieved: "Sequences all 3", status: "developing" },
+      { step: "Label 'before / now'", workingTowards: "Imitates word", developing: "Single word with cue", achieved: "Uses independently", status: "working-towards" },
     ],
   },
   {
@@ -522,6 +523,22 @@ export const iepGoals: IepGoal[] = ([
     ],
   },
 ] as Omit<IepGoal, "semester">[]).map((g) => ({ ...g, semester: seedSemester }));
+
+// Semester 2 goal: Geography replaces History in the HASS block during S2.
+iepGoals.push({
+  id: "g12b", studentId: "s1", studentName: "Mia Nguyen", domain: "Geography",
+  learningArea: "Humanities · Geography", level: "F", vcLink: "VC2HGFK01",
+  learningIntention: "Identify the places I belong to — home, classroom, school.",
+  smart: "Mia will match 4 place photos to labels (home, classroom, yard, hall) in 4/5 trials.",
+  baseline: "Matches 2 places with model", status: "developing",
+  evidenceCount: 0, lastEvidence: "—", reviewDue: "Wk 4 · S2",
+  successCriteria: [
+    { step: "Recognise own classroom photo", workingTowards: "With prompt", developing: "With cue", achieved: "Independently", status: "developing" },
+    { step: "Match 4 places to labels", workingTowards: "Matches 1", developing: "Matches 2–3", achieved: "Matches all 4", status: "developing" },
+    { step: "Name place during walk", workingTowards: "Imitates word", developing: "Single word with cue", achieved: "Names independently", status: "developing" },
+  ],
+  semester: "Semester 2 · 2026",
+});
 
 // Specialist teacher entries — comments and photo evidence attached to a student
 // by visiting specialists (PE, Music, Drama, Visual Arts, Learn to Play) who edit IEPs.
