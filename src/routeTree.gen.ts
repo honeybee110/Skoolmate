@@ -17,6 +17,7 @@ import { Route as ParentRouteImport } from './routes/parent'
 import { Route as LessonsRouteImport } from './routes/lessons'
 import { Route as IepsRouteImport } from './routes/ieps'
 import { Route as EvidenceRouteImport } from './routes/evidence'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ClassesRouteImport } from './routes/classes'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BehaviourRouteImport } from './routes/behaviour'
@@ -65,6 +66,11 @@ const EvidenceRoute = EvidenceRouteImport.update({
   path: '/evidence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClassesRoute = ClassesRouteImport.update({
   id: '/classes',
   path: '/classes',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
+  '/dashboard': typeof DashboardRoute
   '/evidence': typeof EvidenceRoute
   '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
+  '/dashboard': typeof DashboardRoute
   '/evidence': typeof EvidenceRoute
   '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
+  '/dashboard': typeof DashboardRoute
   '/evidence': typeof EvidenceRoute
   '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/behaviour'
     | '/calendar'
     | '/classes'
+    | '/dashboard'
     | '/evidence'
     | '/ieps'
     | '/lessons'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/behaviour'
     | '/calendar'
     | '/classes'
+    | '/dashboard'
     | '/evidence'
     | '/ieps'
     | '/lessons'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/behaviour'
     | '/calendar'
     | '/classes'
+    | '/dashboard'
     | '/evidence'
     | '/ieps'
     | '/lessons'
@@ -212,6 +224,7 @@ export interface RootRouteChildren {
   BehaviourRoute: typeof BehaviourRoute
   CalendarRoute: typeof CalendarRoute
   ClassesRoute: typeof ClassesRoute
+  DashboardRoute: typeof DashboardRoute
   EvidenceRoute: typeof EvidenceRoute
   IepsRoute: typeof IepsRouteWithChildren
   LessonsRoute: typeof LessonsRoute
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/evidence'
       fullPath: '/evidence'
       preLoaderRoute: typeof EvidenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/classes': {
@@ -360,6 +380,7 @@ const rootRouteChildren: RootRouteChildren = {
   BehaviourRoute: BehaviourRoute,
   CalendarRoute: CalendarRoute,
   ClassesRoute: ClassesRoute,
+  DashboardRoute: DashboardRoute,
   EvidenceRoute: EvidenceRoute,
   IepsRoute: IepsRouteWithChildren,
   LessonsRoute: LessonsRoute,

@@ -255,7 +255,7 @@ function ParentPortal() {
         </Card>
 
         <p className="text-center text-[10px] text-muted-foreground">
-          <Link to="/" className="hover:text-foreground hover:underline">← Back to teacher view</Link> · SchoolMate AU
+          <Link to="/dashboard" className="hover:text-foreground hover:underline">← Back to teacher view</Link> · SchoolMate AU
         </p>
       </main>
     </div>
