@@ -29,17 +29,11 @@ function assertSemester(v: unknown): Semester {
   return v as Semester;
 }
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+
 type AdminContext = {
-  supabase: {
-    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
-    from: (table: string) => {
-      select: (cols: string) => {
-        order: (col: string, opts: { ascending: boolean }) => {
-          limit: (n: number) => Promise<{ data: unknown[] | null; error: { message: string } | null }>;
-        };
-      };
-    };
-  };
+  supabase: SupabaseClient<Database>;
   userId: string;
 };
 
