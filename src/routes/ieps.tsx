@@ -723,7 +723,7 @@ function SpecialistsSection({
           </label>
           <label className="space-y-1">
             <span className="font-medium text-muted-foreground">Role</span>
-            <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.specialistRole} onChange={(e) => setForm((f) => ({ ...f, specialistRole: e.target.value as SpecialistSubject }))}>
+            <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.specialistRole} onChange={(e) => setForm((f) => ({ ...f, specialistRole: e.target.value as SpecialistSubject, goalId: "" }))}>
               {SPECIALIST_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
           </label>
