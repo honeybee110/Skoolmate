@@ -686,17 +686,28 @@ function SpecialistsSection({
     comment: "",
     withPhoto: true,
   });
+  const [goalError, setGoalError] = useState(false);
+
+  const matchingGoals = goals.filter(
+    (g) => g.studentId === form.studentId && g.learningArea === form.specialistRole,
+  );
+  const hasMatchingGoals = matchingGoals.length > 0;
 
   function submit() {
     if (!form.specialistName.trim() || !form.comment.trim()) {
       toast.error("Add your name and a comment.");
       return;
     }
+    if (!form.goalId) {
+      setGoalError(true);
+      return;
+    }
+    setGoalError(false);
     onAdd({
       specialistName: form.specialistName.trim(),
       specialistRole: form.specialistRole,
       studentId: form.studentId,
-      goalId: form.goalId || undefined,
+      goalId: form.goalId,
       comment: form.comment.trim(),
       photoHue: form.withPhoto ? Math.floor(Math.random() * 360) : undefined,
     });
