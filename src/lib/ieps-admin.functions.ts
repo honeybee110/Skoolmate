@@ -29,14 +29,28 @@ function assertSemester(v: unknown): Semester {
   return v as Semester;
 }
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+type AdminContext = {
+  supabase: {
+    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+    from: (table: string) => {
+      select: (cols: string) => {
+        order: (col: string, opts: { ascending: boolean }) => {
+          limit: (n: number) => Promise<{ data: unknown[] | null; error: { message: string } | null }>;
+        };
+      };
+    };
+  };
+  userId: string;
+};
+
+async function assertAdmin(context: AdminContext) {
   const { data, error } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
   });
   if (error) throw new Error(`Role check failed: ${error.message}`);
   if (!data) {
-    const err: any = new Error("forbidden: admin role required");
+    const err = new Error("forbidden: admin role required") as Error & { code?: string };
     err.code = "forbidden";
     throw err;
   }
