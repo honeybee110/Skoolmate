@@ -734,14 +734,20 @@ function SpecialistsSection({
             </select>
           </label>
           <label className="space-y-1">
-            <span className="font-medium text-muted-foreground">Link to IEP goal (optional)</span>
+            <span className="font-medium text-muted-foreground">Link to IEP goal ({form.specialistRole} only)</span>
             <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.goalId} onChange={(e) => setForm((f) => ({ ...f, goalId: e.target.value }))}>
               <option value="">— None —</option>
-              {goals.filter((g) => g.studentId === form.studentId).map((g) => (
-                <option key={g.id} value={g.id}>{g.learningArea} — {g.smart.slice(0, 60)}…</option>
-              ))}
+              {goals
+                .filter((g) => g.studentId === form.studentId && g.learningArea === form.specialistRole)
+                .map((g) => (
+                  <option key={g.id} value={g.id}>{g.learningArea} — {g.smart.slice(0, 60)}…</option>
+                ))}
+              {goals.filter((g) => g.studentId === form.studentId && g.learningArea === form.specialistRole).length === 0 && (
+                <option value="" disabled>No {form.specialistRole} goals for this student yet</option>
+              )}
             </select>
           </label>
+
           <label className="space-y-1 md:col-span-2">
             <span className="font-medium text-muted-foreground">Comment</span>
             <textarea
