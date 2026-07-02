@@ -99,16 +99,37 @@ function AdminLogin() {
                 <div>
                   <p className="font-medium">This account can't access the Admin Portal.</p>
                   <p className="mt-1 text-xs text-amber-800/80">
-                    Your account has teacher-only permissions. Sign in via the Teacher
-                    Portal instead, or ask IT to grant you an admin role.
+                    Your account has teacher-only permissions. If you're the school
+                    founder and no admin exists yet, claim founder access below.
                   </p>
                 </div>
               </div>
-              <Button asChild className="w-full">
+              <Button
+                className="w-full gap-1.5"
+                disabled={loading}
+                onClick={async () => {
+                  setLoading(true);
+                  const { error } = await supabase.rpc("claim_founder_admin");
+                  setLoading(false);
+                  if (error) {
+                    toast.error(
+                      error.message.includes("founder_already_claimed")
+                        ? "Founder access has already been claimed. Ask your existing admin to grant you a role."
+                        : error.message
+                    );
+                  } else {
+                    toast.success("Founder access granted. Redirecting…");
+                    setTimeout(() => window.location.assign("/admin"), 600);
+                  }
+                }}
+              >
+                <ShieldCheck className="h-4 w-4" /> Claim founder access
+              </Button>
+              <Button asChild variant="outline" className="w-full">
                 <Link to="/teacher/login">Go to Teacher Portal</Link>
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 className="w-full"
                 onClick={async () => {
                   await supabase.auth.signOut();
