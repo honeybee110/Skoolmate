@@ -43,6 +43,7 @@ import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminRemindersRouteImport } from './routes/admin.reminders'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminIepsRouteImport } from './routes/admin.ieps'
 import { Route as AdminEvidenceRouteImport } from './routes/admin.evidence'
 import { Route as AdminDocumentsRouteImport } from './routes/admin.documents'
 import { Route as AdminCurriculumRouteImport } from './routes/admin.curriculum'
@@ -224,6 +225,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIepsRoute = AdminIepsRouteImport.update({
+  id: '/admin/ieps',
+  path: '/admin/ieps',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminEvidenceRoute = AdminEvidenceRouteImport.update({
   id: '/admin/evidence',
   path: '/admin/evidence',
@@ -303,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/documents': typeof AdminDocumentsRoute
   '/admin/evidence': typeof AdminEvidenceRoute
+  '/admin/ieps': typeof AdminIepsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/reminders': typeof AdminRemindersRoute
@@ -349,6 +356,7 @@ export interface FileRoutesByTo {
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/documents': typeof AdminDocumentsRoute
   '/admin/evidence': typeof AdminEvidenceRoute
+  '/admin/ieps': typeof AdminIepsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/reminders': typeof AdminRemindersRoute
@@ -396,6 +404,7 @@ export interface FileRoutesById {
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/documents': typeof AdminDocumentsRoute
   '/admin/evidence': typeof AdminEvidenceRoute
+  '/admin/ieps': typeof AdminIepsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/reminders': typeof AdminRemindersRoute
@@ -444,6 +453,7 @@ export interface FileRouteTypes {
     | '/admin/curriculum'
     | '/admin/documents'
     | '/admin/evidence'
+    | '/admin/ieps'
     | '/admin/login'
     | '/admin/notifications'
     | '/admin/reminders'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/admin/curriculum'
     | '/admin/documents'
     | '/admin/evidence'
+    | '/admin/ieps'
     | '/admin/login'
     | '/admin/notifications'
     | '/admin/reminders'
@@ -536,6 +547,7 @@ export interface FileRouteTypes {
     | '/admin/curriculum'
     | '/admin/documents'
     | '/admin/evidence'
+    | '/admin/ieps'
     | '/admin/login'
     | '/admin/notifications'
     | '/admin/reminders'
@@ -583,6 +595,7 @@ export interface RootRouteChildren {
   AdminCurriculumRoute: typeof AdminCurriculumRoute
   AdminDocumentsRoute: typeof AdminDocumentsRoute
   AdminEvidenceRoute: typeof AdminEvidenceRoute
+  AdminIepsRoute: typeof AdminIepsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminRemindersRoute: typeof AdminRemindersRoute
@@ -840,6 +853,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/ieps': {
+      id: '/admin/ieps'
+      path: '/admin/ieps'
+      fullPath: '/admin/ieps'
+      preLoaderRoute: typeof AdminIepsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/evidence': {
       id: '/admin/evidence'
       path: '/admin/evidence'
@@ -963,6 +983,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCurriculumRoute: AdminCurriculumRoute,
   AdminDocumentsRoute: AdminDocumentsRoute,
   AdminEvidenceRoute: AdminEvidenceRoute,
+  AdminIepsRoute: AdminIepsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminRemindersRoute: AdminRemindersRoute,

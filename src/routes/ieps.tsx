@@ -1,637 +1,357 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo, useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import {
-  Target, Plus, Sparkles, AlertTriangle, CheckCircle2,
-  Search, Filter, ChevronRight, Calendar, BookOpen, ListChecks,
-  FileDown, ExternalLink, Send, ShieldCheck, Clock, Link2, X,
-  Camera, MessageSquarePlus, Pencil, UserCog,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
+} from "@/components/ui/sheet";
+import {
+  Target, Sparkles, Search, Calendar, Save, ChevronDown, ChevronRight,
+  BookOpen, CheckCircle2, Camera, MessageSquarePlus, ExternalLink,
+  Plus, Filter, LayoutGrid, User, ClipboardList,
 } from "lucide-react";
-import {
-  iepGoals as seedGoals, students, evidenceItems as seedEvidence,
-  specialistEntries as seedSpecialists,
-  availableSemesters, currentSemester,
-  type IepGoal, type IepStatus, type IepDomain, type IepApproval,
-  type SuccessCriterion, type EvidenceItem, type Semester,
-  type SpecialistEntry, type SpecialistSubject,
-} from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useActiveSemester } from "@/lib/semester-context";
-import { scopedSearch } from "@/lib/scope";
+import {
+  students, availableSemesters, currentSemester, classInfo,
+  type Semester, type VcLevel,
+} from "@/lib/mock-data";
+import {
+  CURRICULUM_SUBJECTS, LEVEL_TONE, findRecord, recordsFor, visibleSubjects,
+  type CurriculumRecord, type CurriculumSubject,
+} from "@/lib/curriculum-db";
 
 export const Route = createFileRoute("/ieps")({
-  head: () => ({ meta: [{ title: "IEPs · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "IEP Builder · SchoolMate AU" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
-    goal: typeof s.goal === "string" ? s.goal : undefined,
   }),
-  component: IepsPage,
+  component: IepBuilderPage,
 });
 
+// ---------- Cell state ----------
 
-type ActiveStatus = Exclude<IepStatus, "not-started">;
+type Status = "not-started" | "working-towards" | "nearly-there" | "achieved" | "exceeded";
 
-const statusMeta: Record<IepStatus, { label: string; tone: string; pct: number; dot: string }> = {
-  "not-started": { label: "Not started", tone: "bg-muted text-muted-foreground", pct: 0, dot: "bg-muted-foreground" },
-  developing: { label: "Developing", tone: "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300", pct: 33, dot: "bg-orange-500" },
-  "working-towards": { label: "Working Towards", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300", pct: 66, dot: "bg-amber-500" },
-  achieved: { label: "Achieved", tone: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300", pct: 100, dot: "bg-emerald-500" },
+const STATUS_META: Record<Status, { label: string; tone: string; pct: number }> = {
+  "not-started":   { label: "Not started",     tone: "bg-slate-100 text-slate-600 border-slate-200", pct: 0 },
+  "working-towards": { label: "Working Towards", tone: "bg-orange-100 text-orange-700 border-orange-200", pct: 25 },
+  "nearly-there":  { label: "Nearly There",    tone: "bg-amber-100 text-amber-700 border-amber-200", pct: 60 },
+  achieved:        { label: "Achieved",         tone: "bg-emerald-100 text-emerald-700 border-emerald-200", pct: 100 },
+  exceeded:        { label: "Exceeded",         tone: "bg-navy/10 text-navy border-navy/20", pct: 110 },
 };
 
-const approvalMeta: Record<IepApproval, { label: string; tone: string; icon: React.ComponentType<{ className?: string }> }> = {
-  draft: { label: "Draft", tone: "bg-muted text-muted-foreground", icon: Clock },
-  pending: { label: "Pending approval", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300", icon: Send },
-  approved: { label: "Approved", tone: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300", icon: ShieldCheck },
-};
-
-const domainTone: Record<IepDomain, string> = {
-  English: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
-  Maths: "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
-  "Personal & Social": "bg-accent/15 text-accent",
-  Science: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
-  History: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
-  Geography: "bg-lime-100 text-lime-700 dark:bg-lime-500/15 dark:text-lime-300",
-  PE: "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
-  "Visual Arts": "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
-  Music: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
-  Drama: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/15 dark:text-fuchsia-300",
-  "Learn to Play": "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300",
-  "Self-care": "bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300",
-};
-
-function goalProgress(goal: IepGoal) {
-  const sum = goal.successCriteria.reduce((acc, s) => acc + statusMeta[s.status].pct, 0);
-  return Math.round(sum / goal.successCriteria.length);
+interface CellState {
+  curriculumId?: string;
+  levelOverride?: VcLevel;
+  entrySkillsOverride?: string;
+  progress: number;
+  status: Status;
+  comment: string;
+  evidenceCount: number;
 }
 
-const initialApproval = (id: string): IepApproval => {
-  if (["g5", "g6"].includes(id)) return "approved";
-  if (["g1", "g3"].includes(id)) return "pending";
-  return "draft";
-};
-const seeded: IepGoal[] = seedGoals.map((g) => ({
-  ...g,
-  approval: g.approval ?? initialApproval(g.id),
-  approvedBy: ["g5", "g6"].includes(g.id) ? "K. Patel (Learning Specialist)" : undefined,
-  approvedAt: ["g5", "g6"].includes(g.id) ? "Wk 4 · 2026" : undefined,
-}));
+const cellKey = (studentId: string, subject: string, strand: string) =>
+  `${studentId}::${subject}::${strand}`;
 
-const SUBJECTS: IepDomain[] = [
-  "English",
-  "Maths",
-  "Personal & Social",
-  "Science",
-  "History",
-  "Geography",
-  "PE",
-  "Visual Arts",
-  "Music",
-  "Drama",
-  "Learn to Play",
-  "Self-care",
-];
+// Seeded matrix for demo — a handful of pre-filled cells so it looks alive.
+function seedCells(): Record<string, CellState> {
+  const seeds: Array<[string, string, string, Partial<CellState>]> = [
+    ["s1", "Mathematics", "Number", { curriculumId: "ma-n-f", progress: 55, status: "working-towards", evidenceCount: 8, comment: "Mia counting 0–15 confidently." }],
+    ["s1", "English", "Reading and Viewing", { curriculumId: "en-rv-b1", progress: 40, status: "working-towards", evidenceCount: 3 }],
+    ["s2", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 30, status: "working-towards", evidenceCount: 12 }],
+    ["s2", "English", "Reading and Viewing", { curriculumId: "en-rv-d", progress: 65, status: "nearly-there", evidenceCount: 3 }],
+    ["s3", "English", "Writing", { curriculumId: "en-w-f", progress: 100, status: "achieved", evidenceCount: 14 }],
+    ["s3", "Science", "Science Understanding", { curriculumId: "sc-f", progress: 40, status: "working-towards", evidenceCount: 3 }],
+    ["s4", "Self-Care", "Daily Living", { curriculumId: "sc-c-d", progress: 45, status: "working-towards", evidenceCount: 6 }],
+    ["s4", "Physical Education", "Movement and Physical Activity", { curriculumId: "pe-d", progress: 60, status: "nearly-there", evidenceCount: 4 }],
+    ["s5", "Music", "Making and Responding", { curriculumId: "mu-c", progress: 35, status: "working-towards", evidenceCount: 2 }],
+    ["s5", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 100, status: "achieved", evidenceCount: 9 }],
+    ["s7", "Learn to Play", "Play Skills", { curriculumId: "l2p-d", progress: 40, status: "working-towards", evidenceCount: 2 }],
+    ["s8", "Drama", "Making and Responding", { curriculumId: "dr-c", progress: 35, status: "working-towards", evidenceCount: 1 }],
+    ["s8", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 50, status: "working-towards", evidenceCount: 7 }],
+  ];
+  const out: Record<string, CellState> = {};
+  const base: CellState = { progress: 0, status: "not-started", comment: "", evidenceCount: 0 };
+  for (const [sid, subj, strand, patch] of seeds) {
+    out[cellKey(sid, subj, strand)] = { ...base, ...patch };
+  }
+  return out;
+}
 
+// ---------- Page ----------
 
-function IepsPage() {
+function IepBuilderPage() {
   const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-  const [goals, setGoals] = useState<IepGoal[]>(seeded);
-  const [evidence, setEvidence] = useState<EvidenceItem[]>(seedEvidence);
-  const [specialists, setSpecialists] = useState<SpecialistEntry[]>(seedSpecialists);
-  const [subject, setSubject] = useState<IepDomain | "all">("all");
-  const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(search.semester ?? currentSemester);
-  const studentScope = search.student;
+  const [semester, setSemester] = useState<Semester>(
+    (search.semester && search.semester !== "all" ? (search.semester as Semester) : currentSemester),
+  );
+  const [cells, setCells] = useState<Record<string, CellState>>(seedCells);
+  const [view, setView] = useState<"matrix" | "detail">("matrix");
+  const [detailStudentId, setDetailStudentId] = useState<string>(search.student ?? students[0].id);
+  const [query, setQuery] = useState("");
+  const [editorKey, setEditorKey] = useState<string | null>(null);
 
-  const initialGoalId = search.goal && seeded.some((g) => g.id === search.goal)
-    ? search.goal
-    : (studentScope ? (seeded.find((g) => g.studentId === studentScope)?.id ?? seeded[0].id) : seeded[0].id);
-  const [selectedId, setSelectedId] = useState<string>(initialGoalId);
+  const subjects = visibleSubjects(semester);
+  const filteredStudents = students.filter((s) => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return (`${s.firstName} ${s.lastName}`).toLowerCase().includes(q);
+  });
 
-  const scopedStudent = studentScope ? students.find((s) => s.id === studentScope) : undefined;
+  function updateCell(key: string, patch: Partial<CellState>) {
+    setCells((prev) => {
+      const base: CellState = { progress: 0, status: "not-started", comment: "", evidenceCount: 0 };
+      return { ...prev, [key]: { ...base, ...prev[key], ...patch } };
+    });
+  }
 
-  const scopedGoals = useMemo(() => goals.filter((g) => {
-    if (semesterFilter !== "all" && g.semester !== semesterFilter) return false;
-    if (studentScope && g.studentId !== studentScope) return false;
-    if (subject !== "all" && g.domain !== subject) return false;
-    return true;
-  }), [goals, semesterFilter, studentScope, subject]);
-
-  const selected = goals.find((g) => g.id === selectedId) ?? scopedGoals[0] ?? goals[0];
-
-  // Enforce semester scope: if the selected goal falls outside the active
-  // semester filter, snap selection to the first in-scope goal so the
-  // Cross-Check panel can never display descriptors from another semester.
-  useEffect(() => {
-    if (semesterFilter === "all") return;
-    const current = goals.find((g) => g.id === selectedId);
-    if (!current || current.semester !== semesterFilter) {
-      const next = scopedGoals[0];
-      if (next && next.id !== selectedId) setSelectedId(next.id);
-    }
-  }, [semesterFilter, selectedId, goals, scopedGoals]);
+  function pickGoal(key: string, curriculumId: string) {
+    const rec = findRecord(curriculumId);
+    updateCell(key, {
+      curriculumId,
+      levelOverride: undefined,
+      entrySkillsOverride: undefined,
+      status: cells[key]?.status ?? "working-towards",
+      progress: cells[key]?.progress ?? 10,
+    });
+    if (rec) toast.success(`Goal set · Level ${rec.level} · ${rec.curriculumCode}`, {
+      description: "Level and Entry Skills auto-filled from Scope & Sequence.",
+    });
+  }
 
   const stats = useMemo(() => {
-    const xs = semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter);
-    const scope = studentScope ? xs.filter((g) => g.studentId === studentScope) : xs;
+    const scoped = Object.values(cells);
     return {
-      total: scope.length,
-      achieved: scope.filter((g) => g.status === "achieved").length,
-      developing: scope.filter((g) => g.status === "developing").length,
-      pending: scope.filter((g) => g.approval === "pending").length,
+      total: scoped.length,
+      achieved: scoped.filter((c) => c.status === "achieved" || c.status === "exceeded").length,
+      inProgress: scoped.filter((c) => c.status === "working-towards" || c.status === "nearly-there").length,
+      avg: scoped.length
+        ? Math.round(scoped.reduce((a, c) => a + Math.min(c.progress, 100), 0) / scoped.length)
+        : 0,
     };
-  }, [goals, semesterFilter, studentScope]);
+  }, [cells]);
 
-  function setApproval(id: string, approval: IepApproval) {
-    setGoals((prev) => prev.map((g) => g.id === id ? {
-      ...g, approval,
-      approvedBy: approval === "approved" ? "K. Patel (Learning Specialist)" : g.approvedBy,
-      approvedAt: approval === "approved" ? "Today" : g.approvedAt,
-    } : g));
-    if (approval === "pending") toast.success("Submitted for Learning Specialist approval.");
-    if (approval === "approved") toast.success("IEP goal approved.");
-    if (approval === "draft") toast("Returned to draft for edits.");
-  }
-
-  function linkEvidence(evId: string, goalId: string) {
-    setEvidence((prev) => prev.map((e) => e.id === evId
-      ? { ...e, aiTagged: true, goalIds: [...e.goalIds, goalId], aiSuggestedGoal: undefined }
-      : e));
-    setGoals((prev) => prev.map((g) => g.id === goalId
-      ? { ...g, evidenceCount: g.evidenceCount + 1, lastEvidence: "Just now" }
-      : g));
-    toast.success("Evidence linked to goal.");
-  }
-  function dismissSuggestion(evId: string) {
-    setEvidence((prev) => prev.map((e) => e.id === evId ? { ...e, aiSuggestedGoal: undefined } : e));
-  }
-
-  function addSpecialistEntry(entry: Omit<SpecialistEntry, "id" | "addedAt" | "semester">) {
-    setSpecialists((prev) => [
-      { ...entry, id: `sp${prev.length + 1}-${Date.now()}`, addedAt: "Just now", semester: currentSemester },
-      ...prev,
-    ]);
-    toast.success(`Specialist note from ${entry.specialistName} added.`);
-  }
-
-  // Build class roster: one row per student, with per-subject goal aggregates
-  const roster = useMemo(() => students.map((s) => {
-    const studentGoals = (semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter))
-      .filter((g) => g.studentId === s.id);
-    const bySubject = SUBJECTS.reduce<Record<IepDomain, IepGoal[]>>((acc, d) => {
-      acc[d] = studentGoals.filter((g) => g.domain === d);
-      return acc;
-    }, {} as Record<IepDomain, IepGoal[]>);
-    return { student: s, all: studentGoals, bySubject };
-  }), [goals, semesterFilter]);
-
-  const rosterFiltered = studentScope ? roster.filter((r) => r.student.id === studentScope) : roster;
+  const editorCell = editorKey ? { key: editorKey, state: cells[editorKey] } : null;
+  const editorParts = editorKey ? editorKey.split("::") : null;
+  const editorStudent = editorParts ? students.find((s) => s.id === editorParts[0]) : null;
 
   return (
     <AppShell>
       <PageHeader
-        title="IEP Goals"
-        subtitle="Class list · cross-subject goal tracker · specialist teacher notes"
+        title="IEP Builder"
+        subtitle={`${classInfo.code} · ${classInfo.teacher} · Curriculum-aligned goal matrix (VC 2.0)`}
         actions={
           <>
-            <Button asChild variant="outline" size="sm">
-              <a href="/parent" target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" />Parent portal</a>
-            </Button>
-            <Button variant="outline" size="sm"><Calendar className="h-4 w-4" />Schedule review</Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4" />New goal from S&S</Button>
+            <div className="hidden items-center gap-1 rounded-lg border bg-card p-1 text-xs md:flex">
+              <button
+                onClick={() => setView("matrix")}
+                className={cn("flex items-center gap-1 rounded-md px-2 py-1 transition",
+                  view === "matrix" ? "bg-navy text-white" : "hover:bg-secondary")}
+              ><LayoutGrid className="h-3.5 w-3.5" />Class Matrix</button>
+              <button
+                onClick={() => setView("detail")}
+                className={cn("flex items-center gap-1 rounded-md px-2 py-1 transition",
+                  view === "detail" ? "bg-navy text-white" : "hover:bg-secondary")}
+              ><User className="h-3.5 w-3.5" />Student Detail</button>
+            </div>
+            <Button size="sm" variant="outline"><Save className="h-4 w-4" />Auto-saved</Button>
           </>
         }
       />
 
+      {/* Stat strip with navy gradient */}
       <div className="grid grid-cols-2 gap-3 px-4 pt-6 md:grid-cols-4 md:px-8">
-        <StatCard label={semesterFilter === "all" ? "Active goals (all sem.)" : `Active goals · ${semesterFilter.replace(" · 2026", "")}`} value={stats.total} icon={<Target className="h-4 w-4" />} />
-        <StatCard label="Achieved" value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
-        <StatCard label="Developing" value={stats.developing} icon={<Target className="h-4 w-4 text-orange-600" />} />
-        <StatCard label="Pending approval" value={stats.pending} icon={<Send className="h-4 w-4 text-amber-600" />} highlight />
+        <StatTile label={`Goals set · ${semester.replace(" · 2026", "")}`} value={stats.total} icon={<Target className="h-4 w-4" />} accent />
+        <StatTile label="Achieved / Exceeded" value={stats.achieved} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} />
+        <StatTile label="In progress" value={stats.inProgress} icon={<ClipboardList className="h-4 w-4 text-amber-600" />} />
+        <StatTile label="Class avg progress" value={`${stats.avg}%`} icon={<Sparkles className="h-4 w-4 text-primary" />} />
       </div>
 
-      <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[1fr_460px]">
-        <div className="space-y-3">
-          {scopedStudent && (
-            <Card className="flex items-center justify-between gap-3 border-primary/30 bg-primary-soft/30 px-3 py-2 text-xs">
-              <div className="flex items-center gap-2">
-                <Filter className="h-3.5 w-3.5 text-primary" />
-                <span>Drilled in from report · showing goals for</span>
-                <Badge variant="outline" className="font-medium">{scopedStudent.firstName} {scopedStudent.lastName}</Badge>
-                {search.semester && <Badge variant="outline">{search.semester}</Badge>}
-              </div>
-              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate({ search: {} })}>
-                <X className="h-3 w-3" /> Clear
-              </Button>
-            </Card>
-          )}
-
-          {/* Semester + subject tabs */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
-              <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-              <button onClick={() => setSemesterFilter("all")} className={cn("rounded-md px-2.5 py-1 transition", semesterFilter === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All sem.</button>
-              {availableSemesters.map((s) => (
-                <button key={s} onClick={() => setSemesterFilter(s)} className={cn("rounded-md px-2.5 py-1 transition whitespace-nowrap", semesterFilter === s ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
-                  {s.replace(" · 2026", "")}
-                </button>
-              ))}
-            </div>
-            <div className="flex flex-wrap items-center gap-1 rounded-lg border bg-card p-1 text-xs">
-              <BookOpen className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-              <button onClick={() => setSubject("all")} className={cn("rounded-md px-2.5 py-1 transition", subject === "all" ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>All subjects</button>
-              {SUBJECTS.map((d) => (
-                <button key={d} onClick={() => setSubject(d)} className={cn("rounded-md px-2.5 py-1 transition whitespace-nowrap", subject === d ? "bg-primary text-primary-foreground" : "hover:bg-secondary")}>
-                  {d}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Class roster table — subjects as columns */}
-          <ClassRoster
-            rows={rosterFiltered}
-            subjectFilter={subject}
-            selectedId={selected.id}
-            onSelect={setSelectedId}
-          />
-
-          {/* Specialist teachers — comments + photos */}
-          <SpecialistsSection
-            entries={specialists.filter((e) => semesterFilter === "all" || e.semester === semesterFilter)}
-            goals={semesterFilter === "all" ? goals : goals.filter((g) => g.semester === semesterFilter)}
-            allGoals={goals}
-            onAdd={addSpecialistEntry}
-            scopedStudentId={studentScope}
-            activeSemester={semesterFilter === "all" ? currentSemester : semesterFilter}
-          />
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2 px-4 pt-4 md:px-8">
+        <div className="flex items-center gap-1 rounded-lg border bg-card p-1 text-xs">
+          <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+          {availableSemesters.map((s) => (
+            <button key={s} onClick={() => setSemester(s)}
+              className={cn("rounded-md px-2.5 py-1 transition whitespace-nowrap",
+                semester === s ? "bg-navy text-white" : "hover:bg-secondary")}>
+              {s.replace(" · 2026", "")}
+            </button>
+          ))}
         </div>
-
-        <CrossCheckPanel
-          goal={selected}
-          evidence={evidence}
-          semesterFilter={semesterFilter}
-          onApprovalChange={(a) => setApproval(selected.id, a)}
-          onLinkEvidence={(evId) => linkEvidence(evId, selected.id)}
-          onDismiss={dismissSuggestion}
-        />
+        <div className="relative flex-1 min-w-[220px] max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search student…" className="pl-8 h-9" />
+        </div>
+        {view === "detail" && (
+          <Select value={detailStudentId} onValueChange={setDetailStudentId}>
+            <SelectTrigger className="h-9 w-[220px] text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {students.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.firstName} {s.lastName} · {s.yearLevel}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <span className="text-[11px] text-muted-foreground ml-auto flex items-center gap-1">
+          <Filter className="h-3 w-3" />
+          {subjects.length} subjects visible · semester-aware
+        </span>
       </div>
+
+      <div className="px-4 py-6 md:px-8">
+        {view === "matrix" ? (
+          <ClassMatrix
+            students={filteredStudents}
+            subjects={subjects}
+            cells={cells}
+            semester={semester}
+            onOpenCell={(k) => setEditorKey(k)}
+          />
+        ) : (
+          <StudentDetail
+            studentId={detailStudentId}
+            subjects={subjects}
+            semester={semester}
+            cells={cells}
+            onPickGoal={pickGoal}
+            onUpdate={updateCell}
+          />
+        )}
+      </div>
+
+      {/* Editor sheet — inline cell edit */}
+      <Sheet open={editorCell !== null} onOpenChange={(o) => !o && setEditorKey(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
+          {editorCell && editorParts && editorStudent && (
+            <>
+              <SheetHeader className="border-b pb-4">
+                <SheetTitle className="flex items-center gap-2">
+                  <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg text-xs font-semibold text-foreground/80", editorStudent.avatarColor)}>
+                    {editorStudent.initials}
+                  </span>
+                  {editorStudent.firstName} {editorStudent.lastName}
+                </SheetTitle>
+                <SheetDescription>
+                  {editorParts[1]} · <span className="font-medium">{editorParts[2]}</span> · {semester.replace(" · 2026", "")}
+                </SheetDescription>
+              </SheetHeader>
+              <div className="py-4">
+                <CellEditor
+                  cellKey={editorCell.key}
+                  state={editorCell.state}
+                  subject={editorParts[1]}
+                  strand={editorParts[2]}
+                  semester={semester}
+                  onPickGoal={pickGoal}
+                  onUpdate={updateCell}
+                />
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </AppShell>
   );
 }
 
-function StatCard({ label, value, icon, highlight }: { label: string; value: number; icon: React.ReactNode; highlight?: boolean }) {
+// ---------- Stat tile ----------
+
+function StatTile({ label, value, icon, accent }: { label: string; value: React.ReactNode; icon: React.ReactNode; accent?: boolean }) {
   return (
-    <Card className={cn("p-4", highlight && "border-accent/40 bg-accent/5")}>
-      <div className="flex items-center justify-between">
+    <Card className={cn("p-4 relative overflow-hidden", accent && "border-navy/20")}>
+      {accent && (
+        <div className="absolute inset-0 bg-gradient-to-br from-navy/8 via-transparent to-primary/5 pointer-events-none" />
+      )}
+      <div className="relative flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         {icon}
       </div>
-      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
+      <p className="relative mt-2 text-2xl font-semibold tracking-tight">{value}</p>
     </Card>
   );
 }
 
-function GoalRow({ goal, selected, onSelect }: { goal: IepGoal; selected: boolean; onSelect: () => void }) {
-  const meta = statusMeta[goal.status];
-  const appr = approvalMeta[goal.approval ?? "draft"];
-  const ApprIcon = appr.icon;
-  const student = students.find((s) => s.id === goal.studentId);
-  const pct = goalProgress(goal);
-  return (
-    <Card onClick={onSelect} className={cn("cursor-pointer p-4 transition hover:border-primary/40 hover:shadow-sm", selected && "border-primary shadow-sm ring-1 ring-primary/30")}>
-      <div className="flex items-start gap-3">
-        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-foreground/80", student?.avatarColor)}>
-          {student?.initials}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-sm font-semibold">{goal.studentName}</span>
-            <Badge variant="outline" className={cn("font-normal", domainTone[goal.domain])}>{goal.domain}</Badge>
-            <Badge variant="outline" className="font-normal text-[10px]">Level {goal.level} · {goal.learningArea}</Badge>
-            <Badge variant="outline" className="font-mono text-[10px]">{goal.vcLink}</Badge>
-            <Badge variant="outline" className="font-normal text-[10px]"><Calendar className="h-2.5 w-2.5" />{goal.semester.replace(" · 2026", "")}</Badge>
-            <Badge className={cn("font-normal text-[10px]", appr.tone)}><ApprIcon className="h-2.5 w-2.5" />{appr.label}</Badge>
-          </div>
-          <p className="mt-1.5 text-sm leading-snug text-foreground/85 line-clamp-2">{goal.smart}</p>
-          <div className="mt-3 flex items-center gap-3">
-            <div className="flex-1"><Progress value={pct} className="h-1.5" /></div>
-            <Badge className={cn("font-normal", meta.tone)}>{meta.label}</Badge>
-            <span className="text-xs text-muted-foreground tabular-nums">{goal.evidenceCount} ev.</span>
-          </div>
-        </div>
-        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-      </div>
-    </Card>
-  );
-}
+// ---------- Class Matrix ----------
 
-function CrossCheckPanel({
-  goal, evidence, semesterFilter, onApprovalChange, onLinkEvidence, onDismiss,
+function ClassMatrix({
+  students, subjects, cells, semester, onOpenCell,
 }: {
-  goal: IepGoal;
-  evidence: EvidenceItem[];
-  semesterFilter: Semester | "all";
-  onApprovalChange: (a: IepApproval) => void;
-  onLinkEvidence: (evId: string) => void;
-  onDismiss: (evId: string) => void;
+  students: typeof import("@/lib/mock-data").students;
+  subjects: CurriculumSubject[];
+  cells: Record<string, CellState>;
+  semester: Semester;
+  onOpenCell: (key: string) => void;
 }) {
-  const { activeSemester } = useActiveSemester();
-  const meta = statusMeta[goal.status];
-  const pct = goalProgress(goal);
-  const appr = approvalMeta[goal.approval ?? "draft"];
-  const ApprIcon = appr.icon;
-  const outOfScope = semesterFilter !== "all" && goal.semester !== semesterFilter;
-
-  const suggestions = evidence.filter(
-    (e) => e.studentId === goal.studentId && !e.goalIds.includes(goal.id) && (e.aiSuggestedGoal === goal.id || !e.aiTagged),
-  ).slice(0, 3);
-
-  const recommendation = useMemo(() => {
-    const achievedSteps = goal.successCriteria.filter((s) => s.status === "achieved").length;
-    const total = goal.successCriteria.length;
-    if (achievedSteps === total) return { title: "Ready to extend", body: `All ${total} success criteria are Achieved. Promote ${goal.studentName.split(" ")[0]} to the next Scope & Sequence level (currently Level ${goal.level}) and draft a new SMART goal.` };
-    if (achievedSteps >= Math.ceil(total / 2) && goal.evidenceCount >= 8) return { title: "Promote status", body: `${achievedSteps}/${total} criteria Achieved with ${goal.evidenceCount} pieces of evidence — cross-check supports moving overall status from "${meta.label}" → "Achieved" at the ${goal.reviewDue} review.` };
-    if (goal.evidenceCount < 4) return { title: "Evidence gap", body: `Only ${goal.evidenceCount} pieces of evidence linked across ${total} criteria. Plan 2 focused activities this week to capture progress before ${goal.reviewDue}.` };
-    return { title: "On track", body: `Steady progression across ${total} criteria with ${goal.evidenceCount} evidence pieces. Continue current supports and re-check at ${goal.reviewDue}.` };
-  }, [goal, meta.label]);
-
-  return (
-    <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-      <Card className="overflow-hidden">
-        <div className="border-b bg-gradient-to-r from-primary-soft/40 to-background px-5 py-4">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5" />Scope & Sequence</span>
-            <Badge className={cn("font-normal", meta.tone)}>{meta.label}</Badge>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <Badge variant="outline" className="font-normal text-[10px]">Level {goal.level}</Badge>
-            <Badge variant="outline" className={cn("font-normal text-[10px]", domainTone[goal.domain])}>{goal.learningArea}</Badge>
-            <Badge variant="outline" className="font-mono text-[10px]">{goal.vcLink}</Badge>
-          </div>
-          <p className="mt-2 text-xs italic text-muted-foreground">Learning intention: {goal.learningIntention}</p>
-          <h3 className="mt-2 text-base font-semibold leading-snug">{goal.smart}</h3>
-        </div>
-
-        <div className="space-y-3 p-5 text-sm">
-          <Detail label="Student">{goal.studentName}</Detail>
-          <Detail label="Baseline">{goal.baseline}</Detail>
-          <Detail label="Semester">{goal.semester}</Detail>
-          <Detail label="Review due">{goal.reviewDue}</Detail>
-
-          <div className="border-t pt-3">
-            <div className="mb-1 flex items-center justify-between text-xs">
-              <span className="font-medium text-muted-foreground">Step-by-step progress</span>
-              <span className="tabular-nums">{pct}%</span>
-            </div>
-            <Progress value={pct} className="h-2" />
-          </div>
-          <div className="flex flex-wrap gap-2 border-t pt-3">
-            <Button asChild size="sm" variant="outline" className="h-8 text-xs">
-              <a href={`/ieps/${goal.id}/print`} target="_blank" rel="noreferrer"><FileDown className="h-3.5 w-3.5" />Generate IEP PDF</a>
-            </Button>
-            <Button asChild size="sm" variant="ghost" className="h-8 text-xs">
-              <a href={`/parent?goal=${goal.id}`} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" />Open in parent portal</a>
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Approval flow */}
-      <Card className="overflow-hidden">
-        <div className="flex items-center justify-between border-b px-4 py-2.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5" />Approval flow
-          </div>
-          <Badge className={cn("font-normal text-[10px]", appr.tone)}><ApprIcon className="h-2.5 w-2.5" />{appr.label}</Badge>
-        </div>
-        <div className="space-y-3 p-4 text-sm">
-          <div className="flex items-center gap-2 text-xs">
-            <Stage active={["draft", "pending", "approved"].includes(goal.approval ?? "draft")} label="Draft" />
-            <span className="text-muted-foreground">→</span>
-            <Stage active={["pending", "approved"].includes(goal.approval ?? "draft")} label="Pending" />
-            <span className="text-muted-foreground">→</span>
-            <Stage active={goal.approval === "approved"} label="Approved" />
-          </div>
-          {goal.approval === "approved" && goal.approvedBy && (
-            <p className="text-xs text-muted-foreground">Approved by <span className="font-medium text-foreground">{goal.approvedBy}</span> · {goal.approvedAt}</p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            {(goal.approval ?? "draft") === "draft" && (
-              <Button size="sm" className="h-8 bg-primary text-xs hover:bg-primary/90" onClick={() => onApprovalChange("pending")}><Send className="h-3.5 w-3.5" />Submit for approval</Button>
-            )}
-            {goal.approval === "pending" && (
-              <>
-                <Button size="sm" className="h-8 bg-emerald-600 text-xs text-white hover:bg-emerald-600/90" onClick={() => onApprovalChange("approved")}><CheckCircle2 className="h-3.5 w-3.5" />Approve</Button>
-                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => onApprovalChange("draft")}>Return to draft</Button>
-              </>
-            )}
-            {goal.approval === "approved" && (
-              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => onApprovalChange("draft")}>Reopen for edits</Button>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      <Card className="overflow-hidden">
-        <div className="flex items-center justify-between border-b px-4 py-2.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <ListChecks className="h-3.5 w-3.5" />Cross-Check
-          </div>
-          <span className="text-[10px] text-muted-foreground">{goal.semester} master</span>
-        </div>
-        {outOfScope ? (
-          <div className="flex items-start gap-2 p-4 text-xs text-muted-foreground">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
-            <p>
-              Cross-Check descriptors are locked to the goal's own semester ({goal.semester}).
-              Switch the semester filter to <span className="font-medium text-foreground">{goal.semester.replace(" · 2026", "")}</span> or <span className="font-medium text-foreground">All sem.</span> to view and select these descriptors.
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y">
-            {goal.successCriteria.map((c, i) => (
-              <CrossCheckRow key={i} index={i + 1} criterion={c} />
-            ))}
-          </div>
-        )}
-      </Card>
-
-      {/* One-click evidence linking */}
-      <Card className="overflow-hidden">
-        <div className="flex items-center justify-between border-b px-4 py-2.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <Link2 className="h-3.5 w-3.5" />Suggested evidence
-          </div>
-          <span className="text-[10px] text-muted-foreground">{suggestions.length} match{suggestions.length === 1 ? "" : "es"}</span>
-        </div>
-        {suggestions.length === 0 ? (
-          <p className="p-4 text-xs italic text-muted-foreground">No unlinked evidence for {goal.studentName.split(" ")[0]} right now.</p>
-        ) : (
-          <div className="divide-y">
-            {suggestions.map((e) => (
-              <div key={e.id} className="flex items-start gap-3 p-3">
-                <div
-                  className="h-10 w-10 shrink-0 rounded-lg"
-                  style={{ background: `linear-gradient(135deg, oklch(0.85 0.08 ${e.thumbHue}) 0%, oklch(0.92 0.05 ${e.thumbHue + 30}) 100%)` }}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium">{e.medium} · {e.capturedAt}</p>
-                  <p className="text-xs leading-snug text-foreground/85 line-clamp-2">{e.caption}</p>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Button size="sm" className="h-7 bg-primary text-[11px] hover:bg-primary/90" onClick={() => onLinkEvidence(e.id)}><Link2 className="h-3 w-3" />Link</Button>
-                  <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => onDismiss(e.id)}><X className="h-3 w-3" />Skip</Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
-
-      <Card className="border-primary/30 bg-gradient-to-br from-primary-soft/30 via-background to-background p-5">
-        <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm font-semibold">AI cross-check</h4>
-              <Badge variant="outline" className="text-[10px]">S&S + Evidence Hub</Badge>
-            </div>
-            <p className="mt-1 text-xs font-medium text-primary">{recommendation.title}</p>
-            <p className="mt-1.5 text-sm leading-relaxed text-foreground/85">{recommendation.body}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" className="h-7 text-xs"><CheckCircle2 className="h-3.5 w-3.5" />Apply suggestion</Button>
-              <Link
-                to="/evidence"
-                search={scopedSearch(activeSemester, { student: goal.studentId, semester: goal.semester, goal: goal.id })}
-                className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-              >
-                View evidence ({goal.evidenceCount})
-              </Link>
-            </div>
-          </div>
-        </div>
-      </Card>
-    </div>
+  // Flatten (subject, strand) into column list.
+  const columns = subjects.flatMap((sub) =>
+    sub.strands.map((strand) => ({ subject: sub.label, strand, color: sub.color })),
   );
-}
-
-function Stage({ active, label }: { active: boolean; label: string }) {
-  return (
-    <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-      {label}
-    </span>
-  );
-}
-
-function CrossCheckRow({ index, criterion }: { index: number; criterion: SuccessCriterion }) {
-  const stages: Array<{ key: ActiveStatus; label: string; text: string }> = [
-    { key: "developing", label: "Developing", text: criterion.developing },
-    { key: "working-towards", label: "Working Towards", text: criterion.workingTowards },
-    { key: "achieved", label: "Achieved", text: criterion.achieved },
-  ];
-  return (
-    <div className="p-4">
-      <p className="mb-2 text-sm font-medium leading-snug">
-        <span className="mr-1.5 text-muted-foreground tabular-nums">{index}.</span>{criterion.step}
-      </p>
-      <div className="grid grid-cols-3 gap-1.5">
-        {stages.map((s) => {
-          const active = s.key === criterion.status;
-          const meta = statusMeta[s.key];
-          return (
-            <div
-              key={s.key}
-              className={cn(
-                "rounded-md border p-2 text-[11px] leading-snug transition",
-                active ? `${meta.tone} border-transparent font-medium shadow-sm` : "bg-muted/30 text-muted-foreground",
-              )}
-            >
-              <div className="mb-1 flex items-center gap-1">
-                <span className={cn("h-1.5 w-1.5 rounded-full", active ? meta.dot : "bg-muted-foreground/40")} />
-                <span className="text-[10px] uppercase tracking-wide">{s.label}</span>
-              </div>
-              {s.text}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function Detail({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
-      <span className="text-right text-sm">{children}</span>
-    </div>
-  );
-}
-
-// ---------- Class Roster ----------
-
-function ClassRoster({
-  rows, subjectFilter, selectedId, onSelect,
-}: {
-  rows: { student: typeof students[number]; all: IepGoal[]; bySubject: Record<IepDomain, IepGoal[]> }[];
-  subjectFilter: IepDomain | "all";
-  selectedId: string;
-  onSelect: (id: string) => void;
-}) {
-  const columns: IepDomain[] = subjectFilter === "all" ? SUBJECTS : [subjectFilter];
 
   return (
-    <Card className="overflow-hidden">
-      <div className="flex items-center justify-between border-b bg-secondary/30 px-4 py-2.5">
-        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          <Target className="h-3.5 w-3.5" />Class IEP Goal Tracker · {classInfoCode()}
+    <Card className="overflow-hidden border-navy/10">
+      <div className="flex items-center justify-between bg-gradient-to-r from-navy to-navy-light px-4 py-2.5 text-white">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider">
+          <LayoutGrid className="h-3.5 w-3.5" />Class IEP Matrix · {classInfo.code}
         </div>
-        <span className="text-[10px] text-muted-foreground">{rows.length} students · {columns.length} subject{columns.length === 1 ? "" : "s"}</span>
+        <span className="text-[10px] text-white/80">{students.length} students · {columns.length} strands · click any cell to edit</span>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[820px] border-collapse text-sm">
-          <thead>
-            <tr className="border-b bg-muted/30 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-              <th className="sticky left-0 z-10 bg-muted/30 px-3 py-2 font-medium">Student</th>
-              {columns.map((c) => (
-                <th key={c} className="px-3 py-2 font-medium">{c}</th>
+      <div className="overflow-x-auto max-h-[70vh]">
+        <table className="w-full min-w-[1400px] border-collapse text-sm">
+          <thead className="sticky top-0 z-20">
+            <tr className="border-b bg-muted/60 text-left text-[10px] uppercase tracking-wide text-muted-foreground backdrop-blur">
+              <th className="sticky left-0 z-30 bg-muted/80 px-3 py-2 font-semibold min-w-[180px]">Student</th>
+              {subjects.map((sub) => (
+                <th key={sub.label} colSpan={sub.strands.length}
+                  className={cn("px-3 py-1.5 text-center font-semibold border-l border-border/60", sub.color)}>
+                  {sub.label}
+                </th>
+              ))}
+            </tr>
+            <tr className="border-b bg-muted/40 text-left text-[10px] uppercase tracking-wide text-muted-foreground/80">
+              <th className="sticky left-0 z-30 bg-muted/60 px-3 py-1.5"></th>
+              {columns.map((c, i) => (
+                <th key={i} className="px-2 py-1.5 min-w-[200px] font-medium border-l border-border/40">
+                  {c.strand}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ student, bySubject }) => (
-              <tr key={student.id} className="border-b align-top last:border-b-0 hover:bg-secondary/20">
-                <td className="sticky left-0 z-10 w-[180px] bg-card px-3 py-3">
+            {students.map((s) => (
+              <tr key={s.id} className="border-b align-top last:border-b-0 hover:bg-secondary/20">
+                <td className="sticky left-0 z-10 bg-card px-3 py-2.5 border-r border-border/60">
                   <div className="flex items-center gap-2">
-                    <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold text-foreground/80", student.avatarColor)}>
-                      {student.initials}
+                    <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold text-foreground/80", s.avatarColor)}>
+                      {s.initials}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold leading-tight">{student.firstName} {student.lastName}</p>
-                      <p className="text-[10px] text-muted-foreground">{student.yearLevel}</p>
+                      <p className="truncate text-sm font-semibold leading-tight">{s.firstName} {s.lastName}</p>
+                      <p className="text-[10px] text-muted-foreground">{s.yearLevel}</p>
                     </div>
                   </div>
                 </td>
-                {columns.map((c) => (
-                  <td key={c} className="px-3 py-3 align-top">
-                    <SubjectCell
-                      goals={bySubject[c] ?? []}
-                      selectedId={selectedId}
-                      onSelect={onSelect}
-                    />
-                  </td>
-                ))}
+                {columns.map((c, i) => {
+                  const key = cellKey(s.id, c.subject, c.strand);
+                  const cell = cells[key];
+                  return (
+                    <td key={i} className="p-1.5 border-l border-border/40">
+                      <MatrixCell cell={cell} semester={semester} onClick={() => onOpenCell(key)} subject={c.subject} strand={c.strand} />
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
@@ -641,257 +361,136 @@ function ClassRoster({
   );
 }
 
-function classInfoCode() {
-  return "P7 · Honey";
-}
-
-function SubjectCell({ goals, selectedId, onSelect }: { goals: IepGoal[]; selectedId: string; onSelect: (id: string) => void }) {
-  if (goals.length === 0) {
+function MatrixCell({
+  cell, semester, subject, strand, onClick,
+}: {
+  cell?: CellState;
+  semester: Semester;
+  subject: string;
+  strand: string;
+  onClick: () => void;
+}) {
+  void semester;
+  void subject; void strand;
+  if (!cell || !cell.curriculumId) {
     return (
-      <button className="rounded-md border border-dashed border-border/60 px-2 py-1 text-[11px] text-muted-foreground/70 hover:border-primary/40 hover:text-primary">
-        <Plus className="mr-0.5 inline h-3 w-3" />Add
+      <button onClick={onClick}
+        className="w-full rounded-md border border-dashed border-border/60 px-2 py-2 text-[11px] text-muted-foreground/70 hover:border-navy/40 hover:bg-navy/5 hover:text-navy transition">
+        <Plus className="mr-0.5 inline h-3 w-3" />Set goal
       </button>
     );
   }
+  const rec = findRecord(cell.curriculumId);
+  if (!rec) return null;
+  const level = cell.levelOverride ?? rec.level;
+  const status = STATUS_META[cell.status];
   return (
-    <div className="space-y-1.5">
-      {goals.map((g) => {
-        const pct = goalProgress(g);
-        const meta = statusMeta[g.status];
-        const isSel = g.id === selectedId;
-        return (
-          <button
-            key={g.id}
-            onClick={() => onSelect(g.id)}
-            className={cn(
-              "group block w-full rounded-md border px-2 py-1.5 text-left transition",
-              isSel ? "border-primary bg-primary-soft/40 ring-1 ring-primary/30" : "border-border/60 hover:border-primary/40 hover:bg-secondary/40",
-            )}
-            title={g.smart}
-          >
-            <p className="line-clamp-2 text-[11px] font-medium leading-snug text-foreground/90">{g.learningArea.replace(/^[^·]+·\s*/, "")}</p>
-            <div className="mt-1 flex items-center gap-1.5">
-              <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
-                <div className={cn("h-full", meta.dot)} style={{ width: `${pct}%` }} />
-              </div>
-              <span className="text-[10px] tabular-nums text-muted-foreground">{pct}%</span>
-            </div>
-            <div className="mt-1 flex items-center justify-between gap-1">
-              <Badge variant="outline" className={cn("h-4 px-1 text-[9px] font-normal", meta.tone)}>{meta.label}</Badge>
-              <span className="text-[9px] text-muted-foreground">L{g.level} · {g.evidenceCount}ev</span>
-            </div>
-          </button>
-        );
-      })}
+    <button onClick={onClick}
+      className="w-full rounded-md border border-border/60 bg-card px-2 py-1.5 text-left transition hover:border-navy/40 hover:shadow-sm">
+      <p className="line-clamp-2 text-[11px] font-medium leading-snug">{rec.goal}</p>
+      <div className="mt-1 flex items-center gap-1.5">
+        <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
+          <div className="h-full bg-gradient-to-r from-navy to-primary" style={{ width: `${Math.min(cell.progress, 100)}%` }} />
+        </div>
+        <span className="text-[9px] tabular-nums text-muted-foreground">{cell.progress}%</span>
+      </div>
+      <div className="mt-1 flex items-center justify-between gap-1">
+        <span className={cn("rounded border px-1 text-[9px] font-semibold", LEVEL_TONE[level])}>L{level}</span>
+        <span className={cn("rounded border px-1 text-[9px]", status.tone)}>{status.label}</span>
+      </div>
+    </button>
+  );
+}
+
+// ---------- Student Detail ----------
+
+function StudentDetail({
+  studentId, subjects, semester, cells, onPickGoal, onUpdate,
+}: {
+  studentId: string;
+  subjects: CurriculumSubject[];
+  semester: Semester;
+  cells: Record<string, CellState>;
+  onPickGoal: (key: string, curriculumId: string) => void;
+  onUpdate: (key: string, patch: Partial<CellState>) => void;
+}) {
+  const student = students.find((s) => s.id === studentId)!;
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(subjects.map((s) => [s.label, s.label === "English" || s.label === "Mathematics"])),
+  );
+
+  return (
+    <div className="space-y-4">
+      <Card className="flex items-center gap-4 p-5 border-navy/20 bg-gradient-to-r from-navy/5 via-primary-soft/40 to-background">
+        <div className={cn("flex h-14 w-14 items-center justify-center rounded-xl text-lg font-semibold text-foreground/80", student.avatarColor)}>
+          {student.initials}
+        </div>
+        <div className="flex-1">
+          <h2 className="text-lg font-semibold tracking-tight">{student.firstName} {student.lastName}</h2>
+          <p className="text-xs text-muted-foreground">{student.yearLevel} · {student.className} · {semester}</p>
+        </div>
+        <Button variant="outline" size="sm" asChild>
+          <a href={`/students/${student.id}`}><ExternalLink className="h-4 w-4" />Student profile</a>
+        </Button>
+      </Card>
+
+      {subjects.map((sub) => (
+        <SubjectAccordion
+          key={sub.label}
+          subject={sub}
+          open={expanded[sub.label] ?? false}
+          onToggle={() => setExpanded((e) => ({ ...e, [sub.label]: !e[sub.label] }))}
+          studentId={studentId}
+          semester={semester}
+          cells={cells}
+          onPickGoal={onPickGoal}
+          onUpdate={onUpdate}
+        />
+      ))}
     </div>
   );
 }
 
-// ---------- Specialists ----------
-
-const SPECIALIST_ROLES: SpecialistSubject[] = [
-  "PE",
-  "Music",
-  "Drama",
-  "Visual Arts",
-  "Learn to Play",
-];
-
-function SpecialistsSection({
-  entries, goals, allGoals, onAdd, scopedStudentId, activeSemester,
+function SubjectAccordion({
+  subject, open, onToggle, studentId, semester, cells, onPickGoal, onUpdate,
 }: {
-  entries: SpecialistEntry[];
-  goals: IepGoal[];
-  allGoals: IepGoal[];
-  onAdd: (entry: Omit<SpecialistEntry, "id" | "addedAt" | "semester">) => void;
-  scopedStudentId?: string;
-  activeSemester: Semester;
+  subject: CurriculumSubject;
+  open: boolean;
+  onToggle: () => void;
+  studentId: string;
+  semester: Semester;
+  cells: Record<string, CellState>;
+  onPickGoal: (key: string, curriculumId: string) => void;
+  onUpdate: (key: string, patch: Partial<CellState>) => void;
 }) {
-  const visible = scopedStudentId ? entries.filter((e) => e.studentId === scopedStudentId) : entries;
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    specialistName: "",
-    specialistRole: "PE" as SpecialistSubject,
-    studentId: scopedStudentId ?? students[0].id,
-    goalId: "",
-    comment: "",
-    withPhoto: true,
-  });
-  const [goalError, setGoalError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const matchingGoals = goals.filter(
-    (g) => g.studentId === form.studentId && g.learningArea === form.specialistRole,
-  );
-  const hasMatchingGoals = matchingGoals.length > 0;
-
-  async function submit() {
-    if (!form.specialistName.trim() || !form.comment.trim()) {
-      toast.error("Add your name and a comment.");
-      return;
-    }
-    if (!form.goalId) {
-      setGoalError("Please select a matching IEP goal for this domain before saving.");
-      return;
-    }
-    setGoalError(null);
-    setSaving(true);
-    try {
-      const { saveSpecialistNote } = await import("@/lib/ieps.functions");
-      const result = await saveSpecialistNote({
-        data: {
-          specialistName: form.specialistName.trim(),
-          specialistRole: form.specialistRole,
-          studentId: form.studentId,
-          goalId: form.goalId,
-          comment: form.comment.trim(),
-          withPhoto: form.withPhoto,
-          activeSemester,
-        },
-      });
-      if (!result.ok) {
-        setGoalError(result.error.message);
-        toast.error(result.error.message);
-        return;
-      }
-      onAdd({
-        specialistName: result.entry.specialistName,
-        specialistRole: result.entry.specialistRole,
-        studentId: result.entry.studentId,
-        goalId: result.entry.goalId,
-        comment: result.entry.comment,
-        photoHue: result.entry.photoHue,
-      });
-      setForm((f) => ({ ...f, specialistName: "", comment: "", goalId: "" }));
-      setOpen(false);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to save note.");
-    } finally {
-      setSaving(false);
-    }
-  }
-  // Silence unused param warning — allGoals is threaded for parity with server view.
-  void allGoals;
-
-
   return (
     <Card className="overflow-hidden">
-      <div className="flex items-center justify-between border-b bg-gradient-to-r from-accent/10 to-background px-4 py-2.5">
-        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          <UserCog className="h-3.5 w-3.5 text-accent" />Specialist teachers · IEP edits, comments & photos
+      <button onClick={onToggle}
+        className="flex w-full items-center justify-between gap-2 border-b bg-gradient-to-r from-secondary/60 to-transparent px-4 py-2.5 text-left">
+        <div className="flex items-center gap-2">
+          {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <BookOpen className={cn("h-4 w-4", subject.color)} />
+          <span className="text-sm font-semibold">{subject.label}</span>
+          {subject.semesterLock && (
+            <Badge variant="outline" className="text-[10px]">{subject.semesterLock} only</Badge>
+          )}
         </div>
-        <Button size="sm" variant={open ? "outline" : "default"} className={cn("h-7 text-xs", !open && "bg-accent text-accent-foreground hover:bg-accent/90")} onClick={() => setOpen((v) => !v)}>
-          {open ? <><X className="h-3 w-3" />Close</> : <><MessageSquarePlus className="h-3 w-3" />Add specialist note</>}
-        </Button>
-      </div>
-
+        <span className="text-[10px] text-muted-foreground">{subject.strands.length} strand{subject.strands.length === 1 ? "" : "s"}</span>
+      </button>
       {open && (
-        <div className="grid gap-2 border-b bg-secondary/30 p-4 text-xs md:grid-cols-2">
-          <label className="space-y-1">
-            <span className="font-medium text-muted-foreground">Specialist name</span>
-            <Input value={form.specialistName} onChange={(e) => setForm((f) => ({ ...f, specialistName: e.target.value }))} placeholder="e.g. Coach Tom" className="h-8" />
-          </label>
-          <label className="space-y-1">
-            <span className="font-medium text-muted-foreground">Role</span>
-            <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.specialistRole} onChange={(e) => setForm((f) => ({ ...f, specialistRole: e.target.value as SpecialistSubject, goalId: "" }))}>
-              {SPECIALIST_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select>
-          </label>
-          <label className="space-y-1">
-            <span className="font-medium text-muted-foreground">Student</span>
-            <select className="h-8 w-full rounded-md border bg-card px-2 text-xs" value={form.studentId} onChange={(e) => setForm((f) => ({ ...f, studentId: e.target.value, goalId: "" }))}>
-              {students.map((s) => <option key={s.id} value={s.id}>{s.firstName} {s.lastName}</option>)}
-            </select>
-          </label>
-          <label className="space-y-1">
-            <span className="font-medium text-muted-foreground">Link to IEP goal ({form.specialistRole} only) <span className="text-red-500">*</span></span>
-            <select
-              className={cn(
-                "h-8 w-full rounded-md border bg-card px-2 text-xs",
-                goalError && "border-red-500 ring-1 ring-red-500/30"
-              )}
-              value={form.goalId}
-              onChange={(e) => { setForm((f) => ({ ...f, goalId: e.target.value })); setGoalError(null); }}
-            >
-              <option value="">— Select a goal —</option>
-              {matchingGoals.map((g) => (
-                <option key={g.id} value={g.id}>{g.learningArea} — {g.smart.slice(0, 60)}…</option>
-              ))}
-              {matchingGoals.length === 0 && (
-                <option value="" disabled>No {form.specialistRole} goals for this student yet</option>
-              )}
-            </select>
-            {goalError && (
-              <p className="flex items-center gap-1 text-[11px] text-red-500">
-                <AlertTriangle className="h-3 w-3" />
-                {goalError}
-                {!hasMatchingGoals && ` No ${form.specialistRole} IEP goals exist for this student in ${activeSemester}. Create one in the tracker first.`}
-              </p>
-            )}
-          </label>
-
-          <label className="space-y-1 md:col-span-2">
-            <span className="font-medium text-muted-foreground">Comment</span>
-            <textarea
-              value={form.comment}
-              onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
-              placeholder="e.g. Noah caught the ball 3/5 today — best result yet."
-              className="min-h-[64px] w-full rounded-md border bg-card p-2 text-xs"
-            />
-          </label>
-          <div className="flex items-center justify-between md:col-span-2">
-            <label className="flex items-center gap-2 text-xs">
-              <input type="checkbox" checked={form.withPhoto} onChange={(e) => setForm((f) => ({ ...f, withPhoto: e.target.checked }))} />
-              <Camera className="h-3.5 w-3.5" />Attach session photo
-            </label>
-            <Button size="sm" disabled={saving} className="h-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={submit}>
-              <Send className="h-3.5 w-3.5" />{saving ? "Saving…" : "Post to IEP"}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {visible.length === 0 ? (
-        <p className="p-4 text-xs italic text-muted-foreground">No specialist notes yet for this scope.</p>
-      ) : (
-        <div className="grid gap-3 p-4 md:grid-cols-2">
-          {visible.map((e) => {
-            const student = students.find((s) => s.id === e.studentId);
-            const linkedGoal = e.goalId ? goals.find((g) => g.id === e.goalId) : undefined;
+        <div className="divide-y">
+          {subject.strands.map((strand) => {
+            const key = cellKey(studentId, subject.label, strand);
             return (
-              <div key={e.id} className="flex gap-3 rounded-lg border bg-card p-3">
-                {e.photoHue !== undefined ? (
-                  <div
-                    className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md ring-1 ring-border"
-                    style={{ background: `linear-gradient(135deg, oklch(0.82 0.09 ${e.photoHue}) 0%, oklch(0.92 0.05 ${(e.photoHue + 40) % 360}) 100%)` }}
-                  >
-                    <Camera className="absolute bottom-1 right-1 h-3 w-3 text-foreground/40" />
-                  </div>
-                ) : (
-                  <div className="grid h-20 w-20 shrink-0 place-items-center rounded-md bg-muted text-[10px] text-muted-foreground">No photo</div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-sm font-semibold">{e.specialistName}</span>
-                    <Badge variant="outline" className="text-[10px]">{e.specialistRole}</Badge>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground">
-                    {student ? `${student.firstName} ${student.lastName}` : "—"} · {e.addedAt}
-                  </p>
-                  <p className="mt-1.5 text-xs leading-snug text-foreground/85">{e.comment}</p>
-                  {linkedGoal && (
-                    <div className="mt-2 flex items-center gap-1.5 text-[10px]">
-                      <Link2 className="h-3 w-3 text-primary" />
-                      <Badge variant="outline" className="font-normal text-[10px]">{linkedGoal.learningArea}</Badge>
-                      <span className="truncate text-muted-foreground">{linkedGoal.smart}</span>
-                    </div>
-                  )}
-                  <div className="mt-2 flex gap-1">
-                    <Button size="sm" variant="ghost" className="h-6 text-[10px]"><Pencil className="h-3 w-3" />Edit</Button>
-                    <Button size="sm" variant="ghost" className="h-6 text-[10px]"><Plus className="h-3 w-3" />Add to goal</Button>
-                  </div>
-                </div>
-              </div>
+              <StrandRow key={strand}
+                cellKey={key}
+                state={cells[key]}
+                subject={subject.label}
+                strand={strand}
+                semester={semester}
+                onPickGoal={onPickGoal}
+                onUpdate={onUpdate}
+              />
             );
           })}
         </div>
@@ -900,3 +499,230 @@ function SpecialistsSection({
   );
 }
 
+function StrandRow({
+  cellKey, state, subject, strand, semester, onPickGoal, onUpdate,
+}: {
+  cellKey: string;
+  state?: CellState;
+  subject: string;
+  strand: string;
+  semester: Semester;
+  onPickGoal: (key: string, curriculumId: string) => void;
+  onUpdate: (key: string, patch: Partial<CellState>) => void;
+}) {
+  return (
+    <div className="p-4">
+      <div className="mb-2 flex items-center gap-2">
+        <span className="rounded bg-navy/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-navy">{strand}</span>
+      </div>
+      <CellEditor
+        cellKey={cellKey}
+        state={state}
+        subject={subject}
+        strand={strand}
+        semester={semester}
+        onPickGoal={onPickGoal}
+        onUpdate={onUpdate}
+        compact
+      />
+    </div>
+  );
+}
+
+// ---------- Cell Editor (shared for sheet + detail) ----------
+
+function CellEditor({
+  cellKey, state, subject, strand, semester, onPickGoal, onUpdate, compact,
+}: {
+  cellKey: string;
+  state?: CellState;
+  subject: string;
+  strand: string;
+  semester: Semester;
+  onPickGoal: (key: string, curriculumId: string) => void;
+  onUpdate: (key: string, patch: Partial<CellState>) => void;
+  compact?: boolean;
+}) {
+  const options = recordsFor(subject, strand, semester);
+  const currentId = state?.curriculumId;
+  const rec: CurriculumRecord | undefined = currentId ? findRecord(currentId) : undefined;
+  const level = state?.levelOverride ?? rec?.level;
+  const entrySkills = state?.entrySkillsOverride ?? rec?.entrySkills ?? "";
+  const status = state?.status ?? "not-started";
+  const progress = state?.progress ?? 0;
+  const s = STATUS_META[status];
+
+  return (
+    <div className={cn("space-y-3", !compact && "space-y-4")}>
+      {/* Goal dropdown */}
+      <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
+        <div>
+          <Label>Goal (Scope & Sequence)</Label>
+          <Select value={currentId ?? ""} onValueChange={(v) => onPickGoal(cellKey, v)}>
+            <SelectTrigger className="h-9 mt-1">
+              <SelectValue placeholder="▼ Select Goal from curriculum…" />
+            </SelectTrigger>
+            <SelectContent className="max-w-[520px]">
+              {options.length === 0 && (
+                <div className="p-3 text-xs text-muted-foreground">No S&S entries for this strand in {semester.replace(" · 2026", "")}.</div>
+              )}
+              {options.map((o) => (
+                <SelectItem key={o.id} value={o.id}>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("rounded border px-1 text-[9px] font-bold", LEVEL_TONE[o.level])}>L{o.level}</span>
+                    <span className="text-sm">{o.goal}</span>
+                    <span className="ml-auto font-mono text-[9px] text-muted-foreground">{o.curriculumCode}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Level</Label>
+          {rec ? (
+            <Select value={level} onValueChange={(v) => onUpdate(cellKey, { levelOverride: v as VcLevel })}>
+              <SelectTrigger className={cn("h-9 mt-1 w-24 font-bold", level && LEVEL_TONE[level])}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(["A","B","C","D","F","1","2"] as VcLevel[]).map((L) => (
+                  <SelectItem key={L} value={L}>Level {L}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="mt-1 flex h-9 w-24 items-center justify-center rounded-md border border-dashed text-xs text-muted-foreground">—</div>
+          )}
+        </div>
+        <div>
+          <Label>VC 2.0</Label>
+          <div className="mt-1 flex h-9 items-center rounded-md border bg-muted/40 px-2 font-mono text-xs text-muted-foreground">
+            {rec?.curriculumCode ?? "—"}
+          </div>
+        </div>
+      </div>
+
+      {/* Auto-filled entry skills */}
+      <div>
+        <div className="flex items-center justify-between">
+          <Label>Entry Skills <span className="ml-1 text-[10px] text-muted-foreground">(auto-filled · editable)</span></Label>
+          {rec && <Badge variant="outline" className="text-[10px]">{rec.yearLevel}</Badge>}
+        </div>
+        <Textarea
+          value={entrySkills}
+          disabled={!rec}
+          onChange={(e) => onUpdate(cellKey, { entrySkillsOverride: e.target.value })}
+          className="mt-1 min-h-[70px] text-sm"
+          placeholder="Select a Goal to auto-fill Entry Skills from the curriculum."
+        />
+      </div>
+
+      {rec && (
+        <div className="grid gap-2 md:grid-cols-2">
+          <ReadOnlyBlock label="Achievement Standard" value={rec.achievementStandard} />
+          <ReadOnlyBlock label="Content Description" value={rec.contentDescription} />
+        </div>
+      )}
+
+      {/* Progress + status */}
+      <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+        <div>
+          <Label>Progress</Label>
+          <div className="mt-2 flex items-center gap-3">
+            <input
+              type="range" min={0} max={110} value={progress}
+              onChange={(e) => onUpdate(cellKey, { progress: Number(e.target.value) })}
+              className="flex-1 accent-navy"
+            />
+            <span className="w-12 text-right text-sm font-semibold tabular-nums">{progress}%</span>
+          </div>
+          <Progress value={Math.min(progress, 100)} className="mt-1 h-1.5" />
+        </div>
+        <div>
+          <Label>Status</Label>
+          <Select value={status} onValueChange={(v) => onUpdate(cellKey, { status: v as Status })}>
+            <SelectTrigger className={cn("mt-1 h-9 w-[160px]", s.tone)}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.entries(STATUS_META) as [Status, typeof STATUS_META[Status]][]).map(([k, v]) => (
+                <SelectItem key={k} value={k}>{v.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Comment + evidence */}
+      <div>
+        <Label>Teacher comment</Label>
+        <Textarea
+          value={state?.comment ?? ""}
+          onChange={(e) => onUpdate(cellKey, { comment: e.target.value })}
+          className="mt-1 min-h-[60px] text-sm"
+          placeholder="Add an observation, next step or teaching note…"
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary/40 p-2 text-xs">
+        <span className="flex items-center gap-1 text-muted-foreground">
+          <Camera className="h-3.5 w-3.5" />
+          {state?.evidenceCount ?? 0} pieces of evidence linked
+        </span>
+        <div className="flex gap-1">
+          <Button size="sm" variant="outline" className="h-7 text-[11px]"
+            onClick={() => { onUpdate(cellKey, { evidenceCount: (state?.evidenceCount ?? 0) + 1 }); toast.success("Evidence linked."); }}>
+            <Camera className="h-3 w-3" />Link evidence
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]"
+            onClick={() => toast("Comment thread opened")}>
+            <MessageSquarePlus className="h-3 w-3" />Comment
+          </Button>
+        </div>
+      </div>
+
+      {/* AI smart suggestion when nothing set */}
+      {!rec && options.length > 0 && (
+        <SmartSuggestion recommend={options[Math.min(1, options.length - 1)]} onAccept={(id) => onPickGoal(cellKey, id)} />
+      )}
+    </div>
+  );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{children}</span>;
+}
+
+function ReadOnlyBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="mt-1 rounded-md border bg-muted/30 p-2 text-xs leading-snug text-foreground/80">{value}</div>
+    </div>
+  );
+}
+
+function SmartSuggestion({ recommend, onAccept }: { recommend: CurriculumRecord; onAccept: (id: string) => void }) {
+  return (
+    <Card className="border-navy/30 bg-gradient-to-br from-navy/10 via-primary-soft/30 to-background p-3">
+      <div className="flex items-start gap-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-navy text-white">
+          <Sparkles className="h-4 w-4" />
+        </div>
+        <div className="flex-1">
+          <p className="text-xs font-semibold text-navy">AI Smart Goal Suggestion</p>
+          <p className="mt-0.5 text-xs text-foreground/85">
+            Based on previous semester progress and evidence trends, we recommend <span className="font-medium">"{recommend.goal}"</span> at <span className="font-medium">Level {recommend.level}</span>.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <Button size="sm" className="h-7 bg-navy text-white text-[11px] hover:bg-navy-light" onClick={() => onAccept(recommend.id)}>
+              <CheckCircle2 className="h-3 w-3" />Accept suggestion
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 text-[11px]">Choose another</Button>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
