@@ -32,11 +32,17 @@ function SemesterChip() {
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  variant = "teacher",
+}: {
+  children: ReactNode;
+  variant?: "teacher" | "admin";
+}) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
+        <AppSidebar variant={variant} />
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur md:px-6">
             <SidebarTrigger className="-ml-1" />
@@ -62,3 +68,4 @@ export function AppShell({ children }: { children: ReactNode }) {
     </SidebarProvider>
   );
 }
+

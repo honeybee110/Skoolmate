@@ -21,7 +21,9 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ClassesRouteImport } from './routes/classes'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BehaviourRouteImport } from './routes/behaviour'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as IepsGoalIdPrintRouteImport } from './routes/ieps.$goalId.print'
@@ -86,9 +88,19 @@ const BehaviourRoute = BehaviourRouteImport.update({
   path: '/behaviour',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentsStudentIdRoute = StudentsStudentIdRouteImport.update({
@@ -109,6 +121,7 @@ const IepsGoalIdPrintRoute = IepsGoalIdPrintRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
@@ -123,10 +136,12 @@ export interface FileRoutesByFullPath {
   '/students': typeof StudentsRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
@@ -141,11 +156,13 @@ export interface FileRoutesByTo {
   '/students': typeof StudentsRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/admin': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/behaviour': typeof BehaviourRoute
   '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRoute
@@ -160,12 +177,14 @@ export interface FileRoutesById {
   '/students': typeof StudentsRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/behaviour'
     | '/calendar'
     | '/classes'
@@ -180,10 +199,12 @@ export interface FileRouteTypes {
     | '/students'
     | '/admin/audit'
     | '/students/$studentId'
+    | '/admin/'
     | '/ieps/$goalId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/behaviour'
     | '/calendar'
     | '/classes'
@@ -198,10 +219,12 @@ export interface FileRouteTypes {
     | '/students'
     | '/admin/audit'
     | '/students/$studentId'
+    | '/admin'
     | '/ieps/$goalId/print'
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/behaviour'
     | '/calendar'
     | '/classes'
@@ -216,11 +239,13 @@ export interface FileRouteTypes {
     | '/students'
     | '/admin/audit'
     | '/students/$studentId'
+    | '/admin/'
     | '/ieps/$goalId/print'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   BehaviourRoute: typeof BehaviourRoute
   CalendarRoute: typeof CalendarRoute
   ClassesRoute: typeof ClassesRoute
@@ -234,6 +259,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -322,11 +348,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BehaviourRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/students/$studentId': {
@@ -377,6 +417,7 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   BehaviourRoute: BehaviourRoute,
   CalendarRoute: CalendarRoute,
   ClassesRoute: ClassesRoute,
@@ -390,17 +431,8 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StudentsRoute: StudentsRouteWithChildren,
   AdminAuditRoute: AdminAuditRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

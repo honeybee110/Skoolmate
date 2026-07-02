@@ -164,6 +164,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_hue: number
+          created_at: string
+          display_name: string | null
+          id: string
+          primary_group: Database["public"]["Enums"]["role_group"]
+          updated_at: string
+        }
+        Insert: {
+          avatar_hue?: number
+          created_at?: string
+          display_name?: string | null
+          id: string
+          primary_group?: Database["public"]["Enums"]["role_group"]
+          updated_at?: string
+        }
+        Update: {
+          avatar_hue?: number
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          primary_group?: Database["public"]["Enums"]["role_group"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       specialist_notes: {
         Row: {
           comment: string
@@ -268,6 +295,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      in_group: {
+        Args: {
+          _group: Database["public"]["Enums"]["role_group"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       update_cross_check_status: {
         Args: {
           p_active_semester: string
@@ -279,7 +313,29 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "teacher"
+      app_role:
+        | "admin"
+        | "teacher"
+        | "principal"
+        | "assistant_principal"
+        | "learning_specialist"
+        | "leading_teacher"
+        | "ot"
+        | "slp"
+        | "physio"
+        | "aha"
+        | "psychologist"
+        | "behaviour_specialist"
+        | "nurse"
+        | "wellbeing_officer"
+        | "attendance_officer"
+        | "it_admin"
+      role_group:
+        | "teacher"
+        | "leadership"
+        | "allied_health"
+        | "wellbeing"
+        | "it"
       semester: "Semester 1 · 2026" | "Semester 2 · 2026"
     }
     CompositeTypes: {
@@ -408,7 +464,25 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "teacher"],
+      app_role: [
+        "admin",
+        "teacher",
+        "principal",
+        "assistant_principal",
+        "learning_specialist",
+        "leading_teacher",
+        "ot",
+        "slp",
+        "physio",
+        "aha",
+        "psychologist",
+        "behaviour_specialist",
+        "nurse",
+        "wellbeing_officer",
+        "attendance_officer",
+        "it_admin",
+      ],
+      role_group: ["teacher", "leadership", "allied_health", "wellbeing", "it"],
       semester: ["Semester 1 · 2026", "Semester 2 · 2026"],
     },
   },
