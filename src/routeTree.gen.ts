@@ -25,7 +25,15 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
+import { Route as AdminWellbeingRouteImport } from './routes/admin.wellbeing'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTimetableRouteImport } from './routes/admin.timetable'
+import { Route as AdminTimeclockRouteImport } from './routes/admin.timeclock'
+import { Route as AdminRemindersRouteImport } from './routes/admin.reminders'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAlliedHealthRouteImport } from './routes/admin.allied-health'
 import { Route as IepsGoalIdPrintRouteImport } from './routes/ieps.$goalId.print'
 
 const StudentsRoute = StudentsRouteImport.update({
@@ -108,9 +116,49 @@ const StudentsStudentIdRoute = StudentsStudentIdRouteImport.update({
   path: '/$studentId',
   getParentRoute: () => StudentsRoute,
 } as any)
+const AdminWellbeingRoute = AdminWellbeingRouteImport.update({
+  id: '/admin/wellbeing',
+  path: '/admin/wellbeing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTimetableRoute = AdminTimetableRouteImport.update({
+  id: '/admin/timetable',
+  path: '/admin/timetable',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTimeclockRoute = AdminTimeclockRouteImport.update({
+  id: '/admin/timeclock',
+  path: '/admin/timeclock',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRemindersRoute = AdminRemindersRouteImport.update({
+  id: '/admin/reminders',
+  path: '/admin/reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAuditRoute = AdminAuditRouteImport.update({
   id: '/admin/audit',
   path: '/admin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
+  id: '/admin/approvals',
+  path: '/admin/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/admin/analytics',
+  path: '/admin/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAlliedHealthRoute = AdminAlliedHealthRouteImport.update({
+  id: '/admin/allied-health',
+  path: '/admin/allied-health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IepsGoalIdPrintRoute = IepsGoalIdPrintRouteImport.update({
@@ -134,7 +182,15 @@ export interface FileRoutesByFullPath {
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/admin/allied-health': typeof AdminAlliedHealthRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/reminders': typeof AdminRemindersRoute
+  '/admin/timeclock': typeof AdminTimeclockRoute
+  '/admin/timetable': typeof AdminTimetableRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wellbeing': typeof AdminWellbeingRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/admin/': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
@@ -154,7 +210,15 @@ export interface FileRoutesByTo {
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/admin/allied-health': typeof AdminAlliedHealthRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/reminders': typeof AdminRemindersRoute
+  '/admin/timeclock': typeof AdminTimeclockRoute
+  '/admin/timetable': typeof AdminTimetableRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wellbeing': typeof AdminWellbeingRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/admin': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
@@ -175,7 +239,15 @@ export interface FileRoutesById {
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/admin/allied-health': typeof AdminAlliedHealthRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/reminders': typeof AdminRemindersRoute
+  '/admin/timeclock': typeof AdminTimeclockRoute
+  '/admin/timetable': typeof AdminTimetableRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wellbeing': typeof AdminWellbeingRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/admin/': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
@@ -197,7 +269,15 @@ export interface FileRouteTypes {
     | '/resources'
     | '/settings'
     | '/students'
+    | '/admin/allied-health'
+    | '/admin/analytics'
+    | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/reminders'
+    | '/admin/timeclock'
+    | '/admin/timetable'
+    | '/admin/users'
+    | '/admin/wellbeing'
     | '/students/$studentId'
     | '/admin/'
     | '/ieps/$goalId/print'
@@ -217,7 +297,15 @@ export interface FileRouteTypes {
     | '/resources'
     | '/settings'
     | '/students'
+    | '/admin/allied-health'
+    | '/admin/analytics'
+    | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/reminders'
+    | '/admin/timeclock'
+    | '/admin/timetable'
+    | '/admin/users'
+    | '/admin/wellbeing'
     | '/students/$studentId'
     | '/admin'
     | '/ieps/$goalId/print'
@@ -237,7 +325,15 @@ export interface FileRouteTypes {
     | '/resources'
     | '/settings'
     | '/students'
+    | '/admin/allied-health'
+    | '/admin/analytics'
+    | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/reminders'
+    | '/admin/timeclock'
+    | '/admin/timetable'
+    | '/admin/users'
+    | '/admin/wellbeing'
     | '/students/$studentId'
     | '/admin/'
     | '/ieps/$goalId/print'
@@ -258,7 +354,15 @@ export interface RootRouteChildren {
   ResourcesRoute: typeof ResourcesRoute
   SettingsRoute: typeof SettingsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
+  AdminAlliedHealthRoute: typeof AdminAlliedHealthRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminRemindersRoute: typeof AdminRemindersRoute
+  AdminTimeclockRoute: typeof AdminTimeclockRoute
+  AdminTimetableRoute: typeof AdminTimetableRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminWellbeingRoute: typeof AdminWellbeingRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -376,11 +480,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentsStudentIdRouteImport
       parentRoute: typeof StudentsRoute
     }
+    '/admin/wellbeing': {
+      id: '/admin/wellbeing'
+      path: '/admin/wellbeing'
+      fullPath: '/admin/wellbeing'
+      preLoaderRoute: typeof AdminWellbeingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/timetable': {
+      id: '/admin/timetable'
+      path: '/admin/timetable'
+      fullPath: '/admin/timetable'
+      preLoaderRoute: typeof AdminTimetableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/timeclock': {
+      id: '/admin/timeclock'
+      path: '/admin/timeclock'
+      fullPath: '/admin/timeclock'
+      preLoaderRoute: typeof AdminTimeclockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reminders': {
+      id: '/admin/reminders'
+      path: '/admin/reminders'
+      fullPath: '/admin/reminders'
+      preLoaderRoute: typeof AdminRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/audit': {
       id: '/admin/audit'
       path: '/admin/audit'
       fullPath: '/admin/audit'
       preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/approvals': {
+      id: '/admin/approvals'
+      path: '/admin/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/allied-health': {
+      id: '/admin/allied-health'
+      path: '/admin/allied-health'
+      fullPath: '/admin/allied-health'
+      preLoaderRoute: typeof AdminAlliedHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ieps/$goalId/print': {
@@ -430,7 +590,15 @@ const rootRouteChildren: RootRouteChildren = {
   ResourcesRoute: ResourcesRoute,
   SettingsRoute: SettingsRoute,
   StudentsRoute: StudentsRouteWithChildren,
+  AdminAlliedHealthRoute: AdminAlliedHealthRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminApprovalsRoute: AdminApprovalsRoute,
   AdminAuditRoute: AdminAuditRoute,
+  AdminRemindersRoute: AdminRemindersRoute,
+  AdminTimeclockRoute: AdminTimeclockRoute,
+  AdminTimetableRoute: AdminTimetableRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminWellbeingRoute: AdminWellbeingRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
