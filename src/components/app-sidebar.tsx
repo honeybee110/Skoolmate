@@ -11,7 +11,7 @@ import {
   FileText,
   Library,
   Calendar,
-  Sparkles,
+  
   Settings,
   ShieldCheck,
   ClipboardCheck,
