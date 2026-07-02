@@ -42,9 +42,9 @@ const SECTIONS: { key: SectionKey; title: string; areas: string[]; subBuckets?: 
   {
     key: "English",
     title: "English",
-    areas: ["English · Reading & Viewing", "English · Speaking & Listening", "English · Writing", "English · Phonics"],
+    areas: ["English · Reading & Viewing", "English · Speaking & Listening", "English · Writing"],
     subBuckets: [
-      { label: "Reading and Viewing", match: (a) => a.includes("Reading") || a.includes("Phonics") },
+      { label: "Reading and Viewing", match: (a) => a.includes("Reading") },
       { label: "Speaking and Listening", match: (a) => a.includes("Speaking") },
       { label: "Writing", match: (a) => a.includes("Writing") },
     ],
