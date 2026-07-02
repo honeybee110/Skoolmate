@@ -331,6 +331,27 @@ export function visibleSubjects(semester: Semester): CurriculumSubject[] {
   return CURRICULUM_SUBJECTS.filter((s) => !s.semesterLock || s.semesterLock === sem);
 }
 
+/** Per-subject strand rotation by semester. */
+const STRAND_SEMESTER_LOCK: Record<string, Record<string, CurriculumSemester>> = {
+  Mathematics: {
+    "Number": "Both",
+    "Measurement and Space": "Semester 1",
+    "Algebra": "Semester 2",
+    "Statistics": "Semester 2",
+  },
+};
+
+/** Strands to show for a subject in the given semester (honours rotation locks). */
+export function strandsForSemester(subject: CurriculumSubject, semester: Semester): string[] {
+  const sem: CurriculumSemester = semester.startsWith("Semester 1") ? "Semester 1" : "Semester 2";
+  const locks = STRAND_SEMESTER_LOCK[subject.label];
+  if (!locks) return subject.strands;
+  return subject.strands.filter((s) => {
+    const lock = locks[s];
+    return !lock || lock === "Both" || lock === sem;
+  });
+}
+
 export const LEVEL_TONE: Record<VcLevel, string> = {
   A: "bg-rose-100 text-rose-700 border-rose-200",
   B: "bg-orange-100 text-orange-700 border-orange-200",
