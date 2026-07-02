@@ -33,7 +33,7 @@ export interface CurriculumRecord {
 
 export const CURRICULUM_SUBJECTS: CurriculumSubject[] = [
   { id: "english",  label: "English",       strands: ["Reading and Viewing", "Speaking and Listening", "Writing"], color: "text-blue-700" },
-  { id: "maths",    label: "Mathematics",   strands: ["Number", "Algebra", "Statistics", "Measurement and Space", "Probability"], color: "text-violet-700" },
+  { id: "maths",    label: "Mathematics",   strands: ["Number", "Measurement and Space", "Algebra", "Statistics"], color: "text-violet-700" },
   { id: "science",  label: "Science",       strands: ["Science Understanding"], color: "text-emerald-700" },
   { id: "history",  label: "History",       strands: ["Historical Knowledge"], semesterLock: "Semester 1", color: "text-amber-700" },
   { id: "geography",label: "Geography",     strands: ["Geographical Knowledge"], semesterLock: "Semester 2", color: "text-lime-700" },
