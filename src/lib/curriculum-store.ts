@@ -213,7 +213,10 @@ export function resetCurriculumToDefaults() {
 export { cellKey };
 
 export function updateCell(key: string, patch: Partial<IepCellState>, actor: "teacher" | "admin" = "teacher") {
-  const base: IepCellState = { progress: 0, status: "not-started", comment: "", evidenceCount: 0 };
+  const base: IepCellState = {
+    progress: 0, status: "developing", comment: "", evidenceCount: 0,
+    crossChecks: [false, false, false],
+  };
   set((s) => ({
     ...s,
     cells: {
