@@ -506,9 +506,17 @@ function CellEditor({
   const rec: CurriculumRecord | undefined = currentId ? findRecordIn(records, currentId) : undefined;
   const level = state?.levelOverride ?? rec?.level;
   const entrySkills = state?.entrySkillsOverride ?? rec?.entrySkills ?? "";
-  const status = state?.status ?? "not-started";
+  const status: Status = state?.status ?? "developing";
   const progress = state?.progress ?? 0;
+  const checks: CrossChecks = state?.crossChecks ?? [false, false, false];
   const s = STATUS_META[status];
+
+  const toggleCheck = (i: number) => {
+    const next: CrossChecks = [...checks] as CrossChecks;
+    next[i] = !next[i];
+    const derived = deriveFromChecks(next);
+    onUpdate(cellKey, { crossChecks: next, status: derived.status, progress: derived.progress });
+  };
 
   return (
     <div className={cn("space-y-3", !compact && "space-y-4")}>
