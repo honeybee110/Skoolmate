@@ -31,8 +31,8 @@ import {
 } from "@/lib/curriculum-db";
 import {
   useCurriculumStore, updateCell as storeUpdateCell, pickGoal as storePickGoal,
-  cellKey, findRecordIn, recordsForIn,
-  type IepCellState, type IepStatus,
+  cellKey, findRecordIn, recordsForIn, deriveFromChecks, CROSS_CHECK_LABELS,
+  type IepCellState, type IepStatus, type CrossChecks,
 } from "@/lib/curriculum-store";
 
 export const Route = createFileRoute("/ieps")({
@@ -50,11 +50,9 @@ type Status = IepStatus;
 type CellState = IepCellState;
 
 const STATUS_META: Record<Status, { label: string; tone: string; pct: number }> = {
-  "not-started":   { label: "Not started",     tone: "bg-slate-100 text-slate-600 border-slate-200", pct: 0 },
-  "working-towards": { label: "Working Towards", tone: "bg-orange-100 text-orange-700 border-orange-200", pct: 25 },
-  "nearly-there":  { label: "Nearly There",    tone: "bg-amber-100 text-amber-700 border-amber-200", pct: 60 },
-  achieved:        { label: "Achieved",         tone: "bg-emerald-100 text-emerald-700 border-emerald-200", pct: 100 },
-  exceeded:        { label: "Exceeded",         tone: "bg-navy/10 text-navy border-navy/20", pct: 110 },
+  developing:        { label: "Developing",      tone: "bg-orange-100 text-orange-700 border-orange-200", pct: 10 },
+  "working-towards": { label: "Working Towards", tone: "bg-amber-100 text-amber-700 border-amber-200",   pct: 50 },
+  achieved:          { label: "Achieved",        tone: "bg-emerald-100 text-emerald-700 border-emerald-200", pct: 100 },
 };
 
 // ---------- Page ----------
