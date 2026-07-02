@@ -121,9 +121,15 @@ function Landing() {
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary-soft/30 via-background to-background">
-        <div className="absolute -left-24 top-24 h-72 w-72 rotate-12 rounded-3xl bg-primary/25 blur-[2px]" aria-hidden />
-        <div className="absolute right-16 top-40 h-24 w-24 rounded-full bg-accent/70" aria-hidden />
-        <div className="absolute -bottom-6 left-40 h-16 w-16 rounded-2xl bg-accent/60" aria-hidden />
+        {/* Floating brand shapes */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="drift-a absolute -left-20 top-20 h-72 w-72 rounded-[42%_58%_63%_37%/45%_46%_54%_55%] bg-primary/25 blur-2xl" />
+          <div className="drift-b absolute right-10 top-32 h-40 w-40 rounded-full bg-accent/40 blur-xl" />
+          <div className="drift-c absolute bottom-10 left-1/3 h-24 w-24 rounded-full border-[6px] border-primary/30" />
+          <div className="drift-d absolute -bottom-4 right-24 h-56 w-56 rounded-[58%_42%_38%_62%/52%_40%_60%_48%] bg-gradient-to-br from-primary/20 to-accent/30 blur-2xl" />
+          <div className="drift-a absolute top-1/2 left-16 h-3 w-3 rotate-45 bg-primary/60" />
+          <div className="drift-c absolute top-24 right-1/3 h-4 w-4 rotate-45 bg-accent/70" />
+        </div>
         <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-20 text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/70 px-3 py-1 text-xs font-medium text-primary">
             <Sparkles className="h-3.5 w-3.5" /> Built for Australian Special Developmental Schools
