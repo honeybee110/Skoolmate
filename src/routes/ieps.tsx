@@ -89,8 +89,8 @@ function IepBuilderPage() {
     const scoped = Object.values(cells);
     return {
       total: scoped.length,
-      achieved: scoped.filter((c) => c.status === "achieved" || c.status === "exceeded").length,
-      inProgress: scoped.filter((c) => c.status === "working-towards" || c.status === "nearly-there").length,
+      achieved: scoped.filter((c) => c.status === "achieved").length,
+      inProgress: scoped.filter((c) => c.status === "working-towards").length,
       avg: scoped.length
         ? Math.round(scoped.reduce((a, c) => a + Math.min(c.progress, 100), 0) / scoped.length)
         : 0,
