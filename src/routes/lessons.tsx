@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw, Library, Save, FolderOpen } from "lucide-react";
 import { generateLessonPlan, type GeneratedLesson } from "@/lib/lessons.functions";
 import { curriculumStrands, lessonExamples } from "@/lib/mock-data";
-import { useLessonStore, saveLesson, setLessonStatus, type LessonNotes, type LessonTerm, type SavedLesson } from "@/lib/lesson-store";
+import { useLessonStore, saveLesson, setLessonStatus, LESSON_WEEKS, type LessonNotes, type LessonTerm, type LessonWeek, type SavedLesson } from "@/lib/lesson-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lessons")({
@@ -66,6 +66,7 @@ function LessonsPage() {
   const [loading, setLoading] = useState(false);
   const [lesson, setLesson] = useState<GeneratedLesson | null>(null);
   const [term, setTerm] = useState<LessonTerm>("Term 1");
+  const [week, setWeek] = useState<LessonWeek>("Week 1");
   const [status, setStatus] = useState<"draft" | "pending" | "approved">("draft");
   const [currentId, setCurrentId] = useState<string | null>(null);
 
@@ -101,6 +102,7 @@ function LessonsPage() {
       subject, strand, topic, duration,
       abilityRange: ability,
       term,
+      week,
       vcCode: (lesson as GeneratedLesson | null)?.vcCode,
       notes: notes as LessonNotes,
       aiPlan: lesson ?? undefined,
@@ -126,6 +128,7 @@ function LessonsPage() {
     setDuration(s.duration);
     setAbility(s.abilityRange);
     setTerm(s.term);
+    if (s.week) setWeek(s.week);
     setStatus(s.status);
     setNotes(s.notes);
     setLesson((s.aiPlan as GeneratedLesson) ?? null);
@@ -234,7 +237,7 @@ function LessonsPage() {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Term</Label>
                 <Select value={term} onValueChange={(v) => setTerm(v as LessonTerm)}>
@@ -242,6 +245,17 @@ function LessonsPage() {
                   <SelectContent>
                     {(["Term 1", "Term 2", "Term 3", "Term 4"] as LessonTerm[]).map((t) => (
                       <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Week</Label>
+                <Select value={week} onValueChange={(v) => setWeek(v as LessonWeek)}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {LESSON_WEEKS.map((w) => (
+                      <SelectItem key={w} value={w}>{w}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
