@@ -325,10 +325,12 @@ export function findRecord(id: string) {
   return CURRICULUM_DB.find((r) => r.id === id);
 }
 
-/** Semester-aware subject list — hides History in S2 and Geography in S1. */
+/** Semester-aware subject list — hides History in S2, Geography in S1, and Self-Care from the IEP matrix. */
 export function visibleSubjects(semester: Semester): CurriculumSubject[] {
   const sem: CurriculumSemester = semester.startsWith("Semester 1") ? "Semester 1" : "Semester 2";
-  return CURRICULUM_SUBJECTS.filter((s) => !s.semesterLock || s.semesterLock === sem);
+  return CURRICULUM_SUBJECTS.filter(
+    (s) => s.id !== "selfcare" && (!s.semesterLock || s.semesterLock === sem),
+  );
 }
 
 /** Per-subject strand rotation by semester. */
