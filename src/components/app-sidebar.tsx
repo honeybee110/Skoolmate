@@ -71,6 +71,7 @@ const teacherNav = {
 const adminNav = {
   Overview: [
     { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
+    { title: "IEP Management", url: "/admin/ieps", icon: Target },
     { title: "Approval Centre", url: "/admin/approvals", icon: ClipboardCheck },
     { title: "Document Centre", url: "/admin/documents", icon: FolderKanban },
     { title: "Notifications", url: "/admin/notifications", icon: Bell },
