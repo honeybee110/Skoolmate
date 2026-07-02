@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -121,12 +122,12 @@ function Analytics() {
                     <div key={h} className="text-center text-[10px] text-muted-foreground pb-1">{h}</div>
                   ))}
                   {heatmap.map((row, i) => (
-                    <>
-                      <div key={`d${i}`} className="pr-2 text-right text-[11px] text-muted-foreground flex items-center justify-end">{dayLabels[i]}</div>
+                    <Fragment key={`row-${i}`}>
+                      <div className="pr-2 text-right text-[11px] text-muted-foreground flex items-center justify-end">{dayLabels[i]}</div>
                       {row.map((v, j) => (
                         <div key={`${i}-${j}`} className={cn("h-8 m-0.5 rounded", heatTone[v])} title={`${dayLabels[i]} ${hourLabels[j]}: ${v}`} />
                       ))}
-                    </>
+                    </Fragment>
                   ))}
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-[10px] text-muted-foreground">
