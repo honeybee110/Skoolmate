@@ -164,6 +164,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_hue: number
+          created_at: string
+          display_name: string | null
+          id: string
+          primary_group: Database["public"]["Enums"]["role_group"]
+          updated_at: string
+        }
+        Insert: {
+          avatar_hue?: number
+          created_at?: string
+          display_name?: string | null
+          id: string
+          primary_group?: Database["public"]["Enums"]["role_group"]
+          updated_at?: string
+        }
+        Update: {
+          avatar_hue?: number
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          primary_group?: Database["public"]["Enums"]["role_group"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       specialist_notes: {
         Row: {
           comment: string
@@ -264,6 +291,13 @@ export type Database = {
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      in_group: {
+        Args: {
+          _group: Database["public"]["Enums"]["role_group"]
           _user_id: string
         }
         Returns: boolean
