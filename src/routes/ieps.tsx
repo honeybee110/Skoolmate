@@ -591,32 +591,48 @@ function CellEditor({
         </div>
       )}
 
-      {/* Progress + status */}
-      <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-        <div>
-          <Label>Progress</Label>
-          <div className="mt-2 flex items-center gap-3">
-            <input
-              type="range" min={0} max={110} value={progress}
-              onChange={(e) => onUpdate(cellKey, { progress: Number(e.target.value) })}
-              className="flex-1 accent-navy"
-            />
-            <span className="w-12 text-right text-sm font-semibold tabular-nums">{progress}%</span>
-          </div>
-          <Progress value={Math.min(progress, 100)} className="mt-1 h-1.5" />
+      {/* Cross-Check steps drive Status + Progress */}
+      <div>
+        <div className="flex items-center justify-between">
+          <Label>Cross-Check steps <span className="ml-1 text-[10px] text-muted-foreground normal-case">Status is auto-set from completed steps</span></Label>
+          <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-semibold", s.tone)}>{s.label}</span>
         </div>
-        <div>
-          <Label>Status</Label>
-          <Select value={status} onValueChange={(v) => onUpdate(cellKey, { status: v as Status })}>
-            <SelectTrigger className={cn("mt-1 h-9 w-[160px]", s.tone)}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.entries(STATUS_META) as [Status, typeof STATUS_META[Status]][]).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="mt-2 grid gap-2 md:grid-cols-3">
+          {CROSS_CHECK_LABELS.map((lbl, i) => {
+            const done = checks[i];
+            return (
+              <button
+                key={lbl}
+                type="button"
+                onClick={() => toggleCheck(i)}
+                className={cn(
+                  "flex items-start gap-2 rounded-lg border p-2.5 text-left transition",
+                  done
+                    ? i === 2
+                      ? "border-emerald-300 bg-emerald-50"
+                      : i === 1
+                        ? "border-amber-300 bg-amber-50"
+                        : "border-orange-300 bg-orange-50"
+                    : "border-dashed bg-muted/30 hover:border-navy/40",
+                )}
+              >
+                <span className={cn(
+                  "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                  done ? "bg-navy border-navy text-white" : "border-muted-foreground/40 bg-white",
+                )}>
+                  {done && <CheckCircle2 className="h-3 w-3" />}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider">Step {i + 1}</p>
+                  <p className="text-xs leading-snug">{lbl}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-2 flex items-center gap-2">
+          <Progress value={Math.min(progress, 100)} className="h-1.5 flex-1" />
+          <span className="w-12 text-right text-xs font-semibold tabular-nums text-muted-foreground">{progress}%</span>
         </div>
       </div>
 
