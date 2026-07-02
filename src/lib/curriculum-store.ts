@@ -13,12 +13,16 @@ import type { Semester, VcLevel } from "./mock-data";
 
 // ---------- Types ----------
 
-export type IepStatus =
-  | "not-started"
-  | "working-towards"
-  | "nearly-there"
-  | "achieved"
-  | "exceeded";
+export type IepStatus = "developing" | "working-towards" | "achieved";
+
+/** Three progressive cross-check steps. Toggling checks drives status + progress. */
+export type CrossChecks = [boolean, boolean, boolean];
+
+export const CROSS_CHECK_LABELS: [string, string, string] = [
+  "Developing",
+  "Working Towards",
+  "Achieved",
+];
 
 export interface IepCellState {
   curriculumId?: string;
@@ -26,10 +30,21 @@ export interface IepCellState {
   entrySkillsOverride?: string;
   progress: number;
   status: IepStatus;
+  /** 3-step cross-check state — drives status & progress. */
+  crossChecks: CrossChecks;
   comment: string;
   evidenceCount: number;
   updatedAt?: string;
   updatedBy?: string;
+}
+
+/** Derive status + progress from the 3-step cross-check. */
+export function deriveFromChecks(checks: CrossChecks): { status: IepStatus; progress: number } {
+  const count = checks.filter(Boolean).length;
+  if (count >= 3) return { status: "achieved", progress: 100 };
+  if (count === 2) return { status: "working-towards", progress: 66 };
+  if (count === 1) return { status: "working-towards", progress: 33 };
+  return { status: "developing", progress: 10 };
 }
 
 export interface OverrideEvent {
@@ -48,7 +63,7 @@ interface StoreState {
   audit: OverrideEvent[];
 }
 
-const STORAGE_KEY = "schoolmate.curriculum.v2";
+const STORAGE_KEY = "schoolmate.curriculum.v3";
 const MAX_AUDIT = 100;
 
 // ---------- Seed IEP cells (matches previous demo state) ----------
@@ -57,21 +72,27 @@ const cellKey = (studentId: string, subject: string, strand: string) =>
   `${studentId}::${subject}::${strand}`;
 
 function seedCells(): Record<string, IepCellState> {
-  const base: IepCellState = { progress: 0, status: "not-started", comment: "", evidenceCount: 0 };
+  const mk = (checks: CrossChecks, patch: Partial<IepCellState> = {}): Partial<IepCellState> => {
+    const { status, progress } = deriveFromChecks(checks);
+    return { crossChecks: checks, status, progress, ...patch };
+  };
+  const base: IepCellState = {
+    progress: 0, status: "developing", comment: "", evidenceCount: 0,
+    crossChecks: [false, false, false],
+  };
   const seeds: Array<[string, string, string, Partial<IepCellState>]> = [
-    ["s1", "Mathematics", "Number", { curriculumId: "ma-n-f", progress: 55, status: "working-towards", evidenceCount: 8, comment: "Mia counting 0–15 confidently." }],
-    ["s1", "English", "Reading and Viewing", { curriculumId: "en-rv-b1", progress: 40, status: "working-towards", evidenceCount: 3 }],
-    ["s2", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 30, status: "working-towards", evidenceCount: 12 }],
-    ["s2", "English", "Reading and Viewing", { curriculumId: "en-rv-d", progress: 65, status: "nearly-there", evidenceCount: 3 }],
-    ["s3", "English", "Writing", { curriculumId: "en-w-f", progress: 100, status: "achieved", evidenceCount: 14 }],
-    ["s3", "Science", "Science Understanding", { curriculumId: "sc-f", progress: 40, status: "working-towards", evidenceCount: 3 }],
-    ["s4", "Self-Care", "Daily Living", { curriculumId: "sc-c-d", progress: 45, status: "working-towards", evidenceCount: 6 }],
-    ["s4", "Physical Education", "Movement and Physical Activity", { curriculumId: "pe-d", progress: 60, status: "nearly-there", evidenceCount: 4 }],
-    ["s5", "Music", "Making and Responding", { curriculumId: "mu-c", progress: 35, status: "working-towards", evidenceCount: 2 }],
-    ["s5", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 100, status: "achieved", evidenceCount: 9 }],
-    ["s7", "Learn to Play", "Play Skills", { curriculumId: "l2p-d", progress: 40, status: "working-towards", evidenceCount: 2 }],
-    ["s8", "Drama", "Making and Responding", { curriculumId: "dr-c", progress: 35, status: "working-towards", evidenceCount: 1 }],
-    ["s8", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 50, status: "working-towards", evidenceCount: 7 }],
+    ["s1", "Mathematics", "Number", mk([true, false, false], { curriculumId: "ma-n-f", evidenceCount: 8, comment: "Mia counting 0–15 confidently." })],
+    ["s1", "English", "Reading and Viewing", mk([true, false, false], { curriculumId: "en-rv-b1", evidenceCount: 3 })],
+    ["s2", "English", "Speaking and Listening", mk([true, false, false], { curriculumId: "en-sl-c", evidenceCount: 12 })],
+    ["s2", "English", "Reading and Viewing", mk([true, true, false], { curriculumId: "en-rv-d", evidenceCount: 3 })],
+    ["s3", "English", "Writing", mk([true, true, true], { curriculumId: "en-w-f", evidenceCount: 14 })],
+    ["s3", "Science", "Science Understanding", mk([true, false, false], { curriculumId: "sc-f", evidenceCount: 3 })],
+    ["s4", "Physical Education", "Movement and Physical Activity", mk([true, true, false], { curriculumId: "pe-d", evidenceCount: 4 })],
+    ["s5", "Music", "Making and Responding", mk([true, false, false], { curriculumId: "mu-c", evidenceCount: 2 })],
+    ["s5", "English", "Speaking and Listening", mk([true, true, true], { curriculumId: "en-sl-c", evidenceCount: 9 })],
+    ["s7", "Learn to Play", "Play Skills", mk([true, false, false], { curriculumId: "l2p-d", evidenceCount: 2 })],
+    ["s8", "Drama", "Making and Responding", mk([true, false, false], { curriculumId: "dr-c", evidenceCount: 1 })],
+    ["s8", "English", "Speaking and Listening", mk([true, false, false], { curriculumId: "en-sl-c", evidenceCount: 7 })],
   ];
   const out: Record<string, IepCellState> = {};
   for (const [sid, subj, strand, patch] of seeds) {
