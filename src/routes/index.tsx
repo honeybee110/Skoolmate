@@ -102,11 +102,7 @@ function Landing() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles className="h-4 w-4" strokeWidth={2.5} />
-            </div>
-            <span className="text-lg font-semibold tracking-tight">SchoolMate</span>
-            <span className="ml-1 rounded bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-primary">AU</span>
+            <BrandMark size="sm" />
           </Link>
           <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
             <a href="#features" className="transition hover:text-foreground">Features</a>
