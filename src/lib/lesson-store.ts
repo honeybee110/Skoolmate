@@ -34,6 +34,7 @@ export interface SavedLesson {
   duration: string;
   abilityRange: string;
   term: LessonTerm;
+  week?: LessonWeek;
   vcCode?: string;
   status: LessonStatus;
   notes: LessonNotes;
