@@ -66,6 +66,7 @@ function LessonsPage() {
   const [loading, setLoading] = useState(false);
   const [lesson, setLesson] = useState<GeneratedLesson | null>(null);
   const [term, setTerm] = useState<LessonTerm>("Term 1");
+  const [week, setWeek] = useState<LessonWeek>("Week 1");
   const [status, setStatus] = useState<"draft" | "pending" | "approved">("draft");
   const [currentId, setCurrentId] = useState<string | null>(null);
 
