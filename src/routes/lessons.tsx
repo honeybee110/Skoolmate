@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw, Library, Save, FolderOpen } from "lucide-react";
 import { generateLessonPlan, type GeneratedLesson } from "@/lib/lessons.functions";
 import { curriculumStrands, lessonExamples } from "@/lib/mock-data";
-import { useLessonStore, saveLesson, setLessonStatus, type LessonNotes, type LessonTerm, type SavedLesson } from "@/lib/lesson-store";
+import { useLessonStore, saveLesson, setLessonStatus, LESSON_WEEKS, type LessonNotes, type LessonTerm, type LessonWeek, type SavedLesson } from "@/lib/lesson-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lessons")({
