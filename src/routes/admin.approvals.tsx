@@ -190,7 +190,7 @@ function ApprovalCentre() {
                       <Button variant="ghost" size="sm" asChild className="h-7 px-2 text-xs">
                         <Link
                           to="/ieps"
-                          search={scopedSearch({ studentId: g.studentId })}
+                          search={scopedSearch(activeSemester, { student: g.studentId })}
                         >
                           Open in IEP dashboard →
                         </Link>
