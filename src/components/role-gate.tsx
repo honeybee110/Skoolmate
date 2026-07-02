@@ -8,7 +8,7 @@ import { Loader2, ShieldAlert } from "lucide-react";
 export function RoleGate({
   groups,
   children,
-  redirectIfSignedOut = "/auth",
+  redirectIfSignedOut = "/admin/login",
 }: {
   groups: RoleGroup[];
   children: ReactNode;
@@ -59,7 +59,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const { ready, user } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
-    if (ready && !user) navigate({ to: "/auth" });
+    if (ready && !user) navigate({ to: "/teacher/login" });
   }, [ready, user, navigate]);
   if (!ready) {
     return (

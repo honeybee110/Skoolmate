@@ -20,13 +20,16 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useAuth, roleLabel } from "@/lib/auth-context";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin Portal · SchoolMate AU" }] }),
   component: () => (
-    <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
-      <AdminHome />
-    </RoleGate>
+    <PortalGuard portal="admin">
+      <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
+        <AdminHome />
+      </RoleGate>
+    </PortalGuard>
   ),
 });
 

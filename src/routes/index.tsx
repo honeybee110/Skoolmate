@@ -113,7 +113,8 @@ function Landing() {
             <a href="#teachers" className="transition hover:text-foreground">For Teachers</a>
             <a href="#admins" className="transition hover:text-foreground">For Admins</a>
             <a href="#pricing" className="transition hover:text-foreground">Pricing</a>
-            <Link to="/auth" className="transition hover:text-foreground">Login</Link>
+            <Link to="/teacher/login" className="transition hover:text-foreground">Teacher Login</Link>
+            <Link to="/admin/login" className="transition hover:text-foreground">Admin Login</Link>
           </nav>
           <Button asChild className="rounded-full bg-primary px-5 hover:bg-primary/90">
             <a href="#demo">Book a Demo</a>

@@ -1,70 +1,85 @@
+# SchoolMate AU — Phase 3: Portal Split, IEP English, Document Centre
 
-# SchoolMate AU — Phase 2 Plan
-
-This is a very large scope (19 sections). To ship safely without breaking Phase 1, I'll deliver it in **4 staged milestones**, each independently reviewable. I'll confirm each milestone before starting the next.
-
-Existing UI, colours, sidebar, spacing and typography stay untouched — new features slot into the current shell.
+Delivered in four milestones. I'll pause after each for review.
 
 ---
 
-## Milestone 1 — Auth, Roles & Routing Foundation (sections 1, 2, 19)
+## Milestone A — Separate Portals & VIC Terminology
 
-**Backend (single migration)**
-- Enable Lovable Cloud auth (email/password + Google).
-- Extend `app_role` enum with all Phase 2 roles: `teacher`, `principal`, `assistant_principal`, `learning_specialist`, `leading_teacher`, `ot`, `slp`, `physio`, `aha`, `psychologist`, `behaviour_specialist`, `nurse`, `wellbeing_officer`, `attendance_officer`, `it_admin`.
-- Add `role_group` enum (`teacher`, `leadership`, `allied_health`, `wellbeing`, `it`) + `profiles` table (display_name, primary_group, avatar_hue).
-- `has_role` already exists; add `in_group(uuid, role_group)` helper.
-- Seed demo accounts documentation (users create their own via `/auth`).
+**Auth split**
+- New `/teacher/login` — teacher-branded, redirects to `/dashboard` on success.
+- New `/admin/login` — admin-branded, redirects to `/admin` on success; blocks users without a leadership/allied-health/wellbeing/IT role with a clear "wrong portal" message and a link to `/teacher/login`.
+- Existing `/auth` becomes a chooser page ("I'm a Teacher" / "I'm an Admin").
+- Landing page "Login" CTA becomes two buttons.
 
-**Frontend**
-- `/auth` route (sign in / sign up, Google button).
-- Integration-managed `_authenticated/route.tsx` gate (already scaffolded).
-- Post-login router: teachers → `/dashboard`, any leadership/allied/wellbeing/it role → `/admin`.
-- Split sidebar: `TeacherSidebar` (existing items minus Admin) and `AdminSidebar` (Admin modules only). Same visual style.
-- `useRole()` hook + `<RoleGate roles={...}>` component wrapping admin-only routes.
+**Route guards**
+- Teachers hitting `/admin/*` → redirected to `/dashboard`.
+- Admins hitting `/dashboard` → redirected to `/admin`.
+- "Switch to Admin" shortcut removed from the teacher sidebar entirely — portals feel like separate apps.
 
----
+**Teacher sidebar (final 15 items)**
+Dashboard · Calendar · My Classes · Students · Lesson Planner · IEPs · **Handover Documents (new)** · Evidence Hub · Behaviour · Reports · Resource Bank · Scope & Sequence · Notifications · Time & Attendance · Settings
 
-## Milestone 2 — Admin Portal Core (sections 3, 4, 6, 7, 16)
+**Admin sidebar (final 19 items)**
+Dashboard · Approval Centre · **Document Centre (new)** · Teachers · My Classes · My Students · Whole School Timetable · Resource Bank Management · Curriculum & Scope and Sequence · Reports · Evidence Hub · Behaviour Analytics · Wellbeing · Allied Health · **Leadership Templates (new)** · Notifications · Time & Attendance · User Management · Settings
 
-- `/admin` dashboard: live stat cards (pending plans, IEPs, reports due, incidents, attendance, meetings, absences, clock-ins) + Quick Actions.
-- `/admin/approvals` Approval Centre with Lesson Plans + IEPs tabs, Approve / Reject / Request Changes actions → writes to `approval_events` and triggers notification.
-- `/admin/timetable` Whole School Timetable (Prep–Year 12), filter/search, export to PDF (react-to-print) and Excel (xlsx via SheetJS-lite in a server fn).
-- `/admin/reminders` one-click reminder templates → creates `notifications` row + (optional) Resend email if connector present.
-- `notifications` table + realtime subscription; header bell for both portals.
+**Terminology sweep**
+Replace remaining US/international labels with Victorian DE conventions (e.g. "Grade" → "Year", "Class Roster" → "Class List", "Homeroom" → "Class", ensure "Semester 1/2" everywhere, "Learning Area", "Curriculum").
 
 ---
 
-## Milestone 3 — Teacher Modules & Data Wiring (sections 5, 9, 10, 11, 12, 13, 14, 18)
+## Milestone B — IEP English Restructure
 
-- Notifications bell on teacher header.
-- **Clock In / Out** button on both dashboards → `time_clock` table with today's hours, history, admin export.
-- **Lesson Planner**: Term 1–4 tabs, status pipeline (Draft / Submitted / Pending / Approved / Returned), full filter bar. Submit → creates approval row.
-- **IEP redesign**:
-  - Student list → "View IEP" → Semester 1 / Semester 2 tabs → subject accordions with goals.
-  - Wire up every "Add IEP Goal" button: opens **Scope & Sequence goal picker** dialog (search + curriculum/semester/year level/AS/CD filters) pulling from the existing scope data in `mock-data.ts`, promoted to a real `scope_sequence_goals` table.
-  - Remove Phonics as an English IEP domain — keep only Reading & Viewing / Speaking & Listening / Writing. Phonics stays as a lesson focus tag.
-- **Interactive Cross-Check tracker**: click/drag/percentage input, status = Working Towards / Nearly There / Achieved / Exceeded, autosaves with editor + timestamp, updates dashboards.
-- Cross-module links table (`entity_links`) so Lesson↔IEP↔Evidence↔Behaviour stay in sync without duplication.
+- Drop **Phonics** as an IEP learning area. English learning areas become **Reading & Viewing / Speaking & Listening / Writing** only.
+- Update `LearningArea` type, mock data, Scope & Sequence descriptors, Cross-Check grid, IEP print view, admin approval filters.
+- Phonics kept as a Resource Bank tag and a lesson-plan focus category (not a goal domain).
+- Migration: rename/remove phonics rows in `iep_goals`; update DB triggers' allowed learning-area list.
 
 ---
 
-## Milestone 4 — Allied Health, Resource Bank, Analytics (sections 8, 15, 17)
+## Milestone C — Admin Document Centre
 
-- **Allied Health workspace** at `/admin/allied-health`: observations, therapy notes, referrals, intervention tracking. Every note auto-appears on Student Profile, Behaviour, Wellbeing, Evidence Hub, Timeline via a shared `student_events` view.
-- **Wellbeing workspace** at `/admin/wellbeing`: attendance notes, medical alerts, incident reports, welfare records.
-- **Resource Bank** `/resources`: 11 categories, upload (Supabase Storage), tag, approve, favourite, share; teacher search/filter/download; AI recommendations via Lovable AI Gateway based on active lesson + student goals/sensory/behaviour profile.
-- **Analytics** `/admin/analytics`: dashboards for the 10 listed metrics using Recharts, driven by SQL views.
+**New module `/admin/documents`** — cloud-drive UX (breadcrumbs, folder grid + list toggle, search, filters, upload, rename, move, archive, download, permissions dialog).
+
+**Backend**
+- Tables: `document_folders` (id, parent_id, name, path, class_code, semester, is_pinned, is_system, created_by), `documents` (id, folder_id, name, storage_path, mime, size, uploaded_by, replaces_id, archived_at), `document_permissions` (folder_id, role/user, can_read/upload/manage).
+- Storage bucket `documents` (private) with RLS matching table policies.
+- Leadership roles can CRUD everything; teachers can read all + upload only into `Teacher Uploads` subfolders + folders they're granted; **Leadership Templates folders are undeletable** by teachers (RLS + `is_pinned` flag).
+
+**Seeded folder tree**
+19 top-level folders: IEPs, Weekly Lesson Plans, Handover Documents, Reports, Evidence Hub, Behaviour, Wellbeing, Student Assessments, Curriculum & Scope and Sequence, Resource Bank, School Policies, Professional Development, Timetables, Meeting Minutes, School Events, Student Permissions, Transition Reports, Templates, Start Right.
+
+Under **IEPs**, **Weekly Lesson Plans**, **Handover Documents** — auto-generate:
+```
+<Folder>/
+  Primary/
+    P1..P15/
+      Semester 1/
+        Leadership Templates   (pinned, is_system)
+        Teacher Uploads
+      Semester 2/ ...
+  Secondary/
+    S1..S10/ (same pattern)
+```
+= 3 × (15+10) × 2 × 2 = **300 seeded subfolders**, plus the class/section folders themselves.
 
 ---
 
-## Technical Notes (non-user-facing)
+## Milestone D — Teacher Handover Documents
 
-- Every new table gets `GRANT` + RLS scoped to `has_role`/`in_group`.
-- All server logic via `createServerFn` — no edge functions.
-- Realtime enabled on `notifications`, `approval_events`, `time_clock`, `iep_goals`, `student_events`.
-- No changes to existing files' visual design; only additive routes and new sidebar entries under the Admin group.
+- New `/handover` route on the teacher portal.
+- Auto-scoped to the signed-in teacher's class (P7 for Honey in the demo).
+- Reuses Document Centre APIs; shows the two-semester structure with pinned Leadership Templates at the top and a Teacher Uploads drop zone.
 
 ---
 
-**Proposal:** approve this plan and I'll start with **Milestone 1** (auth + roles + split portals). I'll pause after each milestone for review before continuing. Reply "go" or tell me which milestone to prioritise / reorder.
+## Technical Notes
+
+- New tables ship with `GRANT` + RLS in the same migration; Leadership Templates protected via `is_pinned=true` + role check in DELETE policy.
+- Storage bucket `documents` created via `storage_create_bucket` (private), with `storage.objects` policies mirroring `document_permissions`.
+- File uploads capped at 20 MB (PDF/DOCX/PPTX/XLSX/PNG/JPG/MP4) with server-side mime validation.
+- Route restructure: `admin.documents.tsx`, `admin.documents.$folderId.tsx`, `admin.templates.tsx` (Leadership Templates view), `admin.teachers.tsx`, `admin.classes.tsx`, `admin.students.tsx`, `admin.resources.tsx`, `admin.curriculum.tsx`, `admin.evidence.tsx`, `admin.behaviour.tsx`, `admin.reports.tsx`, `admin.notifications.tsx`, `admin.settings.tsx`, `handover.tsx`, `teacher.login.tsx`, `admin.login.tsx`.
+- Existing `/auth` kept as a chooser to preserve any OAuth `redirect_uri` allowlist entries.
+- All existing tests re-run after each milestone.
+
+Reply **"go"** to start with **Milestone A**, or tell me to reorder (e.g. "Document Centre first").

@@ -22,6 +22,10 @@ import {
   CalendarClock,
   Timer,
   LogOut,
+  FolderKanban,
+  Pin,
+  UserCheck,
+  Archive,
 } from "lucide-react";
 
 import {
@@ -43,13 +47,14 @@ type NavItem = { title: string; url: string; icon: typeof LayoutDashboard };
 const teacherNav = {
   Teach: [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Calendar", url: "/calendar", icon: Calendar },
     { title: "My Classes", url: "/classes", icon: GraduationCap },
     { title: "Students", url: "/students", icon: Users },
-    { title: "Calendar", url: "/calendar", icon: Calendar },
   ] as NavItem[],
   Plan: [
     { title: "Lesson Planner", url: "/lessons", icon: BookOpen },
     { title: "IEPs", url: "/ieps", icon: Target },
+    { title: "Handover Documents", url: "/handover", icon: FolderKanban },
     { title: "Scope & Sequence", url: "/scope-sequence", icon: ClipboardCheck },
     { title: "Resource Bank", url: "/resources", icon: Library },
   ] as NavItem[],
@@ -62,40 +67,49 @@ const teacherNav = {
   ] as NavItem[],
 };
 
-
 const adminNav = {
   Overview: [
-    { title: "Admin Dashboard", url: "/admin", icon: LayoutDashboard },
-    { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
-  ] as NavItem[],
-  Approvals: [
+    { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
     { title: "Approval Centre", url: "/admin/approvals", icon: ClipboardCheck },
-    { title: "Reminders", url: "/admin/reminders", icon: Bell },
+    { title: "Document Centre", url: "/admin/documents", icon: FolderKanban },
+    { title: "Notifications", url: "/admin/notifications", icon: Bell },
   ] as NavItem[],
   School: [
-    { title: "Whole-School Timetable", url: "/admin/timetable", icon: CalendarClock },
-    { title: "Resource Bank", url: "/resources", icon: Library },
-    { title: "Reports", url: "/reports", icon: FileText },
+    { title: "Teachers", url: "/admin/teachers", icon: UserCheck },
+    { title: "My Classes", url: "/admin/classes", icon: GraduationCap },
+    { title: "My Students", url: "/admin/students", icon: Users },
+    { title: "Whole School Timetable", url: "/admin/timetable", icon: CalendarClock },
+  ] as NavItem[],
+  Curriculum: [
+    { title: "Curriculum & Scope and Sequence", url: "/admin/curriculum", icon: BookOpen },
+    { title: "Resource Bank Management", url: "/admin/resources", icon: Library },
+    { title: "Leadership Templates", url: "/admin/templates", icon: Pin },
+  ] as NavItem[],
+  Insights: [
+    { title: "Reports", url: "/admin/reports", icon: FileText },
+    { title: "Evidence Hub", url: "/admin/evidence", icon: Camera },
+    { title: "Behaviour Analytics", url: "/admin/behaviour", icon: BarChart3 },
   ] as NavItem[],
   Teams: [
-    { title: "Allied Health", url: "/admin/allied-health", icon: Stethoscope },
     { title: "Wellbeing", url: "/admin/wellbeing", icon: HeartPulse },
+    { title: "Allied Health", url: "/admin/allied-health", icon: Stethoscope },
   ] as NavItem[],
-  IT: [
-    { title: "User Management", url: "/admin/users", icon: UserCog },
+  Admin: [
     { title: "Time & Attendance", url: "/admin/timeclock", icon: Timer },
-    { title: "Override Audit", url: "/admin/audit", icon: ShieldCheck },
+    { title: "User Management", url: "/admin/users", icon: UserCog },
+    { title: "Override Audit", url: "/admin/audit", icon: Archive },
   ] as NavItem[],
 };
 
 export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "admin" }) {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const { user, profile, roles, signOut, isAdminPortalUser } = useAuth();
+  const { user, profile, roles, signOut } = useAuth();
   const isActive = (url: string) =>
     url === "/admin" ? pathname === "/admin" : pathname === url || pathname.startsWith(url + "/");
 
   const nav = variant === "admin" ? adminNav : teacherNav;
   const homeUrl = variant === "admin" ? "/admin" : "/dashboard";
+  const settingsUrl = variant === "admin" ? "/admin/settings" : "/settings";
 
   const primaryRole = roles[0];
   const initials = (profile?.display_name || user?.email || "SM")
@@ -135,44 +149,25 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <Link to={homeUrl} className="flex items-center gap-2.5 px-2 py-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <Sparkles className="h-5 w-5" strokeWidth={2.5} />
+          <div className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-sm ${variant === "admin" ? "bg-slate-900 text-white" : "bg-primary text-primary-foreground"}`}>
+            {variant === "admin" ? <ShieldCheck className="h-5 w-5" strokeWidth={2.5} /> : <Sparkles className="h-5 w-5" strokeWidth={2.5} />}
           </div>
           <div className="flex flex-col leading-tight">
             <span className="text-sm font-semibold tracking-tight">SchoolMate</span>
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              {variant === "admin" ? "Admin · AU" : "AU"}
+              {variant === "admin" ? "Admin Portal" : "Teacher Portal"}
             </span>
           </div>
         </Link>
       </SidebarHeader>
       <SidebarContent>
         {Object.entries(nav).map(([label, items]) => renderGroup(label, items))}
-        {variant === "teacher" && isAdminPortalUser && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/70">
-              Admin
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link to="/admin" className="flex items-center gap-3">
-                      <ShieldCheck className="h-4 w-4" />
-                      <span>Switch to Admin</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link to="/settings" className="flex items-center gap-3">
+              <Link to={settingsUrl} className="flex items-center gap-3">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
               </Link>

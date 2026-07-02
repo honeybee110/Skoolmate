@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { PortalGuard } from "@/components/portal-guard";
+
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
@@ -35,8 +37,13 @@ export const Route = createFileRoute("/dashboard")({
       { name: "description", content: "Your teaching day at a glance: timetable, behaviour alerts, lessons due, IEP reminders, and your class." },
     ],
   }),
-  component: Dashboard,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <Dashboard />
+    </PortalGuard>
+  ),
 });
+
 
 const kindIcon = {
   medication: Pill,
@@ -64,7 +71,7 @@ function Dashboard() {
     <AppShell>
       <div className="px-4 py-6 md:px-8">
         <div className="flex flex-col gap-1">
-          <p className="text-sm text-muted-foreground">Monday, 29 June 2026 · Term 3</p>
+          <p className="text-sm text-muted-foreground">Monday, 29 June 2026 · Semester 1 · Week 8</p>
           <h1 className="text-3xl font-semibold tracking-tight">Good morning, Honey</h1>
           <p className="mt-1 text-xs text-muted-foreground">P7 · ES Sharifa · <span className="text-accent font-medium">Medical alert — Kristian: Asthma Plan</span></p>
         </div>
