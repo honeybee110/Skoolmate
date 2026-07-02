@@ -65,9 +65,13 @@ function LessonsPage() {
   });
   const [loading, setLoading] = useState(false);
   const [lesson, setLesson] = useState<GeneratedLesson | null>(null);
+  const [term, setTerm] = useState<LessonTerm>("Term 1");
+  const [status, setStatus] = useState<"draft" | "pending" | "approved">("draft");
+  const [currentId, setCurrentId] = useState<string | null>(null);
 
   const strandOptions = curriculumStrands[subject as keyof typeof curriculumStrands] ?? [];
   const notesPayload = useMemo(() => serialiseNotes(notes), [notes]);
+  const { lessons: savedLessons } = useLessonStore();
 
   async function handleGenerate() {
     setLoading(true);
@@ -89,6 +93,45 @@ function LessonsPage() {
     setTopic(ex.topic);
     setDuration(ex.duration);
   }
+
+  function handleSave(nextStatus?: "draft" | "pending" | "approved") {
+    const saved = saveLesson({
+      id: currentId ?? undefined,
+      title: topic,
+      subject, strand, topic, duration,
+      abilityRange: ability,
+      term,
+      vcCode: (lesson as GeneratedLesson | null)?.vcCode,
+      notes: notes as LessonNotes,
+      aiPlan: lesson ?? undefined,
+      author: "Honey P.",
+      status: nextStatus ?? status,
+    });
+    setCurrentId(saved.id);
+    setStatus(saved.status);
+    toast.success(
+      nextStatus === "pending" ? "Submitted for approval." :
+      nextStatus === "approved" ? "Marked as approved." :
+      "Lesson saved to Lesson Bank.",
+    );
+  }
+
+  function loadSaved(id: string) {
+    const s = savedLessons.find((l) => l.id === id);
+    if (!s) return;
+    setCurrentId(s.id);
+    setSubject(s.subject);
+    setStrand(s.strand);
+    setTopic(s.topic);
+    setDuration(s.duration);
+    setAbility(s.abilityRange);
+    setTerm(s.term);
+    setStatus(s.status);
+    setNotes(s.notes);
+    setLesson((s.aiPlan as GeneratedLesson) ?? null);
+    toast.success(`Loaded "${s.title}" (${s.status}).`);
+  }
+
 
 
   return (
