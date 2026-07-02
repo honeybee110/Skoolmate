@@ -7,7 +7,7 @@ import { ModuleStub } from "@/components/module-stub";
 export const Route = createFileRoute("/admin/resources")({
   head: () => ({ meta: [{ title: "Resource Bank Management · SchoolMate AU" }] }),
   component: () => (
-    <RoleGate groups={["leadership", "learning_specialist" as never, "it"]}>
+    <RoleGate groups={["leadership", "it"]}>
       <AppShell variant="admin">
         <PageHeader title="Resource Bank Management" subtitle="Curate the school's shared teaching resources." />
         <div className="px-4 py-6 md:px-8">

@@ -34,8 +34,20 @@ import { Route as AdminWellbeingRouteImport } from './routes/admin.wellbeing'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTimetableRouteImport } from './routes/admin.timetable'
 import { Route as AdminTimeclockRouteImport } from './routes/admin.timeclock'
+import { Route as AdminTemplatesRouteImport } from './routes/admin.templates'
+import { Route as AdminTeachersRouteImport } from './routes/admin.teachers'
+import { Route as AdminStudentsRouteImport } from './routes/admin.students'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminResourcesRouteImport } from './routes/admin.resources'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminRemindersRouteImport } from './routes/admin.reminders'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminEvidenceRouteImport } from './routes/admin.evidence'
+import { Route as AdminDocumentsRouteImport } from './routes/admin.documents'
+import { Route as AdminCurriculumRouteImport } from './routes/admin.curriculum'
+import { Route as AdminClassesRouteImport } from './routes/admin.classes'
+import { Route as AdminBehaviourRouteImport } from './routes/admin.behaviour'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -167,14 +179,74 @@ const AdminTimeclockRoute = AdminTimeclockRouteImport.update({
   path: '/admin/timeclock',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTemplatesRoute = AdminTemplatesRouteImport.update({
+  id: '/admin/templates',
+  path: '/admin/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTeachersRoute = AdminTeachersRouteImport.update({
+  id: '/admin/teachers',
+  path: '/admin/teachers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStudentsRoute = AdminStudentsRouteImport.update({
+  id: '/admin/students',
+  path: '/admin/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminResourcesRoute = AdminResourcesRouteImport.update({
+  id: '/admin/resources',
+  path: '/admin/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/admin/reports',
+  path: '/admin/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRemindersRoute = AdminRemindersRouteImport.update({
   id: '/admin/reminders',
   path: '/admin/reminders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/admin/notifications',
+  path: '/admin/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminEvidenceRoute = AdminEvidenceRouteImport.update({
+  id: '/admin/evidence',
+  path: '/admin/evidence',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDocumentsRoute = AdminDocumentsRouteImport.update({
+  id: '/admin/documents',
+  path: '/admin/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCurriculumRoute = AdminCurriculumRouteImport.update({
+  id: '/admin/curriculum',
+  path: '/admin/curriculum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminClassesRoute = AdminClassesRouteImport.update({
+  id: '/admin/classes',
+  path: '/admin/classes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBehaviourRoute = AdminBehaviourRouteImport.update({
+  id: '/admin/behaviour',
+  path: '/admin/behaviour',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAuditRoute = AdminAuditRouteImport.update({
@@ -226,8 +298,20 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/behaviour': typeof AdminBehaviourRoute
+  '/admin/classes': typeof AdminClassesRoute
+  '/admin/curriculum': typeof AdminCurriculumRoute
+  '/admin/documents': typeof AdminDocumentsRoute
+  '/admin/evidence': typeof AdminEvidenceRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/reminders': typeof AdminRemindersRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/resources': typeof AdminResourcesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/students': typeof AdminStudentsRoute
+  '/admin/teachers': typeof AdminTeachersRoute
+  '/admin/templates': typeof AdminTemplatesRoute
   '/admin/timeclock': typeof AdminTimeclockRoute
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
@@ -260,8 +344,20 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/behaviour': typeof AdminBehaviourRoute
+  '/admin/classes': typeof AdminClassesRoute
+  '/admin/curriculum': typeof AdminCurriculumRoute
+  '/admin/documents': typeof AdminDocumentsRoute
+  '/admin/evidence': typeof AdminEvidenceRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/reminders': typeof AdminRemindersRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/resources': typeof AdminResourcesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/students': typeof AdminStudentsRoute
+  '/admin/teachers': typeof AdminTeachersRoute
+  '/admin/templates': typeof AdminTemplatesRoute
   '/admin/timeclock': typeof AdminTimeclockRoute
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
@@ -295,8 +391,20 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/behaviour': typeof AdminBehaviourRoute
+  '/admin/classes': typeof AdminClassesRoute
+  '/admin/curriculum': typeof AdminCurriculumRoute
+  '/admin/documents': typeof AdminDocumentsRoute
+  '/admin/evidence': typeof AdminEvidenceRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/reminders': typeof AdminRemindersRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/resources': typeof AdminResourcesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/students': typeof AdminStudentsRoute
+  '/admin/teachers': typeof AdminTeachersRoute
+  '/admin/templates': typeof AdminTemplatesRoute
   '/admin/timeclock': typeof AdminTimeclockRoute
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
@@ -331,8 +439,20 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/behaviour'
+    | '/admin/classes'
+    | '/admin/curriculum'
+    | '/admin/documents'
+    | '/admin/evidence'
     | '/admin/login'
+    | '/admin/notifications'
     | '/admin/reminders'
+    | '/admin/reports'
+    | '/admin/resources'
+    | '/admin/settings'
+    | '/admin/students'
+    | '/admin/teachers'
+    | '/admin/templates'
     | '/admin/timeclock'
     | '/admin/timetable'
     | '/admin/users'
@@ -365,8 +485,20 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/behaviour'
+    | '/admin/classes'
+    | '/admin/curriculum'
+    | '/admin/documents'
+    | '/admin/evidence'
     | '/admin/login'
+    | '/admin/notifications'
     | '/admin/reminders'
+    | '/admin/reports'
+    | '/admin/resources'
+    | '/admin/settings'
+    | '/admin/students'
+    | '/admin/teachers'
+    | '/admin/templates'
     | '/admin/timeclock'
     | '/admin/timetable'
     | '/admin/users'
@@ -399,8 +531,20 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/behaviour'
+    | '/admin/classes'
+    | '/admin/curriculum'
+    | '/admin/documents'
+    | '/admin/evidence'
     | '/admin/login'
+    | '/admin/notifications'
     | '/admin/reminders'
+    | '/admin/reports'
+    | '/admin/resources'
+    | '/admin/settings'
+    | '/admin/students'
+    | '/admin/teachers'
+    | '/admin/templates'
     | '/admin/timeclock'
     | '/admin/timetable'
     | '/admin/users'
@@ -434,8 +578,20 @@ export interface RootRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminBehaviourRoute: typeof AdminBehaviourRoute
+  AdminClassesRoute: typeof AdminClassesRoute
+  AdminCurriculumRoute: typeof AdminCurriculumRoute
+  AdminDocumentsRoute: typeof AdminDocumentsRoute
+  AdminEvidenceRoute: typeof AdminEvidenceRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminRemindersRoute: typeof AdminRemindersRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminResourcesRoute: typeof AdminResourcesRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminStudentsRoute: typeof AdminStudentsRoute
+  AdminTeachersRoute: typeof AdminTeachersRoute
+  AdminTemplatesRoute: typeof AdminTemplatesRoute
   AdminTimeclockRoute: typeof AdminTimeclockRoute
   AdminTimetableRoute: typeof AdminTimetableRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -621,6 +777,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTimeclockRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/templates': {
+      id: '/admin/templates'
+      path: '/admin/templates'
+      fullPath: '/admin/templates'
+      preLoaderRoute: typeof AdminTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/teachers': {
+      id: '/admin/teachers'
+      path: '/admin/teachers'
+      fullPath: '/admin/teachers'
+      preLoaderRoute: typeof AdminTeachersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/students': {
+      id: '/admin/students'
+      path: '/admin/students'
+      fullPath: '/admin/students'
+      preLoaderRoute: typeof AdminStudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/resources': {
+      id: '/admin/resources'
+      path: '/admin/resources'
+      fullPath: '/admin/resources'
+      preLoaderRoute: typeof AdminResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/reminders': {
       id: '/admin/reminders'
       path: '/admin/reminders'
@@ -628,11 +826,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/admin/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/evidence': {
+      id: '/admin/evidence'
+      path: '/admin/evidence'
+      fullPath: '/admin/evidence'
+      preLoaderRoute: typeof AdminEvidenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/documents': {
+      id: '/admin/documents'
+      path: '/admin/documents'
+      fullPath: '/admin/documents'
+      preLoaderRoute: typeof AdminDocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/curriculum': {
+      id: '/admin/curriculum'
+      path: '/admin/curriculum'
+      fullPath: '/admin/curriculum'
+      preLoaderRoute: typeof AdminCurriculumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/classes': {
+      id: '/admin/classes'
+      path: '/admin/classes'
+      fullPath: '/admin/classes'
+      preLoaderRoute: typeof AdminClassesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/behaviour': {
+      id: '/admin/behaviour'
+      path: '/admin/behaviour'
+      fullPath: '/admin/behaviour'
+      preLoaderRoute: typeof AdminBehaviourRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/audit': {
@@ -718,8 +958,20 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
   AdminAuditRoute: AdminAuditRoute,
+  AdminBehaviourRoute: AdminBehaviourRoute,
+  AdminClassesRoute: AdminClassesRoute,
+  AdminCurriculumRoute: AdminCurriculumRoute,
+  AdminDocumentsRoute: AdminDocumentsRoute,
+  AdminEvidenceRoute: AdminEvidenceRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
   AdminRemindersRoute: AdminRemindersRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminResourcesRoute: AdminResourcesRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminStudentsRoute: AdminStudentsRoute,
+  AdminTeachersRoute: AdminTeachersRoute,
+  AdminTemplatesRoute: AdminTemplatesRoute,
   AdminTimeclockRoute: AdminTimeclockRoute,
   AdminTimetableRoute: AdminTimetableRoute,
   AdminUsersRoute: AdminUsersRoute,
