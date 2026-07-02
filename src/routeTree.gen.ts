@@ -30,6 +30,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
+import { Route as LessonsBankRouteImport } from './routes/lessons.bank'
 import { Route as AdminWellbeingRouteImport } from './routes/admin.wellbeing'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTimetableRouteImport } from './routes/admin.timetable'
@@ -159,6 +160,11 @@ const StudentsStudentIdRoute = StudentsStudentIdRouteImport.update({
   id: '/$studentId',
   path: '/$studentId',
   getParentRoute: () => StudentsRoute,
+} as any)
+const LessonsBankRoute = LessonsBankRouteImport.update({
+  id: '/bank',
+  path: '/bank',
+  getParentRoute: () => LessonsRoute,
 } as any)
 const AdminWellbeingRoute = AdminWellbeingRouteImport.update({
   id: '/admin/wellbeing',
@@ -291,7 +297,7 @@ export interface FileRoutesByFullPath {
   '/evidence': typeof EvidenceRoute
   '/handover': typeof HandoverRoute
   '/ieps': typeof IepsRouteWithChildren
-  '/lessons': typeof LessonsRoute
+  '/lessons': typeof LessonsRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
@@ -323,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
+  '/lessons/bank': typeof LessonsBankRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -338,7 +345,7 @@ export interface FileRoutesByTo {
   '/evidence': typeof EvidenceRoute
   '/handover': typeof HandoverRoute
   '/ieps': typeof IepsRouteWithChildren
-  '/lessons': typeof LessonsRoute
+  '/lessons': typeof LessonsRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
@@ -370,6 +377,7 @@ export interface FileRoutesByTo {
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
+  '/lessons/bank': typeof LessonsBankRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin': typeof AdminIndexRoute
@@ -386,7 +394,7 @@ export interface FileRoutesById {
   '/evidence': typeof EvidenceRoute
   '/handover': typeof HandoverRoute
   '/ieps': typeof IepsRouteWithChildren
-  '/lessons': typeof LessonsRoute
+  '/lessons': typeof LessonsRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
@@ -418,6 +426,7 @@ export interface FileRoutesById {
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
+  '/lessons/bank': typeof LessonsBankRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -467,6 +476,7 @@ export interface FileRouteTypes {
     | '/admin/timetable'
     | '/admin/users'
     | '/admin/wellbeing'
+    | '/lessons/bank'
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin/'
@@ -514,6 +524,7 @@ export interface FileRouteTypes {
     | '/admin/timetable'
     | '/admin/users'
     | '/admin/wellbeing'
+    | '/lessons/bank'
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin'
@@ -561,6 +572,7 @@ export interface FileRouteTypes {
     | '/admin/timetable'
     | '/admin/users'
     | '/admin/wellbeing'
+    | '/lessons/bank'
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin/'
@@ -577,7 +589,7 @@ export interface RootRouteChildren {
   EvidenceRoute: typeof EvidenceRoute
   HandoverRoute: typeof HandoverRoute
   IepsRoute: typeof IepsRouteWithChildren
-  LessonsRoute: typeof LessonsRoute
+  LessonsRoute: typeof LessonsRouteWithChildren
   NotificationsRoute: typeof NotificationsRoute
   ParentRoute: typeof ParentRoute
   ReportsRoute: typeof ReportsRoute
@@ -762,6 +774,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentsStudentIdRouteImport
       parentRoute: typeof StudentsRoute
     }
+    '/lessons/bank': {
+      id: '/lessons/bank'
+      path: '/bank'
+      fullPath: '/lessons/bank'
+      preLoaderRoute: typeof LessonsBankRouteImport
+      parentRoute: typeof LessonsRoute
+    }
     '/admin/wellbeing': {
       id: '/admin/wellbeing'
       path: '/admin/wellbeing'
@@ -943,6 +962,17 @@ const IepsRouteChildren: IepsRouteChildren = {
 
 const IepsRouteWithChildren = IepsRoute._addFileChildren(IepsRouteChildren)
 
+interface LessonsRouteChildren {
+  LessonsBankRoute: typeof LessonsBankRoute
+}
+
+const LessonsRouteChildren: LessonsRouteChildren = {
+  LessonsBankRoute: LessonsBankRoute,
+}
+
+const LessonsRouteWithChildren =
+  LessonsRoute._addFileChildren(LessonsRouteChildren)
+
 interface StudentsRouteChildren {
   StudentsStudentIdRoute: typeof StudentsStudentIdRoute
 }
@@ -965,7 +995,7 @@ const rootRouteChildren: RootRouteChildren = {
   EvidenceRoute: EvidenceRoute,
   HandoverRoute: HandoverRoute,
   IepsRoute: IepsRouteWithChildren,
-  LessonsRoute: LessonsRoute,
+  LessonsRoute: LessonsRouteWithChildren,
   NotificationsRoute: NotificationsRoute,
   ParentRoute: ParentRoute,
   ReportsRoute: ReportsRoute,
