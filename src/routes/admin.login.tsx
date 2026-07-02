@@ -52,11 +52,8 @@ function AdminLogin() {
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-background">
       <div className="hidden md:flex flex-col justify-between p-10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-white">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight">SchoolMate AU</span>
+        <Link to="/" className="flex items-center gap-2.5 text-white">
+          <BrandMark size="lg" />
         </Link>
         <div className="space-y-3 max-w-md">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs backdrop-blur">

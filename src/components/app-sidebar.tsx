@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { BrandMark } from "@/components/brand-mark";
 import {
   LayoutDashboard,
   Users,
