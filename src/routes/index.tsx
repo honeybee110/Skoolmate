@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BrandMark } from "@/components/brand-mark";
 import {
   Sparkles,
   Wand2,
