@@ -44,6 +44,9 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-navy: var(--navy);
+  --color-navy-light: var(--navy-light);
+  --color-navy-soft: var(--navy-soft);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -107,6 +110,11 @@
   --chart-3: oklch(0.65 0.13 155);
   --chart-4: oklch(0.58 0.12 280);
   --chart-5: oklch(0.78 0.14 80);
+
+  /* Navy blue — leadership / admin accent */
+  --navy: oklch(0.32 0.09 260);
+  --navy-light: oklch(0.45 0.11 258);
+  --navy-soft: oklch(0.95 0.03 258);
 
   --sidebar: oklch(0.99 0.003 200);
   --sidebar-foreground: oklch(0.25 0.02 200);

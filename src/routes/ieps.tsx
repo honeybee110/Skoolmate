@@ -110,14 +110,10 @@ function IepBuilderPage() {
   });
 
   function updateCell(key: string, patch: Partial<CellState>) {
-    setCells((prev) => ({
-      ...prev,
-      [key]: {
-        progress: 0, status: "not-started", comment: "", evidenceCount: 0,
-        ...prev[key],
-        ...patch,
-      },
-    }));
+    setCells((prev) => {
+      const base: CellState = { progress: 0, status: "not-started", comment: "", evidenceCount: 0 };
+      return { ...prev, [key]: { ...base, ...prev[key], ...patch } };
+    });
   }
 
   function pickGoal(key: string, curriculumId: string) {
