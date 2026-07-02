@@ -82,11 +82,9 @@ function seedCells(): Record<string, CellState> {
     ["s8", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 50, status: "working-towards", evidenceCount: 7 }],
   ];
   const out: Record<string, CellState> = {};
+  const base: CellState = { progress: 0, status: "not-started", comment: "", evidenceCount: 0 };
   for (const [sid, subj, strand, patch] of seeds) {
-    out[cellKey(sid, subj, strand)] = {
-      progress: 0, status: "not-started", comment: "", evidenceCount: 0,
-      ...patch,
-    };
+    out[cellKey(sid, subj, strand)] = { ...base, ...patch };
   }
   return out;
 }
