@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { BrandMark } from "@/components/brand-mark";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Card } from "@/components/ui/card";
@@ -24,10 +25,7 @@ function PortalChooser() {
     <div className="min-h-screen bg-gradient-to-br from-primary-soft/30 via-background to-background flex items-center justify-center p-6">
       <div className="w-full max-w-4xl">
         <Link to="/" className="mb-8 flex items-center justify-center gap-2.5 text-foreground">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight">SchoolMate AU</span>
+          <BrandMark size="lg" />
         </Link>
 
         <div className="text-center mb-8">

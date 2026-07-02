@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { BrandMark } from "@/components/brand-mark";
 import {
   LayoutDashboard,
   Users,
@@ -149,15 +150,10 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <Link to={homeUrl} className="flex items-center gap-2.5 px-2 py-2">
-          <div className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-sm ${variant === "admin" ? "bg-slate-900 text-white" : "bg-primary text-primary-foreground"}`}>
-            {variant === "admin" ? <ShieldCheck className="h-5 w-5" strokeWidth={2.5} /> : <Sparkles className="h-5 w-5" strokeWidth={2.5} />}
-          </div>
-          <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold tracking-tight">SchoolMate</span>
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              {variant === "admin" ? "Admin Portal" : "Teacher Portal"}
-            </span>
-          </div>
+          <BrandMark
+            size="sm"
+            tagline={variant === "admin" ? "Admin Portal" : "Teacher Portal"}
+          />
         </Link>
       </SidebarHeader>
       <SidebarContent>
