@@ -11,7 +11,7 @@ import {
   FileText,
   Library,
   Calendar,
-  Sparkles,
+  
   Settings,
   ShieldCheck,
   ClipboardCheck,
@@ -109,9 +109,14 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
   const isActive = (url: string) =>
     url === "/admin" ? pathname === "/admin" : pathname === url || pathname.startsWith(url + "/");
 
-  const nav = variant === "admin" ? adminNav : teacherNav;
-  const homeUrl = variant === "admin" ? "/admin" : "/dashboard";
-  const settingsUrl = variant === "admin" ? "/admin/settings" : "/settings";
+  const isAdmin = variant === "admin";
+  const nav = isAdmin ? adminNav : teacherNav;
+  const homeUrl = isAdmin ? "/admin" : "/dashboard";
+  const settingsUrl = isAdmin ? "/admin/settings" : "/settings";
+
+  const activeClasses = isAdmin
+    ? "data-[active=true]:bg-[color:var(--navy-soft)] data-[active=true]:text-[color:var(--navy)] data-[active=true]:font-semibold data-[active=true]:border-l-2 data-[active=true]:border-[color:var(--navy)]"
+    : "data-[active=true]:bg-primary-soft data-[active=true]:text-primary data-[active=true]:font-medium data-[active=true]:border-l-2 data-[active=true]:border-primary";
 
   const primaryRole = roles[0];
   const initials = (profile?.display_name || user?.email || "SM")
@@ -123,7 +128,11 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
 
   const renderGroup = (label: string, items: NavItem[]) => (
     <SidebarGroup key={label}>
-      <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/70">
+      <SidebarGroupLabel
+        className={`text-[10px] uppercase tracking-[0.14em] font-semibold ${
+          isAdmin ? "text-[color:var(--navy-light)]/80" : "text-muted-foreground/70"
+        }`}
+      >
         {label}
       </SidebarGroupLabel>
       <SidebarGroupContent>
@@ -133,7 +142,7 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
               <SidebarMenuButton
                 asChild
                 isActive={isActive(item.url)}
-                className="data-[active=true]:bg-primary-soft data-[active=true]:text-primary data-[active=true]:font-medium"
+                className={activeClasses}
               >
                 <Link to={item.url} className="flex items-center gap-3">
                   <item.icon className="h-4 w-4" />
@@ -148,19 +157,41 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
   );
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
+    <Sidebar
+      collapsible="icon"
+      className={
+        isAdmin
+          ? "[&_[data-sidebar=sidebar]]:bg-gradient-to-b [&_[data-sidebar=sidebar]]:from-white [&_[data-sidebar=sidebar]]:via-[color:var(--navy-soft)]/40 [&_[data-sidebar=sidebar]]:to-white"
+          : ""
+      }
+    >
+      <SidebarHeader
+        className={
+          isAdmin
+            ? "border-b border-[color:var(--navy)]/15 bg-gradient-to-br from-[color:var(--navy)] to-[color:var(--navy-light)] text-white"
+            : "border-b border-sidebar-border"
+        }
+      >
         <Link to={homeUrl} className="flex items-center gap-2.5 px-2 py-2">
-          <BrandMark
-            size="sm"
-            tagline={variant === "admin" ? "Admin Portal" : "Teacher Portal"}
-          />
+          <BrandMark size="sm" tagline={isAdmin ? "Admin Portal" : "Teacher Portal"} />
         </Link>
+        {isAdmin && (
+          <div className="mx-2 mb-2 flex items-center gap-1.5 rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-white/90">
+            <ShieldCheck className="h-3 w-3" />
+            Leadership access
+          </div>
+        )}
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className={isAdmin ? "gap-0" : ""}>
         {Object.entries(nav).map(([label, items]) => renderGroup(label, items))}
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter
+        className={
+          isAdmin
+            ? "border-t border-[color:var(--navy)]/15 bg-[color:var(--navy-soft)]/40"
+            : "border-t border-sidebar-border"
+        }
+      >
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
@@ -182,7 +213,11 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
         <div className="flex items-center gap-2.5 rounded-lg p-2">
           <div
             className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white"
-            style={{ backgroundColor: `hsl(${profile?.avatar_hue ?? 200} 60% 50%)` }}
+            style={{
+              backgroundColor: isAdmin
+                ? "var(--navy)"
+                : `hsl(${profile?.avatar_hue ?? 200} 60% 50%)`,
+            }}
           >
             {initials || "SM"}
           </div>
@@ -190,7 +225,11 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
             <span className="text-xs font-medium">
               {profile?.display_name ?? user?.email?.split("@")[0] ?? "Guest"}
             </span>
-            <span className="text-[10px] text-muted-foreground">
+            <span
+              className={`text-[10px] ${
+                isAdmin ? "text-[color:var(--navy-light)] font-medium" : "text-muted-foreground"
+              }`}
+            >
               {primaryRole ? roleLabel(primaryRole) : "Not signed in"}
             </span>
           </div>
