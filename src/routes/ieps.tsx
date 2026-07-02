@@ -26,9 +26,14 @@ import {
   type Semester, type VcLevel,
 } from "@/lib/mock-data";
 import {
-  CURRICULUM_SUBJECTS, LEVEL_TONE, findRecord, recordsFor, visibleSubjects,
+  CURRICULUM_SUBJECTS, LEVEL_TONE, visibleSubjects,
   type CurriculumRecord, type CurriculumSubject,
 } from "@/lib/curriculum-db";
+import {
+  useCurriculumStore, updateCell as storeUpdateCell, pickGoal as storePickGoal,
+  cellKey, findRecordIn, recordsForIn,
+  type IepCellState, type IepStatus,
+} from "@/lib/curriculum-store";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEP Builder · SchoolMate AU" }] }),
@@ -41,7 +46,8 @@ export const Route = createFileRoute("/ieps")({
 
 // ---------- Cell state ----------
 
-type Status = "not-started" | "working-towards" | "nearly-there" | "achieved" | "exceeded";
+type Status = IepStatus;
+type CellState = IepCellState;
 
 const STATUS_META: Record<Status, { label: string; tone: string; pct: number }> = {
   "not-started":   { label: "Not started",     tone: "bg-slate-100 text-slate-600 border-slate-200", pct: 0 },
@@ -51,52 +57,14 @@ const STATUS_META: Record<Status, { label: string; tone: string; pct: number }> 
   exceeded:        { label: "Exceeded",         tone: "bg-navy/10 text-navy border-navy/20", pct: 110 },
 };
 
-interface CellState {
-  curriculumId?: string;
-  levelOverride?: VcLevel;
-  entrySkillsOverride?: string;
-  progress: number;
-  status: Status;
-  comment: string;
-  evidenceCount: number;
-}
-
-const cellKey = (studentId: string, subject: string, strand: string) =>
-  `${studentId}::${subject}::${strand}`;
-
-// Seeded matrix for demo — a handful of pre-filled cells so it looks alive.
-function seedCells(): Record<string, CellState> {
-  const seeds: Array<[string, string, string, Partial<CellState>]> = [
-    ["s1", "Mathematics", "Number", { curriculumId: "ma-n-f", progress: 55, status: "working-towards", evidenceCount: 8, comment: "Mia counting 0–15 confidently." }],
-    ["s1", "English", "Reading and Viewing", { curriculumId: "en-rv-b1", progress: 40, status: "working-towards", evidenceCount: 3 }],
-    ["s2", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 30, status: "working-towards", evidenceCount: 12 }],
-    ["s2", "English", "Reading and Viewing", { curriculumId: "en-rv-d", progress: 65, status: "nearly-there", evidenceCount: 3 }],
-    ["s3", "English", "Writing", { curriculumId: "en-w-f", progress: 100, status: "achieved", evidenceCount: 14 }],
-    ["s3", "Science", "Science Understanding", { curriculumId: "sc-f", progress: 40, status: "working-towards", evidenceCount: 3 }],
-    ["s4", "Self-Care", "Daily Living", { curriculumId: "sc-c-d", progress: 45, status: "working-towards", evidenceCount: 6 }],
-    ["s4", "Physical Education", "Movement and Physical Activity", { curriculumId: "pe-d", progress: 60, status: "nearly-there", evidenceCount: 4 }],
-    ["s5", "Music", "Making and Responding", { curriculumId: "mu-c", progress: 35, status: "working-towards", evidenceCount: 2 }],
-    ["s5", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 100, status: "achieved", evidenceCount: 9 }],
-    ["s7", "Learn to Play", "Play Skills", { curriculumId: "l2p-d", progress: 40, status: "working-towards", evidenceCount: 2 }],
-    ["s8", "Drama", "Making and Responding", { curriculumId: "dr-c", progress: 35, status: "working-towards", evidenceCount: 1 }],
-    ["s8", "English", "Speaking and Listening", { curriculumId: "en-sl-c", progress: 50, status: "working-towards", evidenceCount: 7 }],
-  ];
-  const out: Record<string, CellState> = {};
-  const base: CellState = { progress: 0, status: "not-started", comment: "", evidenceCount: 0 };
-  for (const [sid, subj, strand, patch] of seeds) {
-    out[cellKey(sid, subj, strand)] = { ...base, ...patch };
-  }
-  return out;
-}
-
 // ---------- Page ----------
 
 function IepBuilderPage() {
   const search = Route.useSearch();
+  const { cells, records } = useCurriculumStore();
   const [semester, setSemester] = useState<Semester>(
     (search.semester && search.semester !== "all" ? (search.semester as Semester) : currentSemester),
   );
-  const [cells, setCells] = useState<Record<string, CellState>>(seedCells);
   const [view, setView] = useState<"matrix" | "detail">("matrix");
   const [detailStudentId, setDetailStudentId] = useState<string>(search.student ?? students[0].id);
   const [query, setQuery] = useState("");
@@ -109,22 +77,11 @@ function IepBuilderPage() {
     return (`${s.firstName} ${s.lastName}`).toLowerCase().includes(q);
   });
 
-  function updateCell(key: string, patch: Partial<CellState>) {
-    setCells((prev) => {
-      const base: CellState = { progress: 0, status: "not-started", comment: "", evidenceCount: 0 };
-      return { ...prev, [key]: { ...base, ...prev[key], ...patch } };
-    });
-  }
+  const updateCell = (key: string, patch: Partial<CellState>) => storeUpdateCell(key, patch, "teacher");
 
   function pickGoal(key: string, curriculumId: string) {
-    const rec = findRecord(curriculumId);
-    updateCell(key, {
-      curriculumId,
-      levelOverride: undefined,
-      entrySkillsOverride: undefined,
-      status: cells[key]?.status ?? "working-towards",
-      progress: cells[key]?.progress ?? 10,
-    });
+    const rec = findRecordIn(records, curriculumId);
+    storePickGoal(key, curriculumId, "teacher");
     if (rec) toast.success(`Goal set · Level ${rec.level} · ${rec.curriculumCode}`, {
       description: "Level and Entry Skills auto-filled from Scope & Sequence.",
     });
@@ -380,7 +337,8 @@ function MatrixCell({
       </button>
     );
   }
-  const rec = findRecord(cell.curriculumId);
+  const { records } = useCurriculumStore();
+  const rec = findRecordIn(records, cell.curriculumId);
   if (!rec) return null;
   const level = cell.levelOverride ?? rec.level;
   const status = STATUS_META[cell.status];
@@ -543,9 +501,10 @@ function CellEditor({
   onUpdate: (key: string, patch: Partial<CellState>) => void;
   compact?: boolean;
 }) {
-  const options = recordsFor(subject, strand, semester);
+  const { records } = useCurriculumStore();
+  const options = recordsForIn(records, subject, strand, semester);
   const currentId = state?.curriculumId;
-  const rec: CurriculumRecord | undefined = currentId ? findRecord(currentId) : undefined;
+  const rec: CurriculumRecord | undefined = currentId ? findRecordIn(records, currentId) : undefined;
   const level = state?.levelOverride ?? rec?.level;
   const entrySkills = state?.entrySkillsOverride ?? rec?.entrySkills ?? "";
   const status = state?.status ?? "not-started";
