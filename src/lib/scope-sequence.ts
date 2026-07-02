@@ -33,7 +33,7 @@ export const scopeSequence: ScopeItem[] = [
     },
   },
   {
-    id: "ss3", domain: "English", learningArea: "English · Phonics", level: "F", vcLink: "VC2EFLY03",
+    id: "ss3", domain: "English", learningArea: "English · Reading & Viewing", level: "F", vcLink: "VC2EFLY03",
     intention: "Identify and produce initial sounds in familiar spoken words.",
     descriptors: {
       developing: "Attends to sounds; imitates with model",
