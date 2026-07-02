@@ -26,9 +26,14 @@ import {
   type Semester, type VcLevel,
 } from "@/lib/mock-data";
 import {
-  CURRICULUM_SUBJECTS, LEVEL_TONE, findRecord, recordsFor, visibleSubjects,
+  CURRICULUM_SUBJECTS, LEVEL_TONE, visibleSubjects,
   type CurriculumRecord, type CurriculumSubject,
 } from "@/lib/curriculum-db";
+import {
+  useCurriculumStore, updateCell as storeUpdateCell, pickGoal as storePickGoal,
+  cellKey, findRecordIn, recordsForIn,
+  type IepCellState, type IepStatus,
+} from "@/lib/curriculum-store";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEP Builder · SchoolMate AU" }] }),
