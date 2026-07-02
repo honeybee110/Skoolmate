@@ -50,14 +50,18 @@ const teacherNav = {
   Plan: [
     { title: "Lesson Planner", url: "/lessons", icon: BookOpen },
     { title: "IEPs", url: "/ieps", icon: Target },
+    { title: "Scope & Sequence", url: "/scope-sequence", icon: ClipboardCheck },
     { title: "Resource Bank", url: "/resources", icon: Library },
   ] as NavItem[],
   Track: [
     { title: "Evidence Hub", url: "/evidence", icon: Camera },
     { title: "Behaviour", url: "/behaviour", icon: Activity },
     { title: "Reports", url: "/reports", icon: FileText },
+    { title: "Notifications", url: "/notifications", icon: Bell },
+    { title: "Time & Attendance", url: "/timeclock", icon: Timer },
   ] as NavItem[],
 };
+
 
 const adminNav = {
   Overview: [
