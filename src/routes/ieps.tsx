@@ -26,7 +26,7 @@ import {
   type Semester, type VcLevel,
 } from "@/lib/mock-data";
 import {
-  CURRICULUM_SUBJECTS, LEVEL_TONE, visibleSubjects,
+  CURRICULUM_SUBJECTS, LEVEL_TONE, visibleSubjects, strandsForSemester,
   type CurriculumRecord, type CurriculumSubject,
 } from "@/lib/curriculum-db";
 import {
@@ -251,9 +251,10 @@ function ClassMatrix({
   semester: Semester;
   onOpenCell: (key: string) => void;
 }) {
-  // Flatten (subject, strand) into column list.
-  const columns = subjects.flatMap((sub) =>
-    sub.strands.map((strand) => ({ subject: sub.label, strand, color: sub.color })),
+  // Flatten (subject, strand) into column list — semester-aware.
+  const subjectStrands = subjects.map((sub) => ({ sub, strands: strandsForSemester(sub, semester) }));
+  const columns = subjectStrands.flatMap(({ sub, strands }) =>
+    strands.map((strand) => ({ subject: sub.label, strand, color: sub.color })),
   );
 
   return (
@@ -270,8 +271,8 @@ function ClassMatrix({
           <thead className="sticky top-0 z-20">
             <tr className="border-b bg-muted/60 text-left text-[10px] uppercase tracking-wide text-muted-foreground backdrop-blur">
               <th className="sticky left-0 z-30 bg-muted/80 px-3 py-2 font-semibold min-w-[180px]">Student</th>
-              {subjects.map((sub) => (
-                <th key={sub.label} colSpan={sub.strands.length}
+              {subjectStrands.map(({ sub, strands }) => (
+                <th key={sub.label} colSpan={strands.length}
                   className={cn("px-3 py-1.5 text-center font-semibold border-l border-border/60", sub.color)}>
                   {sub.label}
                 </th>
@@ -433,11 +434,11 @@ function SubjectAccordion({
             <Badge variant="outline" className="text-[10px]">{subject.semesterLock} only</Badge>
           )}
         </div>
-        <span className="text-[10px] text-muted-foreground">{subject.strands.length} strand{subject.strands.length === 1 ? "" : "s"}</span>
+        <span className="text-[10px] text-muted-foreground">{strandsForSemester(subject, semester).length} strand{strandsForSemester(subject, semester).length === 1 ? "" : "s"}</span>
       </button>
       {open && (
         <div className="divide-y">
-          {subject.strands.map((strand) => {
+          {strandsForSemester(subject, semester).map((strand) => {
             const key = cellKey(studentId, subject.label, strand);
             return (
               <StrandRow key={strand}
