@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { PortalGuard } from "@/components/portal-guard";
+
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
@@ -35,8 +37,13 @@ export const Route = createFileRoute("/dashboard")({
       { name: "description", content: "Your teaching day at a glance: timetable, behaviour alerts, lessons due, IEP reminders, and your class." },
     ],
   }),
-  component: Dashboard,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <Dashboard />
+    </PortalGuard>
+  ),
 });
+
 
 const kindIcon = {
   medication: Pill,
