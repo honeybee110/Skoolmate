@@ -128,6 +128,7 @@ function LessonsPage() {
     setDuration(s.duration);
     setAbility(s.abilityRange);
     setTerm(s.term);
+    if (s.week) setWeek(s.week);
     setStatus(s.status);
     setNotes(s.notes);
     setLesson((s.aiPlan as GeneratedLesson) ?? null);
