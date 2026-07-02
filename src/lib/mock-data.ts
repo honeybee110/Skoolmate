@@ -261,7 +261,6 @@ export type IepDomain =
   | "Self-care";
 export type VcLevel = "A" | "B" | "C" | "D" | "F" | "1" | "2";
 export type LearningArea =
-  | "English · Phonics"
   | "English · Reading & Viewing"
   | "English · Speaking & Listening"
   | "English · Writing"
@@ -355,7 +354,7 @@ export const iepGoals: IepGoal[] = ([
   },
   {
     id: "g4", studentId: "s2", studentName: "Jack O'Brien", domain: "English",
-    learningArea: "English · Phonics", level: "D", vcLink: "VC2EFDLY02",
+    learningArea: "English · Reading & Viewing", level: "D", vcLink: "VC2EFDLY02",
     learningIntention: "Blend and segment a small number of one-syllable words; read some CVC words.",
     smart: "Jack will read 6 CVC words by blending sounds with 80% accuracy across 3 sessions.",
     baseline: "Matches 2 CVC pictures to words", status: "working-towards",

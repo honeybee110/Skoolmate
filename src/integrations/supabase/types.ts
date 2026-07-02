@@ -288,6 +288,7 @@ export type Database = {
         }
         Returns: Json
       }
+      claim_founder_admin: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
