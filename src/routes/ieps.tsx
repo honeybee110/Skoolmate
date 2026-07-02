@@ -337,7 +337,8 @@ function MatrixCell({
       </button>
     );
   }
-  const rec = findRecord(cell.curriculumId);
+  const { records } = useCurriculumStore();
+  const rec = findRecordIn(records, cell.curriculumId);
   if (!rec) return null;
   const level = cell.levelOverride ?? rec.level;
   const status = STATUS_META[cell.status];
@@ -500,9 +501,10 @@ function CellEditor({
   onUpdate: (key: string, patch: Partial<CellState>) => void;
   compact?: boolean;
 }) {
-  const options = recordsFor(subject, strand, semester);
+  const { records } = useCurriculumStore();
+  const options = recordsForIn(records, subject, strand, semester);
   const currentId = state?.curriculumId;
-  const rec: CurriculumRecord | undefined = currentId ? findRecord(currentId) : undefined;
+  const rec: CurriculumRecord | undefined = currentId ? findRecordIn(records, currentId) : undefined;
   const level = state?.levelOverride ?? rec?.level;
   const entrySkills = state?.entrySkillsOverride ?? rec?.entrySkills ?? "";
   const status = state?.status ?? "not-started";
