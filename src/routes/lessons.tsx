@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw } from "lucide-react";
+import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw, Library } from "lucide-react";
 import { generateLessonPlan, type GeneratedLesson } from "@/lib/lessons.functions";
 import { curriculumStrands, lessonExamples } from "@/lib/mock-data";
 import { toast } from "sonner";
@@ -22,6 +22,31 @@ export const Route = createFileRoute("/lessons")({
 
 const subjects = Object.keys(curriculumStrands) as Array<keyof typeof curriculumStrands>;
 
+/** Six-part planning structure written into the Notes payload sent to the AI. */
+type NotesStruct = {
+  learningIntention: string;
+  successCriteria: string;
+  hook: string;
+  iDo: string;
+  weDo: string;
+  youDo: string;
+};
+
+const NOTES_FIELDS: Array<{ key: keyof NotesStruct; label: string; placeholder: string }> = [
+  { key: "learningIntention", label: "Learning Intention", placeholder: "We are learning to…" },
+  { key: "successCriteria",   label: "Success Criteria",   placeholder: "I can… (one per line)" },
+  { key: "hook",              label: "Hook",               placeholder: "Engagement / warm-up (2–3 min)…" },
+  { key: "iDo",               label: "I do",               placeholder: "Explicit teacher modelling…" },
+  { key: "weDo",              label: "We do",              placeholder: "Guided group / partner practice…" },
+  { key: "youDo",             label: "You do",             placeholder: "Independent / applied task with supports…" },
+];
+
+function serialiseNotes(n: NotesStruct) {
+  return NOTES_FIELDS
+    .map((f) => `${f.label}:\n${n[f.key].trim() || "(to be drafted by AI)"}`)
+    .join("\n\n");
+}
+
 function LessonsPage() {
   const generate = useServerFn(generateLessonPlan);
   const [subject, setSubject] = useState<string>("Mathematics");
@@ -29,16 +54,24 @@ function LessonsPage() {
   const [topic, setTopic] = useState("Counting to 20 with 10-frames");
   const [duration, setDuration] = useState("45 min");
   const [ability, setAbility] = useState("Towards Foundation A–D · mixed AAC users");
-  const [notes, setNotes] = useState("Mia is working on counting to 20. Jack and Hamish use AAC for requesting. Noah needs sensory regulation prompts.");
+  const [notes, setNotes] = useState<NotesStruct>({
+    learningIntention: "We are learning to count and represent numbers 0–20.",
+    successCriteria: "I can count 0–20 aloud.\nI can match numeral to quantity to 10.\nI can fill a 10-frame with support.",
+    hook: "Number of the day song with body percussion; each learner touches the numeral card.",
+    iDo: "Teacher models 1:1 counting on the 10-frame using magnetic counters.",
+    weDo: "Small groups build sets of 5, 8, 10 with adult and peer prompts.",
+    youDo: "Each learner completes their own 10-frame task card with AAC/visual supports.",
+  });
   const [loading, setLoading] = useState(false);
   const [lesson, setLesson] = useState<GeneratedLesson | null>(null);
 
   const strandOptions = curriculumStrands[subject as keyof typeof curriculumStrands] ?? [];
+  const notesPayload = useMemo(() => serialiseNotes(notes), [notes]);
 
   async function handleGenerate() {
     setLoading(true);
     try {
-      const result = await generate({ data: { subject, strand, topic, duration, abilityRange: ability, notes } });
+      const result = await generate({ data: { subject, strand, topic, duration, abilityRange: ability, notes: notesPayload } });
       setLesson(result as GeneratedLesson);
       toast.success("Lesson drafted by AI — review and submit for approval.");
     } catch (err) {
@@ -55,6 +88,7 @@ function LessonsPage() {
     setTopic(ex.topic);
     setDuration(ex.duration);
   }
+
 
   return (
     <AppShell>
