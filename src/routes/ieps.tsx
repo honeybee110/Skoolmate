@@ -434,11 +434,11 @@ function SubjectAccordion({
             <Badge variant="outline" className="text-[10px]">{subject.semesterLock} only</Badge>
           )}
         </div>
-        <span className="text-[10px] text-muted-foreground">{subject.strands.length} strand{subject.strands.length === 1 ? "" : "s"}</span>
+        <span className="text-[10px] text-muted-foreground">{strandsForSemester(subject, semester).length} strand{strandsForSemester(subject, semester).length === 1 ? "" : "s"}</span>
       </button>
       {open && (
         <div className="divide-y">
-          {subject.strands.map((strand) => {
+          {strandsForSemester(subject, semester).map((strand) => {
             const key = cellKey(studentId, subject.label, strand);
             return (
               <StrandRow key={strand}
