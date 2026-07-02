@@ -591,50 +591,67 @@ function CellEditor({
         </div>
       )}
 
-      {/* Cross-Check steps drive Status + Progress */}
+      {/* Cross-Check steps drive Status + Progress — each step shows a curriculum-aligned descriptor. */}
       <div>
         <div className="flex items-center justify-between">
           <Label>Cross-Check steps <span className="ml-1 text-[10px] text-muted-foreground normal-case">Status is auto-set from completed steps</span></Label>
           <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-semibold", s.tone)}>{s.label}</span>
         </div>
-        <div className="mt-2 grid gap-2 md:grid-cols-3">
-          {CROSS_CHECK_LABELS.map((lbl, i) => {
-            const done = checks[i];
-            return (
-              <button
-                key={lbl}
-                type="button"
-                onClick={() => toggleCheck(i)}
-                className={cn(
-                  "flex items-start gap-2 rounded-lg border p-2.5 text-left transition",
-                  done
-                    ? i === 2
-                      ? "border-emerald-300 bg-emerald-50"
-                      : i === 1
-                        ? "border-amber-300 bg-amber-50"
-                        : "border-orange-300 bg-orange-50"
-                    : "border-dashed bg-muted/30 hover:border-navy/40",
-                )}
-              >
-                <span className={cn(
-                  "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border",
-                  done ? "bg-navy border-navy text-white" : "border-muted-foreground/40 bg-white",
-                )}>
-                  {done && <CheckCircle2 className="h-3 w-3" />}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider">Step {i + 1}</p>
-                  <p className="text-xs leading-snug">{lbl}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        {(() => {
+          const stepDescriptions: [string, string, string] = rec
+            ? [
+                rec.entrySkills || "Entry skill demonstrated with adult modelling and prompts.",
+                rec.contentDescription || "Applies the skill in structured practice with reduced prompts.",
+                rec.achievementStandard || "Demonstrates the achievement standard independently across contexts.",
+              ]
+            : [
+                "Select a curriculum goal to load the Step 1 descriptor.",
+                "Select a curriculum goal to load the Step 2 descriptor.",
+                "Select a curriculum goal to load the Step 3 descriptor.",
+              ];
+          return (
+            <div className="mt-2 grid gap-2 md:grid-cols-3">
+              {CROSS_CHECK_LABELS.map((lbl, i) => {
+                const done = checks[i];
+                return (
+                  <button
+                    key={lbl}
+                    type="button"
+                    onClick={() => toggleCheck(i)}
+                    disabled={!rec}
+                    className={cn(
+                      "flex items-start gap-2 rounded-lg border p-2.5 text-left transition disabled:cursor-not-allowed disabled:opacity-60",
+                      done
+                        ? i === 2
+                          ? "border-emerald-300 bg-emerald-50"
+                          : i === 1
+                            ? "border-amber-300 bg-amber-50"
+                            : "border-orange-300 bg-orange-50"
+                        : "border-dashed bg-muted/30 hover:border-navy/40",
+                    )}
+                  >
+                    <span className={cn(
+                      "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                      done ? "bg-navy border-navy text-white" : "border-muted-foreground/40 bg-white",
+                    )}>
+                      {done && <CheckCircle2 className="h-3 w-3" />}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider">Step {i + 1} · {lbl}</p>
+                      <p className="mt-1 text-[11px] leading-snug text-foreground/80">{stepDescriptions[i]}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })()}
         <div className="mt-2 flex items-center gap-2">
           <Progress value={Math.min(progress, 100)} className="h-1.5 flex-1" />
           <span className="w-12 text-right text-xs font-semibold tabular-nums text-muted-foreground">{progress}%</span>
         </div>
       </div>
+
 
       {/* Comment + evidence */}
       <div>

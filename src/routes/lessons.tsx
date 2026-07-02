@@ -10,9 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw, Library } from "lucide-react";
+import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw, Library, Save, FolderOpen } from "lucide-react";
 import { generateLessonPlan, type GeneratedLesson } from "@/lib/lessons.functions";
 import { curriculumStrands, lessonExamples } from "@/lib/mock-data";
+import { useLessonStore, saveLesson, setLessonStatus, type LessonNotes, type LessonTerm, type SavedLesson } from "@/lib/lesson-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lessons")({
@@ -64,9 +65,13 @@ function LessonsPage() {
   });
   const [loading, setLoading] = useState(false);
   const [lesson, setLesson] = useState<GeneratedLesson | null>(null);
+  const [term, setTerm] = useState<LessonTerm>("Term 1");
+  const [status, setStatus] = useState<"draft" | "pending" | "approved">("draft");
+  const [currentId, setCurrentId] = useState<string | null>(null);
 
   const strandOptions = curriculumStrands[subject as keyof typeof curriculumStrands] ?? [];
   const notesPayload = useMemo(() => serialiseNotes(notes), [notes]);
+  const { lessons: savedLessons } = useLessonStore();
 
   async function handleGenerate() {
     setLoading(true);
@@ -89,6 +94,45 @@ function LessonsPage() {
     setDuration(ex.duration);
   }
 
+  function handleSave(nextStatus?: "draft" | "pending" | "approved") {
+    const saved = saveLesson({
+      id: currentId ?? undefined,
+      title: topic,
+      subject, strand, topic, duration,
+      abilityRange: ability,
+      term,
+      vcCode: (lesson as GeneratedLesson | null)?.vcCode,
+      notes: notes as LessonNotes,
+      aiPlan: lesson ?? undefined,
+      author: "Honey P.",
+      status: nextStatus ?? status,
+    });
+    setCurrentId(saved.id);
+    setStatus(saved.status);
+    toast.success(
+      nextStatus === "pending" ? "Submitted for approval." :
+      nextStatus === "approved" ? "Marked as approved." :
+      "Lesson saved to Lesson Bank.",
+    );
+  }
+
+  function loadSaved(id: string) {
+    const s = savedLessons.find((l) => l.id === id);
+    if (!s) return;
+    setCurrentId(s.id);
+    setSubject(s.subject);
+    setStrand(s.strand);
+    setTopic(s.topic);
+    setDuration(s.duration);
+    setAbility(s.abilityRange);
+    setTerm(s.term);
+    setStatus(s.status);
+    setNotes(s.notes);
+    setLesson((s.aiPlan as GeneratedLesson) ?? null);
+    toast.success(`Loaded "${s.title}" (${s.status}).`);
+  }
+
+
 
   return (
     <AppShell>
@@ -97,10 +141,31 @@ function LessonsPage() {
         subtitle="Victorian Curriculum 2.0 · differentiated · approval-ready"
         actions={
           <>
+            {savedLessons.length > 0 && (
+              <Select value={currentId ?? ""} onValueChange={loadSaved}>
+                <SelectTrigger className="h-9 w-[220px] text-xs">
+                  <FolderOpen className="h-3.5 w-3.5" />
+                  <SelectValue placeholder="Load saved lesson…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {savedLessons.map((l) => (
+                    <SelectItem key={l.id} value={l.id}>
+                      <span className="text-xs">{l.title}</span>
+                      <span className="ml-1 text-[10px] text-muted-foreground">· {l.subject} · {l.status}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Button asChild variant="outline" size="sm">
               <Link to="/lessons/bank"><Library className="h-4 w-4" />Lesson Bank</Link>
             </Button>
-            <Button variant="outline" size="sm"><Plus className="h-4 w-4" />Blank lesson</Button>
+            <Button variant="outline" size="sm" onClick={() => { setCurrentId(null); setLesson(null); setStatus("draft"); }}>
+              <Plus className="h-4 w-4" />New
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleSave("draft")}>
+              <Save className="h-4 w-4" />Save
+            </Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleGenerate} disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               {loading ? "Drafting…" : "Generate with AI"}
@@ -108,6 +173,7 @@ function LessonsPage() {
           </>
         }
       />
+
       <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[380px_1fr]">
         {/* Brief panel */}
         <Card className="h-fit p-5">
@@ -168,14 +234,48 @@ function LessonsPage() {
                 ))}
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Term</Label>
+                <Select value={term} onValueChange={(v) => setTerm(v as LessonTerm)}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(["Term 1", "Term 2", "Term 3", "Term 4"] as LessonTerm[]).map((t) => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Status</Label>
+                <div className="flex h-9 items-center gap-1.5 rounded-md border bg-muted/30 px-2 text-xs">
+                  <Badge variant="outline" className="capitalize">{status}</Badge>
+                  {currentId && <span className="text-[10px] text-muted-foreground truncate">saved</span>}
+                </div>
+              </div>
+            </div>
             <Button onClick={handleGenerate} disabled={loading} className="w-full bg-primary hover:bg-primary/90">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               {loading ? "Drafting lesson…" : "Draft with AI"}
             </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" onClick={() => handleSave("draft")}>
+                <Save className="h-4 w-4" />Save draft
+              </Button>
+              <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleSave("pending")}>
+                <Send className="h-4 w-4" />Submit for approval
+              </Button>
+            </div>
+            {currentId && status === "pending" && (
+              <Button variant="outline" size="sm" className="w-full" onClick={() => { setLessonStatus(currentId, "approved"); setStatus("approved"); toast.success("Approved."); }}>
+                <FileCheck2 className="h-4 w-4" />Approve (Leadership)
+              </Button>
+            )}
           </div>
 
 
           <div className="mt-6 border-t pt-4">
+
             <p className="mb-2 text-xs font-medium text-muted-foreground">Quick starts</p>
             <div className="space-y-1.5">
               {lessonExamples.map((ex, i) => (
