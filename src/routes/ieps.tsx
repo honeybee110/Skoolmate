@@ -31,8 +31,8 @@ import {
 } from "@/lib/curriculum-db";
 import {
   useCurriculumStore, updateCell as storeUpdateCell, pickGoal as storePickGoal,
-  cellKey, findRecordIn, recordsForIn,
-  type IepCellState, type IepStatus,
+  cellKey, findRecordIn, recordsForIn, deriveFromChecks, CROSS_CHECK_LABELS,
+  type IepCellState, type IepStatus, type CrossChecks,
 } from "@/lib/curriculum-store";
 
 export const Route = createFileRoute("/ieps")({
@@ -50,11 +50,9 @@ type Status = IepStatus;
 type CellState = IepCellState;
 
 const STATUS_META: Record<Status, { label: string; tone: string; pct: number }> = {
-  "not-started":   { label: "Not started",     tone: "bg-slate-100 text-slate-600 border-slate-200", pct: 0 },
-  "working-towards": { label: "Working Towards", tone: "bg-orange-100 text-orange-700 border-orange-200", pct: 25 },
-  "nearly-there":  { label: "Nearly There",    tone: "bg-amber-100 text-amber-700 border-amber-200", pct: 60 },
-  achieved:        { label: "Achieved",         tone: "bg-emerald-100 text-emerald-700 border-emerald-200", pct: 100 },
-  exceeded:        { label: "Exceeded",         tone: "bg-navy/10 text-navy border-navy/20", pct: 110 },
+  developing:        { label: "Developing",      tone: "bg-orange-100 text-orange-700 border-orange-200", pct: 10 },
+  "working-towards": { label: "Working Towards", tone: "bg-amber-100 text-amber-700 border-amber-200",   pct: 50 },
+  achieved:          { label: "Achieved",        tone: "bg-emerald-100 text-emerald-700 border-emerald-200", pct: 100 },
 };
 
 // ---------- Page ----------
@@ -91,8 +89,8 @@ function IepBuilderPage() {
     const scoped = Object.values(cells);
     return {
       total: scoped.length,
-      achieved: scoped.filter((c) => c.status === "achieved" || c.status === "exceeded").length,
-      inProgress: scoped.filter((c) => c.status === "working-towards" || c.status === "nearly-there").length,
+      achieved: scoped.filter((c) => c.status === "achieved").length,
+      inProgress: scoped.filter((c) => c.status === "working-towards").length,
       avg: scoped.length
         ? Math.round(scoped.reduce((a, c) => a + Math.min(c.progress, 100), 0) / scoped.length)
         : 0,
@@ -508,9 +506,17 @@ function CellEditor({
   const rec: CurriculumRecord | undefined = currentId ? findRecordIn(records, currentId) : undefined;
   const level = state?.levelOverride ?? rec?.level;
   const entrySkills = state?.entrySkillsOverride ?? rec?.entrySkills ?? "";
-  const status = state?.status ?? "not-started";
+  const status: Status = state?.status ?? "developing";
   const progress = state?.progress ?? 0;
+  const checks: CrossChecks = state?.crossChecks ?? [false, false, false];
   const s = STATUS_META[status];
+
+  const toggleCheck = (i: number) => {
+    const next: CrossChecks = [...checks] as CrossChecks;
+    next[i] = !next[i];
+    const derived = deriveFromChecks(next);
+    onUpdate(cellKey, { crossChecks: next, status: derived.status, progress: derived.progress });
+  };
 
   return (
     <div className={cn("space-y-3", !compact && "space-y-4")}>
@@ -585,32 +591,48 @@ function CellEditor({
         </div>
       )}
 
-      {/* Progress + status */}
-      <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-        <div>
-          <Label>Progress</Label>
-          <div className="mt-2 flex items-center gap-3">
-            <input
-              type="range" min={0} max={110} value={progress}
-              onChange={(e) => onUpdate(cellKey, { progress: Number(e.target.value) })}
-              className="flex-1 accent-navy"
-            />
-            <span className="w-12 text-right text-sm font-semibold tabular-nums">{progress}%</span>
-          </div>
-          <Progress value={Math.min(progress, 100)} className="mt-1 h-1.5" />
+      {/* Cross-Check steps drive Status + Progress */}
+      <div>
+        <div className="flex items-center justify-between">
+          <Label>Cross-Check steps <span className="ml-1 text-[10px] text-muted-foreground normal-case">Status is auto-set from completed steps</span></Label>
+          <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-semibold", s.tone)}>{s.label}</span>
         </div>
-        <div>
-          <Label>Status</Label>
-          <Select value={status} onValueChange={(v) => onUpdate(cellKey, { status: v as Status })}>
-            <SelectTrigger className={cn("mt-1 h-9 w-[160px]", s.tone)}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.entries(STATUS_META) as [Status, typeof STATUS_META[Status]][]).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="mt-2 grid gap-2 md:grid-cols-3">
+          {CROSS_CHECK_LABELS.map((lbl, i) => {
+            const done = checks[i];
+            return (
+              <button
+                key={lbl}
+                type="button"
+                onClick={() => toggleCheck(i)}
+                className={cn(
+                  "flex items-start gap-2 rounded-lg border p-2.5 text-left transition",
+                  done
+                    ? i === 2
+                      ? "border-emerald-300 bg-emerald-50"
+                      : i === 1
+                        ? "border-amber-300 bg-amber-50"
+                        : "border-orange-300 bg-orange-50"
+                    : "border-dashed bg-muted/30 hover:border-navy/40",
+                )}
+              >
+                <span className={cn(
+                  "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                  done ? "bg-navy border-navy text-white" : "border-muted-foreground/40 bg-white",
+                )}>
+                  {done && <CheckCircle2 className="h-3 w-3" />}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider">Step {i + 1}</p>
+                  <p className="text-xs leading-snug">{lbl}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-2 flex items-center gap-2">
+          <Progress value={Math.min(progress, 100)} className="h-1.5 flex-1" />
+          <span className="w-12 text-right text-xs font-semibold tabular-nums text-muted-foreground">{progress}%</span>
         </div>
       </div>
 

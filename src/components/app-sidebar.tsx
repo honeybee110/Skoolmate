@@ -54,6 +54,7 @@ const teacherNav = {
   ] as NavItem[],
   Plan: [
     { title: "Lesson Planner", url: "/lessons", icon: BookOpen },
+    { title: "Lesson Bank", url: "/lessons/bank", icon: Library },
     { title: "IEPs", url: "/ieps", icon: Target },
     { title: "Handover Documents", url: "/handover", icon: FolderKanban },
     { title: "Scope & Sequence", url: "/scope-sequence", icon: ClipboardCheck },

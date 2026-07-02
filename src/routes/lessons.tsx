@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw } from "lucide-react";
+import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw, Library } from "lucide-react";
 import { generateLessonPlan, type GeneratedLesson } from "@/lib/lessons.functions";
 import { curriculumStrands, lessonExamples } from "@/lib/mock-data";
 import { toast } from "sonner";
@@ -22,6 +22,31 @@ export const Route = createFileRoute("/lessons")({
 
 const subjects = Object.keys(curriculumStrands) as Array<keyof typeof curriculumStrands>;
 
+/** Six-part planning structure written into the Notes payload sent to the AI. */
+type NotesStruct = {
+  learningIntention: string;
+  successCriteria: string;
+  hook: string;
+  iDo: string;
+  weDo: string;
+  youDo: string;
+};
+
+const NOTES_FIELDS: Array<{ key: keyof NotesStruct; label: string; placeholder: string }> = [
+  { key: "learningIntention", label: "Learning Intention", placeholder: "We are learning to…" },
+  { key: "successCriteria",   label: "Success Criteria",   placeholder: "I can… (one per line)" },
+  { key: "hook",              label: "Hook",               placeholder: "Engagement / warm-up (2–3 min)…" },
+  { key: "iDo",               label: "I do",               placeholder: "Explicit teacher modelling…" },
+  { key: "weDo",              label: "We do",              placeholder: "Guided group / partner practice…" },
+  { key: "youDo",             label: "You do",             placeholder: "Independent / applied task with supports…" },
+];
+
+function serialiseNotes(n: NotesStruct) {
+  return NOTES_FIELDS
+    .map((f) => `${f.label}:\n${n[f.key].trim() || "(to be drafted by AI)"}`)
+    .join("\n\n");
+}
+
 function LessonsPage() {
   const generate = useServerFn(generateLessonPlan);
   const [subject, setSubject] = useState<string>("Mathematics");
@@ -29,16 +54,24 @@ function LessonsPage() {
   const [topic, setTopic] = useState("Counting to 20 with 10-frames");
   const [duration, setDuration] = useState("45 min");
   const [ability, setAbility] = useState("Towards Foundation A–D · mixed AAC users");
-  const [notes, setNotes] = useState("Mia is working on counting to 20. Jack and Hamish use AAC for requesting. Noah needs sensory regulation prompts.");
+  const [notes, setNotes] = useState<NotesStruct>({
+    learningIntention: "We are learning to count and represent numbers 0–20.",
+    successCriteria: "I can count 0–20 aloud.\nI can match numeral to quantity to 10.\nI can fill a 10-frame with support.",
+    hook: "Number of the day song with body percussion; each learner touches the numeral card.",
+    iDo: "Teacher models 1:1 counting on the 10-frame using magnetic counters.",
+    weDo: "Small groups build sets of 5, 8, 10 with adult and peer prompts.",
+    youDo: "Each learner completes their own 10-frame task card with AAC/visual supports.",
+  });
   const [loading, setLoading] = useState(false);
   const [lesson, setLesson] = useState<GeneratedLesson | null>(null);
 
   const strandOptions = curriculumStrands[subject as keyof typeof curriculumStrands] ?? [];
+  const notesPayload = useMemo(() => serialiseNotes(notes), [notes]);
 
   async function handleGenerate() {
     setLoading(true);
     try {
-      const result = await generate({ data: { subject, strand, topic, duration, abilityRange: ability, notes } });
+      const result = await generate({ data: { subject, strand, topic, duration, abilityRange: ability, notes: notesPayload } });
       setLesson(result as GeneratedLesson);
       toast.success("Lesson drafted by AI — review and submit for approval.");
     } catch (err) {
@@ -56,6 +89,7 @@ function LessonsPage() {
     setDuration(ex.duration);
   }
 
+
   return (
     <AppShell>
       <PageHeader
@@ -63,6 +97,9 @@ function LessonsPage() {
         subtitle="Victorian Curriculum 2.0 · differentiated · approval-ready"
         actions={
           <>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/lessons/bank"><Library className="h-4 w-4" />Lesson Bank</Link>
+            </Button>
             <Button variant="outline" size="sm"><Plus className="h-4 w-4" />Blank lesson</Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleGenerate} disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -71,7 +108,7 @@ function LessonsPage() {
           </>
         }
       />
-      <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[360px_1fr]">
+      <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[380px_1fr]">
         {/* Brief panel */}
         <Card className="h-fit p-5">
           <div className="mb-4 flex items-center gap-2">
@@ -109,15 +146,34 @@ function LessonsPage() {
                 <Input value={ability} onChange={(e) => setAbility(e.target.value)} className="h-9 text-sm" />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Class notes (students, supports)</Label>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={5} className="text-sm" />
+
+            {/* Structured Lesson Plan Notes — LI, SC, Hook, I do, We do, You do */}
+            <div className="rounded-lg border border-primary/20 bg-primary-soft/20 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs font-semibold text-primary">Lesson Plan Notes</p>
+                <span className="text-[10px] text-muted-foreground">6-part structure · sent to AI</span>
+              </div>
+              <div className="space-y-2.5">
+                {NOTES_FIELDS.map((f) => (
+                  <div key={f.key} className="space-y-1">
+                    <Label className="text-[11px] font-semibold">{f.label}</Label>
+                    <Textarea
+                      value={notes[f.key]}
+                      onChange={(e) => setNotes((n) => ({ ...n, [f.key]: e.target.value }))}
+                      rows={f.key === "successCriteria" ? 3 : 2}
+                      className="text-xs"
+                      placeholder={f.placeholder}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
             <Button onClick={handleGenerate} disabled={loading} className="w-full bg-primary hover:bg-primary/90">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               {loading ? "Drafting lesson…" : "Draft with AI"}
             </Button>
           </div>
+
 
           <div className="mt-6 border-t pt-4">
             <p className="mb-2 text-xs font-medium text-muted-foreground">Quick starts</p>
