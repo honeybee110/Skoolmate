@@ -271,10 +271,11 @@ function LessonsPage() {
                 <FileCheck2 className="h-4 w-4" />Approve (Leadership)
               </Button>
             )}
-
+          </div>
 
 
           <div className="mt-6 border-t pt-4">
+
             <p className="mb-2 text-xs font-medium text-muted-foreground">Quick starts</p>
             <div className="space-y-1.5">
               {lessonExamples.map((ex, i) => (
