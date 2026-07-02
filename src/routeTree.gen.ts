@@ -9,11 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TimeclockRouteImport } from './routes/timeclock'
 import { Route as StudentsRouteImport } from './routes/students'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ScopeSequenceRouteImport } from './routes/scope-sequence'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ParentRouteImport } from './routes/parent'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LessonsRouteImport } from './routes/lessons'
 import { Route as IepsRouteImport } from './routes/ieps'
 import { Route as EvidenceRouteImport } from './routes/evidence'
@@ -36,6 +39,11 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAlliedHealthRouteImport } from './routes/admin.allied-health'
 import { Route as IepsGoalIdPrintRouteImport } from './routes/ieps.$goalId.print'
 
+const TimeclockRoute = TimeclockRouteImport.update({
+  id: '/timeclock',
+  path: '/timeclock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
   path: '/students',
@@ -44,6 +52,11 @@ const StudentsRoute = StudentsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScopeSequenceRoute = ScopeSequenceRouteImport.update({
+  id: '/scope-sequence',
+  path: '/scope-sequence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResourcesRoute = ResourcesRouteImport.update({
@@ -59,6 +72,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const ParentRoute = ParentRouteImport.update({
   id: '/parent',
   path: '/parent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LessonsRoute = LessonsRouteImport.update({
@@ -177,11 +195,14 @@ export interface FileRoutesByFullPath {
   '/evidence': typeof EvidenceRoute
   '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
+  '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
+  '/scope-sequence': typeof ScopeSequenceRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/timeclock': typeof TimeclockRoute
   '/admin/allied-health': typeof AdminAlliedHealthRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -205,11 +226,14 @@ export interface FileRoutesByTo {
   '/evidence': typeof EvidenceRoute
   '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
+  '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
+  '/scope-sequence': typeof ScopeSequenceRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/timeclock': typeof TimeclockRoute
   '/admin/allied-health': typeof AdminAlliedHealthRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -234,11 +258,14 @@ export interface FileRoutesById {
   '/evidence': typeof EvidenceRoute
   '/ieps': typeof IepsRouteWithChildren
   '/lessons': typeof LessonsRoute
+  '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
+  '/scope-sequence': typeof ScopeSequenceRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/timeclock': typeof TimeclockRoute
   '/admin/allied-health': typeof AdminAlliedHealthRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -264,11 +291,14 @@ export interface FileRouteTypes {
     | '/evidence'
     | '/ieps'
     | '/lessons'
+    | '/notifications'
     | '/parent'
     | '/reports'
     | '/resources'
+    | '/scope-sequence'
     | '/settings'
     | '/students'
+    | '/timeclock'
     | '/admin/allied-health'
     | '/admin/analytics'
     | '/admin/approvals'
@@ -292,11 +322,14 @@ export interface FileRouteTypes {
     | '/evidence'
     | '/ieps'
     | '/lessons'
+    | '/notifications'
     | '/parent'
     | '/reports'
     | '/resources'
+    | '/scope-sequence'
     | '/settings'
     | '/students'
+    | '/timeclock'
     | '/admin/allied-health'
     | '/admin/analytics'
     | '/admin/approvals'
@@ -320,11 +353,14 @@ export interface FileRouteTypes {
     | '/evidence'
     | '/ieps'
     | '/lessons'
+    | '/notifications'
     | '/parent'
     | '/reports'
     | '/resources'
+    | '/scope-sequence'
     | '/settings'
     | '/students'
+    | '/timeclock'
     | '/admin/allied-health'
     | '/admin/analytics'
     | '/admin/approvals'
@@ -349,11 +385,14 @@ export interface RootRouteChildren {
   EvidenceRoute: typeof EvidenceRoute
   IepsRoute: typeof IepsRouteWithChildren
   LessonsRoute: typeof LessonsRoute
+  NotificationsRoute: typeof NotificationsRoute
   ParentRoute: typeof ParentRoute
   ReportsRoute: typeof ReportsRoute
   ResourcesRoute: typeof ResourcesRoute
+  ScopeSequenceRoute: typeof ScopeSequenceRoute
   SettingsRoute: typeof SettingsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
+  TimeclockRoute: typeof TimeclockRoute
   AdminAlliedHealthRoute: typeof AdminAlliedHealthRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
@@ -368,6 +407,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/timeclock': {
+      id: '/timeclock'
+      path: '/timeclock'
+      fullPath: '/timeclock'
+      preLoaderRoute: typeof TimeclockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/students': {
       id: '/students'
       path: '/students'
@@ -380,6 +426,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scope-sequence': {
+      id: '/scope-sequence'
+      path: '/scope-sequence'
+      fullPath: '/scope-sequence'
+      preLoaderRoute: typeof ScopeSequenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resources': {
@@ -401,6 +454,13 @@ declare module '@tanstack/react-router' {
       path: '/parent'
       fullPath: '/parent'
       preLoaderRoute: typeof ParentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lessons': {
@@ -585,11 +645,14 @@ const rootRouteChildren: RootRouteChildren = {
   EvidenceRoute: EvidenceRoute,
   IepsRoute: IepsRouteWithChildren,
   LessonsRoute: LessonsRoute,
+  NotificationsRoute: NotificationsRoute,
   ParentRoute: ParentRoute,
   ReportsRoute: ReportsRoute,
   ResourcesRoute: ResourcesRoute,
+  ScopeSequenceRoute: ScopeSequenceRoute,
   SettingsRoute: SettingsRoute,
   StudentsRoute: StudentsRouteWithChildren,
+  TimeclockRoute: TimeclockRoute,
   AdminAlliedHealthRoute: AdminAlliedHealthRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
