@@ -26,7 +26,7 @@ import {
   type Semester, type VcLevel,
 } from "@/lib/mock-data";
 import {
-  CURRICULUM_SUBJECTS, LEVEL_TONE, visibleSubjects,
+  CURRICULUM_SUBJECTS, LEVEL_TONE, visibleSubjects, strandsForSemester,
   type CurriculumRecord, type CurriculumSubject,
 } from "@/lib/curriculum-db";
 import {
