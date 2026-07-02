@@ -23,6 +23,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BehaviourRouteImport } from './routes/behaviour'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as IepsGoalIdPrintRouteImport } from './routes/ieps.$goalId.print'
@@ -97,6 +98,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudentsStudentIdRoute = StudentsStudentIdRouteImport.update({
   id: '/$studentId',
   path: '/$studentId',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/students': typeof StudentsRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesByTo {
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/students': typeof StudentsRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/admin': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesById {
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/students': typeof StudentsRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRouteTypes {
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/admin/audit'
     | '/students/$studentId'
+    | '/admin/'
     | '/ieps/$goalId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/admin/audit'
     | '/students/$studentId'
+    | '/admin'
     | '/ieps/$goalId/print'
   id:
     | '__root__'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/admin/audit'
     | '/students/$studentId'
+    | '/admin/'
     | '/ieps/$goalId/print'
   fileRoutesById: FileRoutesById
 }
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -349,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/students/$studentId': {
       id: '/students/$studentId'
       path: '/$studentId'
@@ -411,6 +431,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StudentsRoute: StudentsRouteWithChildren,
   AdminAuditRoute: AdminAuditRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -61,11 +61,13 @@ function AdminHome() {
             ? `Signed in as ${roles.map(roleLabel).join(" · ")}`
             : "Admin Portal overview"
         }
-      >
-        <Button className="rounded-full gap-1.5">
-          <Sparkles className="h-4 w-4" /> AI Brief
-        </Button>
-      </PageHeader>
+        actions={
+          <Button className="rounded-full gap-1.5">
+            <Sparkles className="h-4 w-4" /> AI Brief
+          </Button>
+        }
+      />
+
 
       <div className="px-4 py-6 md:px-8 space-y-6">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
