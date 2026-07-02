@@ -237,7 +237,7 @@ function LessonsPage() {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Term</Label>
                 <Select value={term} onValueChange={(v) => setTerm(v as LessonTerm)}>
@@ -245,6 +245,17 @@ function LessonsPage() {
                   <SelectContent>
                     {(["Term 1", "Term 2", "Term 3", "Term 4"] as LessonTerm[]).map((t) => (
                       <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Week</Label>
+                <Select value={week} onValueChange={(v) => setWeek(v as LessonWeek)}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {LESSON_WEEKS.map((w) => (
+                      <SelectItem key={w} value={w}>{w}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
