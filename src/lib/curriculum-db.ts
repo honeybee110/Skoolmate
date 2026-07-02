@@ -143,49 +143,41 @@ export const CURRICULUM_DB: CurriculumRecord[] = [
     contentDescription: "Recognise, represent and order numbers to at least 120.",
     curriculumCode: "VC2M1N01", yearLevel: "1" },
 
-  // ---------- Mathematics · Algebra ----------
-  { id: "ma-a-c", subject: "Mathematics", strand: "Algebra", semester: "Both", level: "C",
+  // ---------- Mathematics · Algebra (Semester 2 only) ----------
+  { id: "ma-a-c", subject: "Mathematics", strand: "Algebra", semester: "Semester 2", level: "C",
     goal: "Copy and continue simple patterns",
     entrySkills: "Copies AB pattern with 2 colours after modelling.",
     achievementStandard: AS("Students copy and continue simple repeating patterns."),
     contentDescription: "Follow and describe simple repeating patterns using objects.",
     curriculumCode: "VC2MFA01", yearLevel: "F" },
-  { id: "ma-a-f", subject: "Mathematics", strand: "Algebra", semester: "Both", level: "F",
+  { id: "ma-a-f", subject: "Mathematics", strand: "Algebra", semester: "Semester 2", level: "F",
     goal: "Sort objects by attribute",
     entrySkills: "Sorts by 1 attribute (colour or shape) with support.",
     achievementStandard: AS("Students sort and describe collections by attribute."),
     contentDescription: "Sort and classify familiar objects and explain the basis for these classifications.",
     curriculumCode: "VC2MFA02", yearLevel: "F" },
 
-  // ---------- Mathematics · Statistics ----------
-  { id: "ma-st-f", subject: "Mathematics", strand: "Statistics", semester: "Both", level: "F",
+  // ---------- Mathematics · Statistics (Semester 2 only) ----------
+  { id: "ma-st-f", subject: "Mathematics", strand: "Statistics", semester: "Semester 2", level: "F",
     goal: "Answer yes/no questions using pictures",
     entrySkills: "Points to picture in response to yes/no question with cue.",
     achievementStandard: AS("Students respond to yes/no questions using picture supports."),
     contentDescription: "Collect, sort and compare data represented by objects and pictures.",
     curriculumCode: "VC2MFST01", yearLevel: "F" },
 
-  // ---------- Mathematics · Measurement and Space ----------
-  { id: "ma-ms-a", subject: "Mathematics", strand: "Measurement and Space", semester: "Both", level: "A",
+  // ---------- Mathematics · Measurement and Space (Semester 1 only) ----------
+  { id: "ma-ms-a", subject: "Mathematics", strand: "Measurement and Space", semester: "Semester 1", level: "A",
     goal: "Compare length of two objects",
     entrySkills: "Compares two objects with prompts (longer / shorter).",
     achievementStandard: AS("Students compare and describe the length of two objects."),
     contentDescription: "Compare directly and indirectly the length of two objects.",
     curriculumCode: "VC2MAM01", yearLevel: "F" },
-  { id: "ma-ms-d", subject: "Mathematics", strand: "Measurement and Space", semester: "Both", level: "D",
+  { id: "ma-ms-d", subject: "Mathematics", strand: "Measurement and Space", semester: "Semester 1", level: "D",
     goal: "Sequence familiar routines",
     entrySkills: "Orders 3 steps with visual supports and a prompt.",
     achievementStandard: AS("Students sequence familiar events using ordinal language."),
     contentDescription: "Sequence familiar routines and events using simple ordinal language.",
     curriculumCode: "VC2MFDM02", yearLevel: "F" },
-
-  // ---------- Mathematics · Probability ----------
-  { id: "ma-pr-f", subject: "Mathematics", strand: "Probability", semester: "Both", level: "F",
-    goal: "Describe chance using 'will / won't / might'",
-    entrySkills: "Chooses between 'will' and 'won't' with model for familiar events.",
-    achievementStandard: AS("Students describe familiar events using everyday chance language."),
-    contentDescription: "Describe everyday events involving chance using informal language.",
-    curriculumCode: "VC2MFPR01", yearLevel: "F" },
 
   // ---------- Science ----------
   { id: "sc-b", subject: "Science", strand: "Science Understanding", semester: "Both", level: "B",
