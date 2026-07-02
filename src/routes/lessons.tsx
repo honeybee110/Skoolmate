@@ -97,6 +97,9 @@ function LessonsPage() {
         subtitle="Victorian Curriculum 2.0 · differentiated · approval-ready"
         actions={
           <>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/lessons/bank"><Library className="h-4 w-4" />Lesson Bank</Link>
+            </Button>
             <Button variant="outline" size="sm"><Plus className="h-4 w-4" />Blank lesson</Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleGenerate} disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -105,7 +108,7 @@ function LessonsPage() {
           </>
         }
       />
-      <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[360px_1fr]">
+      <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[380px_1fr]">
         {/* Brief panel */}
         <Card className="h-fit p-5">
           <div className="mb-4 flex items-center gap-2">
@@ -143,15 +146,34 @@ function LessonsPage() {
                 <Input value={ability} onChange={(e) => setAbility(e.target.value)} className="h-9 text-sm" />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Class notes (students, supports)</Label>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={5} className="text-sm" />
+
+            {/* Structured Lesson Plan Notes — LI, SC, Hook, I do, We do, You do */}
+            <div className="rounded-lg border border-primary/20 bg-primary-soft/20 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs font-semibold text-primary">Lesson Plan Notes</p>
+                <span className="text-[10px] text-muted-foreground">6-part structure · sent to AI</span>
+              </div>
+              <div className="space-y-2.5">
+                {NOTES_FIELDS.map((f) => (
+                  <div key={f.key} className="space-y-1">
+                    <Label className="text-[11px] font-semibold">{f.label}</Label>
+                    <Textarea
+                      value={notes[f.key]}
+                      onChange={(e) => setNotes((n) => ({ ...n, [f.key]: e.target.value }))}
+                      rows={f.key === "successCriteria" ? 3 : 2}
+                      className="text-xs"
+                      placeholder={f.placeholder}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
             <Button onClick={handleGenerate} disabled={loading} className="w-full bg-primary hover:bg-primary/90">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               {loading ? "Drafting lesson…" : "Draft with AI"}
             </Button>
           </div>
+
 
           <div className="mt-6 border-t pt-4">
             <p className="mb-2 text-xs font-medium text-muted-foreground">Quick starts</p>
