@@ -141,10 +141,31 @@ function LessonsPage() {
         subtitle="Victorian Curriculum 2.0 · differentiated · approval-ready"
         actions={
           <>
+            {savedLessons.length > 0 && (
+              <Select value={currentId ?? ""} onValueChange={loadSaved}>
+                <SelectTrigger className="h-9 w-[220px] text-xs">
+                  <FolderOpen className="h-3.5 w-3.5" />
+                  <SelectValue placeholder="Load saved lesson…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {savedLessons.map((l) => (
+                    <SelectItem key={l.id} value={l.id}>
+                      <span className="text-xs">{l.title}</span>
+                      <span className="ml-1 text-[10px] text-muted-foreground">· {l.subject} · {l.status}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Button asChild variant="outline" size="sm">
               <Link to="/lessons/bank"><Library className="h-4 w-4" />Lesson Bank</Link>
             </Button>
-            <Button variant="outline" size="sm"><Plus className="h-4 w-4" />Blank lesson</Button>
+            <Button variant="outline" size="sm" onClick={() => { setCurrentId(null); setLesson(null); setStatus("draft"); }}>
+              <Plus className="h-4 w-4" />New
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleSave("draft")}>
+              <Save className="h-4 w-4" />Save
+            </Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleGenerate} disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               {loading ? "Drafting…" : "Generate with AI"}
@@ -152,6 +173,7 @@ function LessonsPage() {
           </>
         }
       />
+
       <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[380px_1fr]">
         {/* Brief panel */}
         <Card className="h-fit p-5">
