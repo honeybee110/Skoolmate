@@ -48,11 +48,9 @@ const LEVELS: VcLevel[] = ["A", "B", "C", "D", "F", "1", "2"];
 const SEMESTERS: CurriculumSemester[] = ["Both", "Semester 1", "Semester 2"];
 
 const STATUS_LABEL: Record<IepStatus, string> = {
-  "not-started": "Not started",
+  developing: "Developing",
   "working-towards": "Working Towards",
-  "nearly-there": "Nearly There",
   achieved: "Achieved",
-  exceeded: "Exceeded",
 };
 
 function AdminCurriculumPage() {
