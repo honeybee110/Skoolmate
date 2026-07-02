@@ -102,6 +102,7 @@ function LessonsPage() {
       subject, strand, topic, duration,
       abilityRange: ability,
       term,
+      week,
       vcCode: (lesson as GeneratedLesson | null)?.vcCode,
       notes: notes as LessonNotes,
       aiPlan: lesson ?? undefined,
