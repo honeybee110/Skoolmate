@@ -261,7 +261,6 @@ export type IepDomain =
   | "Self-care";
 export type VcLevel = "A" | "B" | "C" | "D" | "F" | "1" | "2";
 export type LearningArea =
-  | "English · Phonics"
   | "English · Reading & Viewing"
   | "English · Speaking & Listening"
   | "English · Writing"
