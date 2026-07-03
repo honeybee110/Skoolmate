@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { availableSemesters, currentSemester, type Semester } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/admin/ieps")({
-  head: () => ({ meta: [{ title: "IEP Management · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "IEP Management · skoolmate" }] }),
   component: AdminIepManagement,
 });
 

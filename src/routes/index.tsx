@@ -18,13 +18,13 @@ import adminShot from "@/assets/landing-admin.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SchoolMate AU — The AI Copilot for Your Entire School" },
+      { title: "skoolmate — The AI Copilot for Your Entire School" },
       {
         name: "description",
         content:
-          "SchoolMate integrates AI-powered lesson planning, IEP tracking, real-time analytics and streamlined admin for Australian Special Developmental Schools.",
+          "skoolmate integrates AI-powered lesson planning, IEP tracking, real-time analytics and streamlined admin for Australian Special Developmental Schools.",
       },
-      { property: "og:title", content: "SchoolMate AU — The AI Copilot for Your Entire School" },
+      { property: "og:title", content: "skoolmate — The AI Copilot for Your Entire School" },
       {
         property: "og:description",
         content:
@@ -77,7 +77,7 @@ const features = [
 const testimonials = [
   {
     quote:
-      "SchoolMate has been a game-changer for our staff. The AI lesson planner has freed up countless hours, allowing our teachers to focus on high-impact instruction.",
+      "skoolmate has been a game-changer for our staff. The AI lesson planner has freed up countless hours, allowing our teachers to focus on high-impact instruction.",
     name: "Sarah Jenkins",
     role: "Principal, Maple Creek Primary",
   },
@@ -138,7 +138,7 @@ function Landing() {
             The AI Copilot for <span className="text-primary">Your Entire School</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
-            SchoolMate integrates AI-powered lesson planning, student analytics and streamlined administration to
+            skoolmate integrates AI-powered lesson planning, student analytics and streamlined administration to
             empower your teachers and leaders.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -250,7 +250,7 @@ function Landing() {
             </h2>
             <p className="mt-4 text-muted-foreground">
               Get a bird's-eye view of your entire school. From real-time analytics to simplified financial and
-              enrolment management, SchoolMate provides the tools you need to make informed decisions.
+              enrolment management, skoolmate provides the tools you need to make informed decisions.
             </p>
             <dl className="mt-6 space-y-2 text-sm">
               <Row label="Principal & Leadership" value="Strategic oversight and data-driven insights." />
@@ -274,7 +274,7 @@ function Landing() {
             Committed to Inclusive and Supportive Education
           </h2>
           <p className="mt-4 text-muted-foreground">
-            SchoolMate is built with the flexibility to support the diverse needs of every student. Our platform
+            skoolmate is built with the flexibility to support the diverse needs of every student. Our platform
             helps teachers differentiate learning and assists schools in meeting their obligations under the
             Disability Discrimination Act 1992 and the Disability Standards for Education 2005.
           </p>
@@ -319,7 +319,7 @@ function Landing() {
       <section id="demo" className="bg-[oklch(0.18_0.03_240)] text-white">
         <div className="mx-auto max-w-5xl px-6 py-20 text-center">
           <h2 className="text-balance text-3xl font-semibold tracking-tight md:text-4xl">
-            Ready to see how SchoolMate can transform your school?
+            Ready to see how skoolmate can transform your school?
           </h2>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" className="rounded-full bg-primary px-6 hover:bg-primary/90">Book a Demo</Button>
@@ -332,7 +332,7 @@ function Landing() {
 
       <footer className="border-t border-border/60 bg-background">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-6 py-8 text-xs text-muted-foreground md:flex-row">
-          <div>© {new Date().getFullYear()} SchoolMate AU. Made for Australian schools.</div>
+          <div>© {new Date().getFullYear()} skoolmate. Made for Australian schools.</div>
           <div className="flex gap-4">
             <a href="#" className="hover:text-foreground">Privacy</a>
             <a href="#" className="hover:text-foreground">Terms</a>

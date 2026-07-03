@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { weeklyTimetable, sessionTimes, type WeekDay } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/admin/timetable")({
-  head: () => ({ meta: [{ title: "Whole-School Timetable · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Whole-School Timetable · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
       <WholeSchoolTimetable />

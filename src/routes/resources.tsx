@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/resources")({
-  head: () => ({ meta: [{ title: "Resource Bank · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Resource Bank · skoolmate" }] }),
   component: ResourceBank,
 });
 

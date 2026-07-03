@@ -12,7 +12,7 @@ import { AlertTriangle, Activity, CheckCircle2, CalendarRange, Target, Camera, F
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/behaviour")({
-  head: () => ({ meta: [{ title: "Behaviour & Wellbeing · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Behaviour & Wellbeing · skoolmate" }] }),
   component: BehaviourPage,
 });
 

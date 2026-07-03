@@ -32,11 +32,18 @@ import {
 import {
   useCurriculumStore, updateCell as storeUpdateCell, pickGoal as storePickGoal,
   cellKey, findRecordIn, recordsForIn, deriveFromChecks, CROSS_CHECK_LABELS,
+  MAX_EVIDENCE_ATTACHMENTS,
   type IepCellState, type IepStatus, type CrossChecks,
+  type EvidenceAttachment, type EvidenceSource,
 } from "@/lib/curriculum-store";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { useRef } from "react";
+import { Laptop, Cloud, HardDrive, Trash2, Paperclip } from "lucide-react";
 
 export const Route = createFileRoute("/ieps")({
-  head: () => ({ meta: [{ title: "IEP Builder · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "IEP Builder · skoolmate" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
@@ -664,22 +671,7 @@ function CellEditor({
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary/40 p-2 text-xs">
-        <span className="flex items-center gap-1 text-muted-foreground">
-          <Camera className="h-3.5 w-3.5" />
-          {state?.evidenceCount ?? 0} pieces of evidence linked
-        </span>
-        <div className="flex gap-1">
-          <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => { onUpdate(cellKey, { evidenceCount: (state?.evidenceCount ?? 0) + 1 }); toast.success("Evidence linked."); }}>
-            <Camera className="h-3 w-3" />Link evidence
-          </Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => toast("Comment thread opened")}>
-            <MessageSquarePlus className="h-3 w-3" />Comment
-          </Button>
-        </div>
-      </div>
+      <EvidenceBlock cellKey={cellKey} state={state} onUpdate={onUpdate} />
 
       {/* AI smart suggestion when nothing set */}
       {!rec && options.length > 0 && (
@@ -723,5 +715,219 @@ function SmartSuggestion({ recommend, onAccept }: { recommend: CurriculumRecord;
         </div>
       </div>
     </Card>
+  );
+}
+
+// ---------- Evidence block + link-evidence dialog ----------
+
+const SOURCE_META: Record<EvidenceSource, { label: string; icon: React.ReactNode; accept?: string; hint: string }> = {
+  "computer":       { label: "This computer",  icon: <Laptop className="h-4 w-4" />,   accept: "image/*,application/pdf,video/*", hint: "Choose photos, PDFs or short videos from your device." },
+  "school-server":  { label: "School server",  icon: <HardDrive className="h-4 w-4" />, accept: "*",                              hint: "Browse shared teacher network drive (H:\\Shared\\Evidence)." },
+  "google-drive":   { label: "Google Drive",   icon: <Cloud className="h-4 w-4" />,     hint: "Pick from your school Google Drive folder." },
+  "onedrive":       { label: "OneDrive",       icon: <Cloud className="h-4 w-4" />,     hint: "Pick from your school Microsoft OneDrive." },
+};
+
+function EvidenceBlock({
+  cellKey, state, onUpdate,
+}: {
+  cellKey: string;
+  state?: IepCellState;
+  onUpdate: (key: string, patch: Partial<IepCellState>) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const attachments = state?.attachments ?? [];
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary/40 p-2 text-xs">
+        <span className="flex items-center gap-1 text-muted-foreground">
+          <Camera className="h-3.5 w-3.5" />
+          {attachments.length} of {MAX_EVIDENCE_ATTACHMENTS} evidence attachment{attachments.length === 1 ? "" : "s"} linked
+        </span>
+        <div className="flex gap-1">
+          <Button
+            size="sm" variant="outline" className="h-7 text-[11px]"
+            onClick={() => setOpen(true)}
+          >
+            <Paperclip className="h-3 w-3" />Link evidence
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]"
+            onClick={() => toast("Comment thread opened")}>
+            <MessageSquarePlus className="h-3 w-3" />Comment
+          </Button>
+        </div>
+      </div>
+      {attachments.length > 0 && (
+        <ul className="mt-1 space-y-1">
+          {attachments.map((a) => (
+            <li key={a.id} className="flex items-center gap-2 rounded-md border bg-card px-2 py-1 text-[11px]">
+              <span className="text-muted-foreground">{SOURCE_META[a.source].icon}</span>
+              <span className="flex-1 truncate">{a.name}</span>
+              <Badge variant="outline" className="text-[9px]">{SOURCE_META[a.source].label}</Badge>
+              <button
+                onClick={() => {
+                  const next = attachments.filter((x) => x.id !== a.id);
+                  onUpdate(cellKey, { attachments: next, evidenceCount: next.length });
+                }}
+                className="text-muted-foreground hover:text-destructive"
+                aria-label="Remove attachment"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <LinkEvidenceDialog
+        open={open}
+        onOpenChange={setOpen}
+        attachments={attachments}
+        onSave={(next) => {
+          onUpdate(cellKey, { attachments: next, evidenceCount: next.length });
+          setOpen(false);
+          toast.success(`${next.length} evidence attachment${next.length === 1 ? "" : "s"} linked.`);
+        }}
+      />
+    </>
+  );
+}
+
+function LinkEvidenceDialog({
+  open, onOpenChange, attachments, onSave,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  attachments: EvidenceAttachment[];
+  onSave: (next: EvidenceAttachment[]) => void;
+}) {
+  const [source, setSource] = useState<EvidenceSource>("computer");
+  const [pending, setPending] = useState<EvidenceAttachment[]>(attachments);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const remaining = MAX_EVIDENCE_ATTACHMENTS - pending.length;
+
+  function addFromFiles(files: FileList | null) {
+    if (!files) return;
+    const list = Array.from(files).slice(0, remaining);
+    const next: EvidenceAttachment[] = [
+      ...pending,
+      ...list.map((f) => ({
+        id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        name: f.name,
+        source: "computer" as EvidenceSource,
+        sizeKb: Math.round(f.size / 1024),
+        addedAt: new Date().toISOString(),
+      })),
+    ];
+    setPending(next.slice(0, MAX_EVIDENCE_ATTACHMENTS));
+  }
+
+  function addFromCloud() {
+    if (remaining <= 0) return;
+    // Simulated picker — in production this would open the provider's OAuth picker.
+    const name = window.prompt(
+      `Enter file name from ${SOURCE_META[source].label} (e.g. "Mia_counting_10frame.jpg")`,
+      "",
+    );
+    if (!name) return;
+    setPending((p) => [
+      ...p,
+      { id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name, source, addedAt: new Date().toISOString() },
+    ].slice(0, MAX_EVIDENCE_ATTACHMENTS));
+  }
+
+  const canAdd = pending.length < MAX_EVIDENCE_ATTACHMENTS;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Link evidence</DialogTitle>
+          <DialogDescription>
+            Attach up to <strong>{MAX_EVIDENCE_ATTACHMENTS}</strong> pieces of evidence (photos, PDFs, videos) from your computer,
+            school Google Drive / OneDrive, or the school network server.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          {(Object.keys(SOURCE_META) as EvidenceSource[]).map((s) => (
+            <button
+              key={s}
+              onClick={() => setSource(s)}
+              className={cn(
+                "flex flex-col items-center gap-1 rounded-lg border p-3 text-xs transition",
+                source === s ? "border-primary bg-primary-soft/40 text-primary" : "hover:border-primary/40",
+              )}
+            >
+              {SOURCE_META[s].icon}
+              <span className="font-medium">{SOURCE_META[s].label}</span>
+            </button>
+          ))}
+        </div>
+
+        <p className="text-[11px] text-muted-foreground">{SOURCE_META[source].hint}</p>
+
+        <div className="rounded-lg border border-dashed p-4">
+          {source === "computer" ? (
+            <>
+              <input
+                ref={fileRef}
+                type="file"
+                accept={SOURCE_META.computer.accept}
+                multiple
+                className="hidden"
+                onChange={(e) => addFromFiles(e.target.files)}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!canAdd}
+                onClick={() => fileRef.current?.click()}
+                className="w-full"
+              >
+                <Laptop className="h-4 w-4" />Choose files from computer
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm" variant="outline" disabled={!canAdd}
+              onClick={addFromCloud} className="w-full"
+            >
+              {SOURCE_META[source].icon}Pick from {SOURCE_META[source].label}
+            </Button>
+          )}
+          <p className="mt-2 text-center text-[10px] text-muted-foreground">
+            {canAdd ? `${remaining} slot${remaining === 1 ? "" : "s"} remaining` : "Maximum reached — remove one to add another."}
+          </p>
+        </div>
+
+        {pending.length > 0 && (
+          <ul className="max-h-40 space-y-1 overflow-y-auto">
+            {pending.map((a) => (
+              <li key={a.id} className="flex items-center gap-2 rounded-md border bg-card px-2 py-1 text-xs">
+                {SOURCE_META[a.source].icon}
+                <span className="flex-1 truncate">{a.name}</span>
+                <Badge variant="outline" className="text-[9px]">{SOURCE_META[a.source].label}</Badge>
+                <button
+                  onClick={() => setPending((p) => p.filter((x) => x.id !== a.id))}
+                  className="text-muted-foreground hover:text-destructive"
+                  aria-label="Remove"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button size="sm" onClick={() => onSave(pending)} disabled={pending.length === 0 && attachments.length === 0}>
+            Save {pending.length} attachment{pending.length === 1 ? "" : "s"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

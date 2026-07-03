@@ -1,4 +1,4 @@
-// SchoolMate AU — Master Curriculum Scope & Sequence database.
+// skoolmate — Master Curriculum Scope & Sequence database.
 // Drives the IEP Builder dropdowns: selecting a Goal auto-fills Level,
 // Entry Skills, Achievement Standard, Content Description and VC 2.0 code.
 // This is the single source of truth teachers pick from — they never type

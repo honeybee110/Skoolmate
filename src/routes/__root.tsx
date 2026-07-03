@@ -81,10 +81,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SchoolMate AU — AI Student Management for Special Developmental Schools" },
+      { title: "skoolmate — AI Student Management for Special Developmental Schools" },
       { name: "description", content: "AI-powered Student Management System built for Australian Special Developmental Schools. Plan lessons, track IEPs, capture evidence, monitor behaviour, and generate reports — all in one place." },
-      { name: "author", content: "SchoolMate AU" },
-      { property: "og:title", content: "SchoolMate AU" },
+      { name: "author", content: "skoolmate" },
+      { property: "og:title", content: "skoolmate" },
       { property: "og:description", content: "AI-powered student management for Special Developmental Schools." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

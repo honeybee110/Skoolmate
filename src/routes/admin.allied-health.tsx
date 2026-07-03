@@ -9,7 +9,7 @@ import { Stethoscope, Users, ClipboardList, CalendarClock, Link2, Plus } from "l
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/allied-health")({
-  head: () => ({ meta: [{ title: "Allied Health · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Allied Health · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership", "allied_health"]}>
       <AlliedHealth />

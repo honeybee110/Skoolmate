@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Sparkles, Loader2, GraduationCap } from "lucide-react";
 
 export const Route = createFileRoute("/teacher/login")({
-  head: () => ({ meta: [{ title: "Teacher Sign in · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Teacher Sign in · skoolmate" }] }),
   component: TeacherLogin,
 });
 

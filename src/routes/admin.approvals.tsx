@@ -24,7 +24,7 @@ import { useActiveSemester } from "@/lib/semester-context";
 import { scopedSearch } from "@/lib/scope";
 
 export const Route = createFileRoute("/admin/approvals")({
-  head: () => ({ meta: [{ title: "Approval Centre · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Approval Centre · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
       <ApprovalCentre />

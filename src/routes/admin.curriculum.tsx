@@ -36,7 +36,7 @@ import { students } from "@/lib/mock-data";
 import type { VcLevel } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/admin/curriculum")({
-  head: () => ({ meta: [{ title: "Curriculum & Scope and Sequence · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Curriculum & Scope and Sequence · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership"]}>
       <AdminCurriculumPage />

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, GraduationCap, ShieldCheck, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Choose your portal · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Choose your portal · skoolmate" }] }),
   component: PortalChooser,
 });
 
@@ -31,7 +31,7 @@ function PortalChooser() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-semibold tracking-tight">Choose your portal</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            SchoolMate has separate experiences for classroom teachers and school leadership.
+            skoolmate has separate experiences for classroom teachers and school leadership.
           </p>
         </div>
 

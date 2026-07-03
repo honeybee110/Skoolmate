@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 
 export const Route = createFileRoute("/reports")({
-  head: () => ({ meta: [{ title: "IEP Reports · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "IEP Reports · skoolmate" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,

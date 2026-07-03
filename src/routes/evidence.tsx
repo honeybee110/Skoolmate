@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/evidence")({
-  head: () => ({ meta: [{ title: "Evidence Hub · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Evidence Hub · skoolmate" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,

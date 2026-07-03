@@ -5,7 +5,7 @@ import { RoleGate } from "@/components/role-gate";
 import { ModuleStub } from "@/components/module-stub";
 
 export const Route = createFileRoute("/admin/resources")({
-  head: () => ({ meta: [{ title: "Resource Bank Management · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Resource Bank Management · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership", "it"]}>
       <AppShell variant="admin">

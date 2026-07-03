@@ -1,4 +1,4 @@
-// SchoolMate AU — Shared Curriculum + IEP store.
+// skoolmate — Shared Curriculum + IEP store.
 // Backed by localStorage so admin edits to the Scope & Sequence and
 // teacher IEP cell edits persist across reloads and appear in both portals.
 
@@ -24,6 +24,18 @@ export const CROSS_CHECK_LABELS: [string, string, string] = [
   "Achieved",
 ];
 
+export type EvidenceSource = "computer" | "google-drive" | "onedrive" | "school-server";
+
+export interface EvidenceAttachment {
+  id: string;
+  name: string;
+  source: EvidenceSource;
+  sizeKb?: number;
+  addedAt: string;
+}
+
+export const MAX_EVIDENCE_ATTACHMENTS = 3;
+
 export interface IepCellState {
   curriculumId?: string;
   levelOverride?: VcLevel;
@@ -34,6 +46,7 @@ export interface IepCellState {
   crossChecks: CrossChecks;
   comment: string;
   evidenceCount: number;
+  attachments?: EvidenceAttachment[];
   updatedAt?: string;
   updatedBy?: string;
 }

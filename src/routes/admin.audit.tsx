@@ -42,7 +42,7 @@ type AuditRow = {
 };
 
 export const Route = createFileRoute("/admin/audit")({
-  head: () => ({ meta: [{ title: "Override audit log · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Override audit log · skoolmate" }] }),
   component: AdminAuditPage,
 });
 

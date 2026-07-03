@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/scope-sequence")({
-  head: () => ({ meta: [{ title: "Scope & Sequence · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Scope & Sequence · skoolmate" }] }),
   component: ScopeSequencePage,
 });
 
