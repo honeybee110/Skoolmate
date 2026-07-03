@@ -61,6 +61,7 @@ const teacherNav = {
     { title: "Resource Bank", url: "/resources", icon: Library },
   ] as NavItem[],
   Track: [
+    { title: "Daily Attendance", url: "/attendance", icon: UserCheck },
     { title: "Evidence Hub", url: "/evidence", icon: Camera },
     { title: "Behaviour", url: "/behaviour", icon: Activity },
     { title: "Reports", url: "/reports", icon: FileText },
