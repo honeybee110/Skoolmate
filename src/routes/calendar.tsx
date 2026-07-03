@@ -110,7 +110,7 @@ function CalendarPage() {
               <Legend swatch="bg-[oklch(0.65_0.13_155)]" label="Therapy" />
             </div>
             <div className="font-medium text-accent">
-              Medical alert · Kristian — Asthma Plan
+              Medical alert · Callum — Asthma Plan
             </div>
           </div>
         </Card>

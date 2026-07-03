@@ -1,7 +1,11 @@
 // skoolmate — Daily attendance/roll store, persisted to localStorage.
+// The roll is marked TWICE per day:
+//   • AM roll — before 9:30 AM (start of day)
+//   • PM roll — at 12:30 PM (after lunch)
 import { useSyncExternalStore } from "react";
 
 export type AttendanceMark = "present" | "absent" | "late" | "medical" | "excused";
+export type RollSession = "AM" | "PM";
 
 export const ATTENDANCE_MARKS: { value: AttendanceMark; label: string; tone: string; short: string }[] = [
   { value: "present", label: "Present",  tone: "bg-emerald-100 text-emerald-700 border-emerald-300", short: "P" },
@@ -11,19 +15,25 @@ export const ATTENDANCE_MARKS: { value: AttendanceMark; label: string; tone: str
   { value: "excused", label: "Excused",  tone: "bg-violet-100 text-violet-700 border-violet-300",    short: "E" },
 ];
 
+export const SESSION_META: Record<RollSession, { label: string; window: string; deadline: string }> = {
+  AM: { label: "Morning roll",   window: "Before 9:30 AM", deadline: "09:30" },
+  PM: { label: "Afternoon roll", window: "At 12:30 PM",    deadline: "12:30" },
+};
+
 export interface AttendanceEntry {
   studentId: string;
+  session: RollSession;
   mark: AttendanceMark;
   note?: string;
   updatedAt: string;
 }
 
 interface State {
-  /** key: `${dateISO}::${studentId}` */
+  /** key: `${dateISO}::${session}::${studentId}` */
   entries: Record<string, AttendanceEntry>;
 }
 
-const KEY = "skoolmate.attendance.v1";
+const KEY = "skoolmate.attendance.v2";
 let state: State = load() ?? { entries: {} };
 const listeners = new Set<() => void>();
 
@@ -44,33 +54,44 @@ export function useAttendanceStore(): State {
   return useSyncExternalStore(subscribe, () => state, getServer);
 }
 
-export const attendanceKey = (date: string, studentId: string) => `${date}::${studentId}`;
+export const attendanceKey = (date: string, session: RollSession, studentId: string) =>
+  `${date}::${session}::${studentId}`;
 
-export function markAttendance(date: string, studentId: string, mark: AttendanceMark, note?: string) {
+export function markAttendance(date: string, session: RollSession, studentId: string, mark: AttendanceMark, note?: string) {
   state = {
     entries: {
       ...state.entries,
-      [attendanceKey(date, studentId)]: { studentId, mark, note, updatedAt: new Date().toISOString() },
+      [attendanceKey(date, session, studentId)]: { studentId, session, mark, note, updatedAt: new Date().toISOString() },
     },
   };
   emit();
 }
 
-export function bulkMark(date: string, studentIds: string[], mark: AttendanceMark) {
+export function bulkMark(date: string, session: RollSession, studentIds: string[], mark: AttendanceMark) {
   const now = new Date().toISOString();
   const next = { ...state.entries };
-  for (const id of studentIds) next[attendanceKey(date, id)] = { studentId: id, mark, updatedAt: now };
+  for (const id of studentIds) next[attendanceKey(date, session, id)] = { studentId: id, session, mark, updatedAt: now };
   state = { entries: next };
   emit();
 }
 
-export function clearDay(date: string, studentIds: string[]) {
+export function clearDay(date: string, session: RollSession, studentIds: string[]) {
   const next = { ...state.entries };
-  for (const id of studentIds) delete next[attendanceKey(date, id)];
+  for (const id of studentIds) delete next[attendanceKey(date, session, id)];
   state = { entries: next };
   emit();
 }
 
 export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** Returns whether the current time is past the session deadline (for the "overdue" chip). */
+export function isSessionOverdue(session: RollSession, date: string): boolean {
+  const now = new Date();
+  const today = todayISO();
+  if (date < today) return true;
+  if (date > today) return false;
+  const [h, m] = SESSION_META[session].deadline.split(":").map(Number);
+  return now.getHours() > h || (now.getHours() === h && now.getMinutes() > m);
 }

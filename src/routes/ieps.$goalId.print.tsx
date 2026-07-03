@@ -1,11 +1,20 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { iepGoals, students, classInfo, evidenceItems, type IepGoal, type SuccessCriterion } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
 import { scopedSearch } from "@/lib/scope";
-import { Printer, ArrowLeft } from "lucide-react";
+import { Printer, ArrowLeft, Languages, Loader2, Sparkles, PenLine, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { translateIepDraft, IEP_LANGUAGES, type IepLanguageCode } from "@/lib/iep-translate.functions";
 
 export const Route = createFileRoute("/ieps/$goalId/print")({
   head: () => ({ meta: [{ title: "IEP · Printable" }] }),
@@ -85,16 +94,33 @@ function IepPrintPage() {
   // The full IEP for this student in the goal's semester
   const studentGoals = iepGoals.filter((g) => g.studentId === goal.studentId && g.semester === goal.semester);
 
+  // Auto-print is opt-in now — parents may want to choose a language first.
+  const [autoPrinted, setAutoPrinted] = useState(false);
+  const [translateOpen, setTranslateOpen] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => window.print(), 800);
+    if (autoPrinted) return;
+    const t = setTimeout(() => { window.print(); setAutoPrinted(true); }, 1200);
     return () => clearTimeout(t);
-  }, []);
+  }, [autoPrinted]);
 
   if (!student) return null;
   const fullName = `${student.firstName} ${student.lastName}`;
   const alertSet = new Set(student.medicalAlerts.map((a) => a.toLowerCase()));
   const isTicked = (label: string) =>
     alertSet.has(label.toLowerCase()) || (label === "Communication Profile" && student.aacUser);
+
+  // Sections available for translation — pulled from the current IEP data.
+  const translationSections = [
+    { heading: "Student", body: `${fullName} · ${student.yearLevel}` },
+    { heading: "Semester", body: goal.semester },
+    { heading: "Learning area", body: goal.learningArea },
+    { heading: "Learning intention", body: goal.learningIntention },
+    { heading: "SMART goal", body: goal.smart },
+    { heading: "Baseline", body: goal.baseline },
+    ...goal.successCriteria.map((sc: SuccessCriterion, i: number) => ({ heading: `Success criterion ${i + 1}`, body: `${sc.step} — Achieved: ${sc.achieved}` })),
+    ...studentGoals.slice(0, 8).map((g) => ({ heading: g.learningArea, body: g.learningIntention })),
+    { heading: "Strengths and interests", body: "Enjoys music, sensory play and structured routines. Responds well to visual supports and predictable transitions. Motivated by 1:1 attention with the classroom team." },
+  ];
 
   return (
     <div className="min-h-screen bg-muted/40 print:bg-white">
@@ -109,17 +135,29 @@ function IepPrintPage() {
         .iep-page { width: 210mm; min-height: 297mm; padding: 18mm 16mm; margin: 0 auto 12px; background: white; }
       `}</style>
 
-      <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b bg-card/95 px-6 py-3 backdrop-blur">
+      <div className="no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b bg-card/95 px-6 py-3 backdrop-blur">
         <Button asChild variant="ghost" size="sm">
           <Link to="/ieps" search={scopedSearch(activeSemester, { student: goal.studentId, semester: goal.semester, goal: goal.id })}>
             <ArrowLeft className="h-4 w-4" />Back to IEPs
           </Link>
         </Button>
-        <p className="text-xs text-muted-foreground">Privacy: photo and school logo are placeholder graphics — no real images embedded.</p>
-        <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => window.print()}>
-          <Printer className="h-4 w-4" />Print / Save as PDF
-        </Button>
+        <p className="text-xs text-muted-foreground">Parents can pick a language before downloading a translated PDF.</p>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setTranslateOpen(true)}>
+            <Languages className="h-4 w-4" />Choose language for parents
+          </Button>
+          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />Print / Save as PDF
+          </Button>
+        </div>
       </div>
+
+      <TranslateDialog
+        open={translateOpen}
+        onClose={() => setTranslateOpen(false)}
+        studentName={fullName}
+        sections={translationSections}
+      />
 
       <div className="py-6 print:py-0">
         {/* PAGE 1 — COVER */}
@@ -391,4 +429,114 @@ function PageFooter({ page, total, fullName, semester }: { page: number; total: 
       <span>Page {page} of {total}</span>
     </div>
   );
+}
+
+// -------- Translation dialog -------------------------------------------------
+type Section = { heading: string; body: string };
+
+function TranslateDialog({ open, onClose, studentName, sections }: {
+  open: boolean; onClose: () => void; studentName: string;
+  sections: Section[];
+}) {
+  const translate = useServerFn(translateIepDraft);
+  const [language, setLanguage] = useState<IepLanguageCode>("en");
+  const [draft, setDraft] = useState<Section[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [locked, setLocked] = useState(false);
+
+  async function handleDraft() {
+    setLoading(true);
+    setLocked(false);
+    try {
+      const result = await translate({ data: { language, sections } });
+      setDraft(result.sections);
+      toast.success(`AI drafted translation in ${result.languageLabel}. Review and edit before download.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Translation failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function downloadPdf() {
+    if (!draft) return;
+    // Open a print window with the (edited) translation — user then Save as PDF.
+    const langLabel = IEP_LANGUAGES.find((l) => l.code === language)?.label ?? language;
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${studentName} · IEP (${langLabel})</title>
+<style>body{font-family:system-ui,sans-serif;padding:32px;max-width:780px;margin:auto;color:#111}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#555;margin:16px 0 4px}
+p{font-size:14px;line-height:1.55;white-space:pre-wrap;margin:0 0 8px}
+.meta{font-size:11px;color:#666;border-bottom:1px solid #ddd;padding-bottom:8px;margin-bottom:16px}</style></head>
+<body><h1>Individual Education Plan</h1>
+<div class="meta">${studentName} · Parent copy · Language: ${langLabel}</div>
+${draft.map((s) => `<h2>${escapeHtml(s.heading)}</h2><p>${escapeHtml(s.body)}</p>`).join("")}
+<script>window.onload=()=>setTimeout(()=>window.print(),400)</script>
+</body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) { toast.error("Please allow pop-ups to download the translated PDF."); return; }
+    w.document.write(html); w.document.close();
+    setLocked(true);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><Languages className="h-4 w-4 text-primary" />Parent language &amp; translated IEP</DialogTitle>
+          <DialogDescription>
+            Some families do not read English. Pick a language, let AI draft the translation, then review or edit it before you export the PDF for the parent.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-muted/30 p-3">
+          <div className="min-w-[220px] flex-1">
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Parent language</p>
+            <Select value={language} onValueChange={(v) => { setLanguage(v as IepLanguageCode); setDraft(null); setLocked(false); }}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {IEP_LANGUAGES.map((l) => <SelectItem key={l.code} value={l.code}>{l.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={handleDraft} disabled={loading} className="bg-primary hover:bg-primary/90">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {loading ? "Translating…" : "Draft translation with AI"}
+          </Button>
+          {draft && (
+            <Button onClick={downloadPdf} variant="outline">
+              <Download className="h-4 w-4" />Download parent PDF
+            </Button>
+          )}
+        </div>
+
+        {draft && (
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[10px]"><PenLine className="mr-1 h-3 w-3" />Reviewable override</Badge>
+              {locked && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 text-[10px]">Locked for download</Badge>}
+            </div>
+            {draft.map((s, i) => (
+              <div key={i} className="rounded-md border bg-card p-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">{s.heading}</p>
+                <Textarea
+                  value={s.body}
+                  onChange={(e) => setDraft((d) => d ? d.map((row, j) => j === i ? { ...row, body: e.target.value } : row) : d)}
+                  rows={Math.max(2, Math.ceil(s.body.length / 90))}
+                  className="mt-1 text-xs"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 }

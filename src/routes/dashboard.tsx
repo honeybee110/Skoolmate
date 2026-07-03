@@ -73,7 +73,7 @@ function Dashboard() {
         <div className="flex flex-col gap-1">
           <p className="text-sm text-muted-foreground">Monday, 29 June 2026 · Semester 1 · Week 8</p>
           <h1 className="text-3xl font-semibold tracking-tight">Good morning, Honey</h1>
-          <p className="mt-1 text-xs text-muted-foreground">P7 · ES Sharifa · <span className="text-accent font-medium">Medical alert — Kristian: Asthma Plan</span></p>
+          <p className="mt-1 text-xs text-muted-foreground">P7 · ES Priya · <span className="text-accent font-medium">Medical alert — Callum: Asthma Plan</span></p>
         </div>
 
         {/* AI Daily Snapshot */}

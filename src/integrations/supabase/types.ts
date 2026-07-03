@@ -164,6 +164,60 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_bank_uploads: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          id: string
+          leadership_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_bytes: number | null
+          status: string
+          storage_path: string
+          term: string
+          title: string
+          updated_at: string
+          uploaded_by: string
+          uploader_name: string | null
+          week: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          leadership_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          status?: string
+          storage_path: string
+          term: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string
+          uploader_name?: string | null
+          week: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          leadership_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          status?: string
+          storage_path?: string
+          term?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string
+          uploader_name?: string | null
+          week?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_hue: number

@@ -10,10 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Plus, Send, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw, Library, Save, FolderOpen } from "lucide-react";
+import { Sparkles, Plus, FileCheck2, BookOpen, Volume2, Hand, Wand2, Loader2, RotateCcw, Library, Save, FolderOpen } from "lucide-react";
 import { generateLessonPlan, type GeneratedLesson } from "@/lib/lessons.functions";
 import { curriculumStrands, lessonExamples } from "@/lib/mock-data";
-import { useLessonStore, saveLesson, setLessonStatus, LESSON_WEEKS, type LessonNotes, type LessonTerm, type LessonWeek, type SavedLesson } from "@/lib/lesson-store";
+import { useLessonStore, saveLesson, LESSON_WEEKS, type LessonNotes, type LessonTerm, type LessonWeek } from "@/lib/lesson-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lessons")({
@@ -95,7 +95,7 @@ function LessonsPage() {
     setDuration(ex.duration);
   }
 
-  function handleSave(nextStatus?: "draft" | "pending" | "approved") {
+  function handleSaveToBank() {
     const saved = saveLesson({
       id: currentId ?? undefined,
       title: topic,
@@ -107,15 +107,13 @@ function LessonsPage() {
       notes: notes as LessonNotes,
       aiPlan: lesson ?? undefined,
       author: "Honey P.",
-      status: nextStatus ?? status,
+      // Teacher-generated drafts land as "draft" in the personal bank; only
+      // leadership can approve weekly lessons via the Weekly Lesson Bank uploads.
+      status: "draft",
     });
     setCurrentId(saved.id);
     setStatus(saved.status);
-    toast.success(
-      nextStatus === "pending" ? "Submitted for approval." :
-      nextStatus === "approved" ? "Marked as approved." :
-      "Lesson saved to Lesson Bank.",
-    );
+    toast.success("Draft saved to your Lesson Bank.");
   }
 
   function loadSaved(id: string) {
@@ -166,8 +164,8 @@ function LessonsPage() {
             <Button variant="outline" size="sm" onClick={() => { setCurrentId(null); setLesson(null); setStatus("draft"); }}>
               <Plus className="h-4 w-4" />New
             </Button>
-            <Button variant="outline" size="sm" onClick={() => handleSave("draft")}>
-              <Save className="h-4 w-4" />Save
+            <Button variant="outline" size="sm" onClick={handleSaveToBank}>
+              <Save className="h-4 w-4" />Save to Lesson Bank
             </Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleGenerate} disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -270,21 +268,15 @@ function LessonsPage() {
             </div>
             <Button onClick={handleGenerate} disabled={loading} className="w-full bg-primary hover:bg-primary/90">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {loading ? "Drafting lesson…" : "Draft with AI"}
+              {loading ? "Drafting lesson…" : "Generate with AI"}
             </Button>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" onClick={() => handleSave("draft")}>
-                <Save className="h-4 w-4" />Save draft
-              </Button>
-              <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleSave("pending")}>
-                <Send className="h-4 w-4" />Submit for approval
-              </Button>
-            </div>
-            {currentId && status === "pending" && (
-              <Button variant="outline" size="sm" className="w-full" onClick={() => { setLessonStatus(currentId, "approved"); setStatus("approved"); toast.success("Approved."); }}>
-                <FileCheck2 className="h-4 w-4" />Approve (Leadership)
-              </Button>
-            )}
+            <Button variant="outline" size="sm" className="w-full" onClick={handleSaveToBank}>
+              <Save className="h-4 w-4" />Save to Lesson Bank
+            </Button>
+            <p className="text-[10px] leading-snug text-muted-foreground">
+              Teacher-generated drafts save straight to your Lesson Bank. Weekly lessons are approved by Leadership via the
+              Weekly Lesson Bank uploads — teachers cannot self-approve.
+            </p>
           </div>
 
 
@@ -357,7 +349,6 @@ function LessonOutput({ lesson, onRegenerate }: { lesson: GeneratedLesson; onReg
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={onRegenerate}><RotateCcw className="h-4 w-4" />Regenerate</Button>
-              <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90"><Send className="h-4 w-4" />Submit for approval</Button>
             </div>
           </div>
         </div>
@@ -369,7 +360,38 @@ function LessonOutput({ lesson, onRegenerate }: { lesson: GeneratedLesson; onReg
             ))}</ul>
           </Field>
         </div>
+        {lesson.narrative && (
+          <div className="border-t bg-muted/20 px-6 py-5">
+            <div className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <BookOpen className="h-4 w-4" />Narrative lesson (weekly planner style)
+            </div>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">{lesson.narrative}</p>
+          </div>
+        )}
       </Card>
+
+      {lesson.sessions && lesson.sessions.length > 0 && (
+        <Card className="p-5">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold"><BookOpen className="h-4 w-4 text-primary" />Weekly sessions — narrative form</h3>
+          <div className="space-y-3">
+            {lesson.sessions.map((s, i) => (
+              <div key={i} className="rounded-lg border bg-card p-4">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="font-mono text-[10px]">{s.time}</Badge>
+                  <p className="text-sm font-semibold">{s.title}</p>
+                </div>
+                <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">{s.narrative}</p>
+                {s.resources.length > 0 && (
+                  <p className="mt-2 text-[11px] text-muted-foreground"><strong>Resources:</strong> {s.resources.join(" · ")}</p>
+                )}
+                {s.groupsAndStaff && (
+                  <p className="text-[11px] text-muted-foreground"><strong>Groups &amp; staff:</strong> {s.groupsAndStaff}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <PhaseCard tag="Hook" body={lesson.hook} />

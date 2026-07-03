@@ -1,22 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Folder, FolderOpen, Search, CheckCircle2, ArrowLeft, FileText, BookOpen, ChevronRight, Sparkles, ExternalLink,
+  Folder, FolderOpen, Search, CheckCircle2, ArrowLeft, FileText, ChevronRight, Sparkles, Upload,
+  Cloud, Smartphone, HardDrive, Loader2, Clock3, XCircle, ShieldCheck, Trash2, Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useLessonStore, type LessonTerm, type SavedLesson } from "@/lib/lesson-store";
+import { LESSON_WEEKS, type LessonWeek, type LessonTerm } from "@/lib/lesson-store";
+import {
+  listWeeklyUploads, registerWeeklyUpload, reviewWeeklyUpload, deleteWeeklyUpload, signWeeklyUpload,
+  type WeeklyUpload,
+} from "@/lib/lesson-uploads.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/lessons/bank")({
-  head: () => ({ meta: [{ title: "Lesson Bank · skoolmate" }] }),
+  head: () => ({ meta: [{ title: "Weekly Lesson Bank · skoolmate" }] }),
   component: LessonBankPage,
 });
 
@@ -29,37 +39,35 @@ const TERM_COLORS: Record<LessonTerm, string> = {
 };
 
 function LessonBankPage() {
-  const { lessons } = useLessonStore();
+  const listFn = useServerFn(listWeeklyUploads);
+  const query = useQuery({ queryKey: ["weekly-uploads"], queryFn: () => listFn() });
   const [openTerm, setOpenTerm] = useState<LessonTerm | null>("Term 1");
-  const [preview, setPreview] = useState<SavedLesson | null>(null);
+  const [openWeek, setOpenWeek] = useState<{ term: LessonTerm; week: LessonWeek } | null>(null);
   const [q, setQ] = useState("");
 
-  const approved = useMemo(() => lessons.filter((l) => l.status === "approved"), [lessons]);
-
-  const filteredApproved = useMemo(() => {
-    if (!q.trim()) return approved;
-    const needle = q.toLowerCase();
-    return approved.filter((e) =>
-      `${e.title} ${e.subject} ${e.strand} ${e.vcCode ?? ""} ${e.author}`.toLowerCase().includes(needle),
-    );
-  }, [approved, q]);
+  const uploads = query.data ?? [];
+  const filtered = useMemo(() => {
+    if (!q.trim()) return uploads;
+    const n = q.toLowerCase();
+    return uploads.filter((u) => `${u.title} ${u.uploader_name ?? ""}`.toLowerCase().includes(n));
+  }, [uploads, q]);
 
   const byTerm = useMemo(() => {
-    const map: Record<LessonTerm, SavedLesson[]> = { "Term 1": [], "Term 2": [], "Term 3": [], "Term 4": [] };
-    for (const e of filteredApproved) map[e.term].push(e);
+    const map: Record<LessonTerm, WeeklyUpload[]> = { "Term 1": [], "Term 2": [], "Term 3": [], "Term 4": [] };
+    for (const u of filtered) map[u.term as LessonTerm].push(u);
     return map;
-  }, [filteredApproved]);
+  }, [filtered]);
 
   return (
     <AppShell>
       <PageHeader
-        title="Lesson Bank"
-        subtitle="Approved lessons only · organised in Term 1 – Term 4 folders · separate from the Lesson Planner"
+        title="Weekly Lesson Bank"
+        subtitle="Term 1 – 4 folders · Week 1 – 10 subfolders · teachers upload weekly plans from computer, phone or drive · leadership approves"
         actions={
           <>
             <div className="relative min-w-[240px] max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search approved lessons…" className="h-9 pl-8" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search uploaded plans…" className="h-9 pl-8" />
             </div>
             <Button asChild variant="outline" size="sm">
               <Link to="/lessons"><ArrowLeft className="h-4 w-4" />Back to Planner</Link>
@@ -77,43 +85,53 @@ function LessonBankPage() {
             <div>
               <p className="text-sm font-semibold">Bank vs Planner</p>
               <p className="text-xs text-muted-foreground">
-                The <strong>Lesson Planner</strong> is where teachers draft with AI, edit, save, and submit for approval.
-                The <strong>Lesson Bank</strong> only holds <strong>approved</strong> lessons, filed into Term 1 – 4 folders,
-                grouped by subject inside each folder — ready to reuse.
+                The <strong>Lesson Planner</strong> is where teachers draft with AI and save straight to their personal Lesson Bank.
+                The <strong>Weekly Lesson Bank</strong> holds uploaded weekly plans — one folder per term, 10 week subfolders inside.
+                Teachers upload from computer, phone or drive; <strong>Leadership</strong> approves each weekly plan.
               </p>
             </div>
           </div>
         </Card>
 
-        {/* Folder grid */}
+        {/* Term folder grid */}
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {TERMS.map((t) => (
             <TermFolderCard
               key={t}
               term={t}
               count={byTerm[t].length}
+              approved={byTerm[t].filter((u) => u.status === "approved").length}
               open={openTerm === t}
-              onToggle={() => setOpenTerm((cur) => (cur === t ? null : t))}
+              onToggle={() => { setOpenTerm((cur) => (cur === t ? null : t)); setOpenWeek(null); }}
             />
           ))}
         </div>
 
-        {/* Open folder contents — approved lessons grouped by subject */}
+        {/* Weeks inside the open term */}
         {openTerm && (
-          <TermFolderContents
+          <TermWeekList
             term={openTerm}
-            rows={byTerm[openTerm]}
-            onOpen={(l) => setPreview(l)}
+            uploads={byTerm[openTerm]}
+            onOpenWeek={(week) => setOpenWeek({ term: openTerm, week })}
           />
         )}
       </div>
 
-      <LessonPreviewDialog lesson={preview} onClose={() => setPreview(null)} />
+      {openWeek && (
+        <WeekFolderDialog
+          term={openWeek.term}
+          week={openWeek.week}
+          onClose={() => setOpenWeek(null)}
+          uploads={uploads.filter((u) => u.term === openWeek.term && u.week === openWeek.week)}
+        />
+      )}
     </AppShell>
   );
 }
 
-function TermFolderCard({ term, count, open, onToggle }: { term: LessonTerm; count: number; open: boolean; onToggle: () => void }) {
+function TermFolderCard({ term, count, approved, open, onToggle }: {
+  term: LessonTerm; count: number; approved: number; open: boolean; onToggle: () => void;
+}) {
   return (
     <button
       onClick={onToggle}
@@ -127,7 +145,7 @@ function TermFolderCard({ term, count, open, onToggle }: { term: LessonTerm; cou
         {open ? <FolderOpen className="h-6 w-6" /> : <Folder className="h-6 w-6" />}
         <div>
           <p className="text-sm font-semibold">{term}</p>
-          <p className="text-[11px] opacity-80">{count} approved lesson{count === 1 ? "" : "s"}</p>
+          <p className="text-[11px] opacity-80">{count} upload{count === 1 ? "" : "s"} · {approved} approved</p>
         </div>
       </div>
       <ChevronRight className={cn("h-4 w-4 transition-transform", open && "rotate-90")} />
@@ -135,116 +153,244 @@ function TermFolderCard({ term, count, open, onToggle }: { term: LessonTerm; cou
   );
 }
 
-function TermFolderContents({ term, rows, onOpen }: { term: LessonTerm; rows: SavedLesson[]; onOpen: (l: SavedLesson) => void }) {
-  const bySubject = useMemo(() => {
-    const map = new Map<string, SavedLesson[]>();
-    for (const e of rows) {
-      if (!map.has(e.subject)) map.set(e.subject, []);
-      map.get(e.subject)!.push(e);
-    }
-    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [rows]);
+function TermWeekList({ term, uploads, onOpenWeek }: {
+  term: LessonTerm; uploads: WeeklyUpload[]; onOpenWeek: (w: LessonWeek) => void;
+}) {
+  const byWeek = useMemo(() => {
+    const map = new Map<LessonWeek, WeeklyUpload[]>();
+    for (const w of LESSON_WEEKS) map.set(w, []);
+    for (const u of uploads) map.get(u.week as LessonWeek)?.push(u);
+    return map;
+  }, [uploads]);
 
   return (
     <Card className="mt-4 p-5">
       <div className="mb-4 flex items-center gap-2">
         <FolderOpen className="h-4 w-4 text-primary" />
-        <h2 className="text-sm font-semibold tracking-tight">{term} · approved</h2>
-        <Badge variant="outline" className="text-[10px]">{rows.length} total</Badge>
+        <h2 className="text-sm font-semibold tracking-tight">{term} · weekly folders</h2>
+        <Badge variant="outline" className="text-[10px]">Week 1 – Week 10</Badge>
       </div>
-
-      {rows.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No approved lessons in {term} yet. Draft one in the Planner and mark it approved to file it here.
-        </div>
-      ) : (
-        <div className="space-y-5">
-          {bySubject.map(([subject, list]) => (
-            <div key={subject}>
-              <div className="mb-2 flex items-center gap-2">
-                <BookOpen className="h-3.5 w-3.5 text-navy" />
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{subject}</h3>
-                <Badge variant="outline" className="text-[10px]">{list.length}</Badge>
+      <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+        {LESSON_WEEKS.map((w) => {
+          const list = byWeek.get(w) ?? [];
+          const approved = list.filter((u) => u.status === "approved").length;
+          const pending = list.filter((u) => u.status === "pending").length;
+          return (
+            <button
+              key={w}
+              onClick={() => onOpenWeek(w)}
+              className="group flex items-center justify-between rounded-lg border bg-card p-3 text-left transition hover:border-primary/40 hover:shadow-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Folder className="h-5 w-5 text-primary/80 group-hover:text-primary" />
+                <div>
+                  <p className="text-sm font-semibold">{w}</p>
+                  <p className="text-[10px] text-muted-foreground">{list.length} file{list.length === 1 ? "" : "s"}</p>
+                </div>
               </div>
-              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-                {list.map((l) => <LessonTile key={l.id} lesson={l} onOpen={() => onOpen(l)} />)}
+              <div className="flex flex-col items-end gap-0.5">
+                {approved > 0 && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 text-[9px] px-1.5 py-0">{approved} ✓</Badge>}
+                {pending > 0 && <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 text-[9px] px-1.5 py-0">{pending} ⏳</Badge>}
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            </button>
+          );
+        })}
+      </div>
     </Card>
   );
 }
 
-function LessonTile({ lesson, onOpen }: { lesson: SavedLesson; onOpen: () => void }) {
-  return (
-    <button onClick={onOpen} className="group rounded-lg border bg-card p-3 text-left transition hover:border-primary/40 hover:shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary">
-          <FileText className="h-3.5 w-3.5" />
-        </div>
-        <Badge className="bg-emerald-100 text-emerald-700 text-[10px] hover:bg-emerald-100">
-          <CheckCircle2 className="mr-1 h-3 w-3" />Approved
-        </Badge>
-      </div>
-      <p className="mt-2 line-clamp-2 text-sm font-semibold leading-snug">{lesson.title}</p>
-      <div className="mt-1 flex flex-wrap gap-1">
-        <Badge variant="outline" className="text-[10px]">{lesson.strand}</Badge>
-        {lesson.vcCode && <Badge variant="outline" className="font-mono text-[10px]">{lesson.vcCode}</Badge>}
-      </div>
-      <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>{lesson.week ?? "—"} · {lesson.duration}</span>
-        <span className="text-primary opacity-0 group-hover:opacity-100 transition">Open →</span>
-      </div>
-    </button>
-  );
-}
+function WeekFolderDialog({ term, week, uploads, onClose }: {
+  term: LessonTerm; week: LessonWeek; uploads: WeeklyUpload[]; onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const registerFn = useServerFn(registerWeeklyUpload);
+  const reviewFn = useServerFn(reviewWeeklyUpload);
+  const deleteFn = useServerFn(deleteWeeklyUpload);
+  const signFn = useServerFn(signWeeklyUpload);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-function LessonPreviewDialog({ lesson, onClose }: { lesson: SavedLesson | null; onClose: () => void }) {
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["weekly-uploads"] });
+
+  const review = useMutation({
+    mutationFn: (v: { id: string; status: "approved" | "rejected"; leadership_note?: string }) =>
+      reviewFn({ data: v }),
+    onSuccess: () => { invalidate(); toast.success("Review saved."); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const del = useMutation({
+    mutationFn: (v: { id: string; storage_path: string }) => deleteFn({ data: v }),
+    onSuccess: () => { invalidate(); toast.success("File removed."); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  async function handleFiles(files: FileList | null) {
+    if (!files || !files.length) return;
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please sign in to upload.");
+      for (const file of Array.from(files)) {
+        const path = `${term}/${week}/${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const { error: upErr } = await supabase.storage.from("lesson-uploads").upload(path, file, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
+        if (upErr) throw new Error(upErr.message);
+        await registerFn({ data: {
+          term, week, title: file.name, storage_path: path,
+          content_type: file.type, size_bytes: file.size,
+          uploader_name: user.user_metadata?.display_name ?? user.email ?? undefined,
+        }});
+      }
+      invalidate();
+      toast.success(`Uploaded ${files.length} file${files.length === 1 ? "" : "s"} to ${term} · ${week}.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function openFile(u: WeeklyUpload) {
+    try {
+      const { url } = await signFn({ data: { path: u.storage_path } });
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not open file");
+    }
+  }
+
   return (
-    <Dialog open={lesson !== null} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        {lesson && (
-          <>
-            <DialogHeader>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100"><CheckCircle2 className="mr-1 h-3 w-3" />Approved</Badge>
-                {lesson.vcCode && <Badge variant="outline" className="font-mono text-[10px]">{lesson.vcCode}</Badge>}
-              </div>
-              <DialogTitle className="mt-2">{lesson.title}</DialogTitle>
-              <DialogDescription>
-                {lesson.subject} · {lesson.strand} · {lesson.term}{lesson.week ? ` · ${lesson.week}` : ""} · {lesson.duration}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-3 text-sm">
-              <PreviewField label="Learning Intention" value={lesson.notes.learningIntention} />
-              <PreviewField label="Success Criteria" value={lesson.notes.successCriteria} />
-              <div className="grid gap-3 md:grid-cols-2">
-                <PreviewField label="Hook" value={lesson.notes.hook} />
-                <PreviewField label="I do" value={lesson.notes.iDo} />
-                <PreviewField label="We do" value={lesson.notes.weDo} />
-                <PreviewField label="You do" value={lesson.notes.youDo} />
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <FolderOpen className="h-4 w-4 text-primary" />
+            <DialogTitle>{term} · {week}</DialogTitle>
+          </div>
+          <DialogDescription>
+            Upload your weekly plan from computer, phone or drive. Leadership will review and approve each plan.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Upload zone */}
+        <div className="rounded-xl border-2 border-dashed border-primary/30 bg-primary-soft/20 p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Upload className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold">Attach weekly planners</p>
+              <p className="text-[11px] text-muted-foreground">
+                PDF, DOCX, PPTX, JPG or PNG — from computer, phone camera roll, Google Drive or OneDrive.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <input ref={fileRef} type="file" hidden multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,image/*" onChange={(e) => handleFiles(e.target.files)} />
+                <Button size="sm" onClick={() => fileRef.current?.click()} disabled={uploading} className="bg-primary hover:bg-primary/90">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <HardDrive className="h-4 w-4" />}
+                  {uploading ? "Uploading…" : "From computer"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                  <Smartphone className="h-4 w-4" />From phone
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                  <Cloud className="h-4 w-4" />From drive
+                </Button>
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
-              <Button asChild size="sm">
-                <Link to="/lessons"><ExternalLink className="h-4 w-4" />Open in Planner</Link>
-              </Button>
+          </div>
+        </div>
+
+        {/* File list */}
+        <div className="mt-4 space-y-2">
+          {uploads.length === 0 && (
+            <div className="rounded-lg border border-dashed p-6 text-center text-xs text-muted-foreground">
+              No files uploaded yet for {term} · {week}. Attach a weekly planner above.
             </div>
-          </>
-        )}
+          )}
+          {uploads.map((u) => (
+            <UploadRow key={u.id} upload={u} onOpen={() => openFile(u)} onReview={review.mutate} onDelete={() => del.mutate({ id: u.id, storage_path: u.storage_path })} />
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function PreviewField({ label, value }: { label: string; value: string }) {
+function UploadRow({ upload, onOpen, onReview, onDelete }: {
+  upload: WeeklyUpload;
+  onOpen: () => void;
+  onReview: (v: { id: string; status: "approved" | "rejected"; leadership_note?: string }) => void;
+  onDelete: () => void;
+}) {
+  const [note, setNote] = useState(upload.leadership_note ?? "");
+  const [reviewing, setReviewing] = useState(false);
+  const tone =
+    upload.status === "approved" ? "border-emerald-200 bg-emerald-50/50" :
+    upload.status === "rejected" ? "border-rose-200 bg-rose-50/50" :
+    "border-amber-200 bg-amber-50/40";
+  const StatusIcon =
+    upload.status === "approved" ? CheckCircle2 :
+    upload.status === "rejected" ? XCircle : Clock3;
+  const statusText = upload.status === "approved" ? "Approved" : upload.status === "rejected" ? "Rejected" : "Pending leadership review";
+
   return (
-    <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-1 whitespace-pre-line rounded-md border bg-muted/30 p-2 text-xs leading-relaxed">{value || "—"}</p>
+    <div className={cn("rounded-lg border p-3", tone)}>
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary">
+          <FileText className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold">{upload.title}</p>
+          <p className="text-[10px] text-muted-foreground">
+            {upload.uploader_name ?? "Teacher"} · {new Date(upload.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+            {upload.size_bytes ? ` · ${(upload.size_bytes / 1024).toFixed(0)} KB` : ""}
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <Badge className={cn(
+              "text-[10px]",
+              upload.status === "approved" && "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
+              upload.status === "rejected" && "bg-rose-100 text-rose-700 hover:bg-rose-100",
+              upload.status === "pending" && "bg-amber-100 text-amber-700 hover:bg-amber-100",
+            )}>
+              <StatusIcon className="mr-1 h-3 w-3" />{statusText}
+            </Badge>
+            {upload.leadership_note && <span className="text-[10px] italic text-muted-foreground">“{upload.leadership_note}”</span>}
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <Button size="sm" variant="outline" onClick={onOpen}><Download className="h-3.5 w-3.5" />Open</Button>
+          <Button size="sm" variant="ghost" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
+        </div>
+      </div>
+      {reviewing ? (
+        <div className="mt-3 space-y-2 rounded-md border bg-background p-2">
+          <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Leadership note (optional)…" className="text-xs" />
+          <div className="flex justify-end gap-1.5">
+            <Button size="sm" variant="ghost" onClick={() => setReviewing(false)}>Cancel</Button>
+            <Button size="sm" variant="outline" className="text-rose-700" onClick={() => { onReview({ id: upload.id, status: "rejected", leadership_note: note }); setReviewing(false); }}>
+              <XCircle className="h-3.5 w-3.5" />Reject
+            </Button>
+            <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-600/90" onClick={() => { onReview({ id: upload.id, status: "approved", leadership_note: note }); setReviewing(false); }}>
+              <CheckCircle2 className="h-3.5 w-3.5" />Approve
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-2 flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setReviewing(true)}>
+            <ShieldCheck className="h-3.5 w-3.5" />Leadership review
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
