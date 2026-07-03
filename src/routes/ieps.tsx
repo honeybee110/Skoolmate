@@ -671,22 +671,7 @@ function CellEditor({
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary/40 p-2 text-xs">
-        <span className="flex items-center gap-1 text-muted-foreground">
-          <Camera className="h-3.5 w-3.5" />
-          {state?.evidenceCount ?? 0} pieces of evidence linked
-        </span>
-        <div className="flex gap-1">
-          <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => { onUpdate(cellKey, { evidenceCount: (state?.evidenceCount ?? 0) + 1 }); toast.success("Evidence linked."); }}>
-            <Camera className="h-3 w-3" />Link evidence
-          </Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => toast("Comment thread opened")}>
-            <MessageSquarePlus className="h-3 w-3" />Comment
-          </Button>
-        </div>
-      </div>
+      <EvidenceBlock cellKey={cellKey} state={state} onUpdate={onUpdate} />
 
       {/* AI smart suggestion when nothing set */}
       {!rec && options.length > 0 && (
