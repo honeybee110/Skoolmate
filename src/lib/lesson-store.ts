@@ -9,11 +9,11 @@ import { useSyncExternalStore } from "react";
 export type LessonStatus = "draft" | "pending" | "approved";
 export type LessonTerm = "Term 1" | "Term 2" | "Term 3" | "Term 4";
 export type LessonWeek =
-  | "Week 1" | "Week 2" | "Week 3" | "Week 4" | "Week 5" | "Week 6"
-  | "Week 7" | "Week 8" | "Week 9" | "Week 10" | "Week 11" | "Week 12";
+  | "Week 1" | "Week 2" | "Week 3" | "Week 4" | "Week 5"
+  | "Week 6" | "Week 7" | "Week 8" | "Week 9" | "Week 10";
 export const LESSON_WEEKS: LessonWeek[] = [
-  "Week 1","Week 2","Week 3","Week 4","Week 5","Week 6",
-  "Week 7","Week 8","Week 9","Week 10","Week 11","Week 12",
+  "Week 1","Week 2","Week 3","Week 4","Week 5",
+  "Week 6","Week 7","Week 8","Week 9","Week 10",
 ];
 
 export interface LessonNotes {

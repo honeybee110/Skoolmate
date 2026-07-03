@@ -58,7 +58,7 @@ export interface TimetableBlock {
   type: "literacy" | "numeracy" | "specialist" | "break" | "therapy";
 }
 
-// P7 — Term 3 SY 2026 (Semester 2) · Teacher: Honey · ES: Sharifa
+// P7 — Term 3 SY 2026 (Semester 2) · Teacher: Honey · ES: Priya
 export type Semester = "Semester 1 · 2026" | "Semester 2 · 2026";
 export const availableSemesters: Semester[] = ["Semester 1 · 2026", "Semester 2 · 2026"];
 export const currentSemester: Semester = "Semester 2 · 2026";
@@ -67,9 +67,9 @@ export const classInfo = {
   term: "Term 3 · 2026",
   semester: currentSemester,
   teacher: "Honey",
-  educationSupport: "Sharifa",
+  educationSupport: "Priya",
   room: "P7",
-  medicalAlerts: [{ student: "Kristian", plan: "Asthma Plan" }],
+  medicalAlerts: [{ student: "Callum", plan: "Asthma Plan" }],
 };
 
 

@@ -1,11 +1,20 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { iepGoals, students, classInfo, evidenceItems, type IepGoal, type SuccessCriterion } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
 import { scopedSearch } from "@/lib/scope";
-import { Printer, ArrowLeft } from "lucide-react";
+import { Printer, ArrowLeft, Languages, Loader2, Sparkles, PenLine, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { translateIepDraft, IEP_LANGUAGES, type IepLanguageCode } from "@/lib/iep-translate.functions";
 
 export const Route = createFileRoute("/ieps/$goalId/print")({
   head: () => ({ meta: [{ title: "IEP · Printable" }] }),
@@ -85,16 +94,33 @@ function IepPrintPage() {
   // The full IEP for this student in the goal's semester
   const studentGoals = iepGoals.filter((g) => g.studentId === goal.studentId && g.semester === goal.semester);
 
+  // Auto-print is opt-in now — parents may want to choose a language first.
+  const [autoPrinted, setAutoPrinted] = useState(false);
+  const [translateOpen, setTranslateOpen] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => window.print(), 800);
+    if (autoPrinted) return;
+    const t = setTimeout(() => { window.print(); setAutoPrinted(true); }, 1200);
     return () => clearTimeout(t);
-  }, []);
+  }, [autoPrinted]);
 
   if (!student) return null;
   const fullName = `${student.firstName} ${student.lastName}`;
   const alertSet = new Set(student.medicalAlerts.map((a) => a.toLowerCase()));
   const isTicked = (label: string) =>
     alertSet.has(label.toLowerCase()) || (label === "Communication Profile" && student.aacUser);
+
+  // Sections available for translation — pulled from the current IEP data.
+  const translationSections = [
+    { heading: "Student", body: `${fullName} · ${student.yearLevel}` },
+    { heading: "Semester", body: goal.semester },
+    { heading: "Learning area", body: goal.learningArea },
+    { heading: "Learning goal", body: goal.goalTitle },
+    { heading: "Entry skills", body: goal.entrySkills ?? "—" },
+    { heading: "Content description", body: goal.contentDescription ?? "—" },
+    { heading: "Achievement standard", body: goal.achievementStandard ?? "—" },
+    ...studentGoals.slice(0, 8).map((g) => ({ heading: g.learningArea, body: g.goalTitle })),
+    { heading: "Strengths and interests", body: "Enjoys music, sensory play and structured routines. Responds well to visual supports and predictable transitions. Motivated by 1:1 attention with the classroom team." },
+  ];
 
   return (
     <div className="min-h-screen bg-muted/40 print:bg-white">
@@ -109,17 +135,29 @@ function IepPrintPage() {
         .iep-page { width: 210mm; min-height: 297mm; padding: 18mm 16mm; margin: 0 auto 12px; background: white; }
       `}</style>
 
-      <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b bg-card/95 px-6 py-3 backdrop-blur">
+      <div className="no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b bg-card/95 px-6 py-3 backdrop-blur">
         <Button asChild variant="ghost" size="sm">
           <Link to="/ieps" search={scopedSearch(activeSemester, { student: goal.studentId, semester: goal.semester, goal: goal.id })}>
             <ArrowLeft className="h-4 w-4" />Back to IEPs
           </Link>
         </Button>
-        <p className="text-xs text-muted-foreground">Privacy: photo and school logo are placeholder graphics — no real images embedded.</p>
-        <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => window.print()}>
-          <Printer className="h-4 w-4" />Print / Save as PDF
-        </Button>
+        <p className="text-xs text-muted-foreground">Parents can pick a language before downloading a translated PDF.</p>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setTranslateOpen(true)}>
+            <Languages className="h-4 w-4" />Choose language for parents
+          </Button>
+          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />Print / Save as PDF
+          </Button>
+        </div>
       </div>
+
+      <TranslateDialog
+        open={translateOpen}
+        onClose={() => setTranslateOpen(false)}
+        studentName={fullName}
+        sections={translationSections}
+      />
 
       <div className="py-6 print:py-0">
         {/* PAGE 1 — COVER */}
