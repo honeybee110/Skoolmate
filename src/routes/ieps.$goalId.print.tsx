@@ -117,7 +117,7 @@ function IepPrintPage() {
     { heading: "Learning intention", body: goal.learningIntention },
     { heading: "SMART goal", body: goal.smart },
     { heading: "Baseline", body: goal.baseline },
-    ...goal.successCriteria.map((sc, i) => ({ heading: `Success criterion ${i + 1}`, body: sc.description })),
+    ...goal.successCriteria.map((sc: SuccessCriterion, i: number) => ({ heading: `Success criterion ${i + 1}`, body: `${sc.step} — Achieved: ${sc.achieved}` })),
     ...studentGoals.slice(0, 8).map((g) => ({ heading: g.learningArea, body: g.learningIntention })),
     { heading: "Strengths and interests", body: "Enjoys music, sensory play and structured routines. Responds well to visual supports and predictable transitions. Motivated by 1:1 attention with the classroom team." },
   ];
