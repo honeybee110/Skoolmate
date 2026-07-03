@@ -114,11 +114,11 @@ function IepPrintPage() {
     { heading: "Student", body: `${fullName} · ${student.yearLevel}` },
     { heading: "Semester", body: goal.semester },
     { heading: "Learning area", body: goal.learningArea },
-    { heading: "Learning goal", body: goal.goalTitle },
-    { heading: "Entry skills", body: goal.entrySkills ?? "—" },
-    { heading: "Content description", body: goal.contentDescription ?? "—" },
-    { heading: "Achievement standard", body: goal.achievementStandard ?? "—" },
-    ...studentGoals.slice(0, 8).map((g) => ({ heading: g.learningArea, body: g.goalTitle })),
+    { heading: "Learning intention", body: goal.learningIntention },
+    { heading: "SMART goal", body: goal.smart },
+    { heading: "Baseline", body: goal.baseline },
+    ...goal.successCriteria.map((sc, i) => ({ heading: `Success criterion ${i + 1}`, body: sc.description })),
+    ...studentGoals.slice(0, 8).map((g) => ({ heading: g.learningArea, body: g.learningIntention })),
     { heading: "Strengths and interests", body: "Enjoys music, sensory play and structured routines. Responds well to visual supports and predictable transitions. Motivated by 1:1 attention with the classroom team." },
   ];
 
