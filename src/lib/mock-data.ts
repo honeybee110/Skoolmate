@@ -1,4 +1,4 @@
-// Mock data for SchoolMate AU UI shell. Replace with real backend reads later.
+// Mock data for skoolmate UI shell. Replace with real backend reads later.
 
 export type BehaviourStatus = "calm" | "settled" | "alert" | "incident";
 export type AttendanceStatus = "present" | "late" | "absent" | "partial";

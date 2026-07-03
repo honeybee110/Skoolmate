@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Folder, FileText, Pin, Upload } from "lucide-react";
 
 export const Route = createFileRoute("/handover")({
-  head: () => ({ meta: [{ title: "Handover Documents · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Handover Documents · skoolmate" }] }),
   component: Handover,
 });
 

@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/classes")({
   head: () => ({
     meta: [
-      { title: "Class Dashboard · SchoolMate AU" },
+      { title: "Class Dashboard · skoolmate" },
       { name: "description", content: "P7 class dashboard — attendance, behaviour, IEP progress, evidence and lesson timeline at a glance." },
     ],
   }),

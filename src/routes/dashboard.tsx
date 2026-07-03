@@ -33,7 +33,7 @@ import { PortalGuard } from "@/components/portal-guard";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard · SchoolMate AU" },
+      { title: "Dashboard · skoolmate" },
       { name: "description", content: "Your teaching day at a glance: timetable, behaviour alerts, lessons due, IEP reminders, and your class." },
     ],
   }),

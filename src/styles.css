@@ -4,7 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* SchoolMate AU — Brand: Teal #0F9D94, White, Orange #F7941D */
+/* skoolmate — Brand: Teal #0F9D94, White, Orange #F7941D */
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

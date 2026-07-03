@@ -11,7 +11,7 @@ import { TrendingUp, TrendingDown, Target, AlertTriangle, BookOpen, Activity, Us
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/analytics")({
-  head: () => ({ meta: [{ title: "Analytics · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Analytics · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
       <Analytics />

@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/documents")({
-  head: () => ({ meta: [{ title: "Document Centre · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Document Centre · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
       <AppShell variant="admin">

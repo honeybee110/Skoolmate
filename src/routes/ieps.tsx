@@ -36,7 +36,7 @@ import {
 } from "@/lib/curriculum-store";
 
 export const Route = createFileRoute("/ieps")({
-  head: () => ({ meta: [{ title: "IEP Builder · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "IEP Builder · skoolmate" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,

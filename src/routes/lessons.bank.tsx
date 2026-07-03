@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { useLessonStore, setLessonStatus, type LessonTerm, type LessonStatus, type SavedLesson } from "@/lib/lesson-store";
 
 export const Route = createFileRoute("/lessons/bank")({
-  head: () => ({ meta: [{ title: "Lesson Bank · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Lesson Bank · skoolmate" }] }),
   component: LessonBankPage,
 });
 

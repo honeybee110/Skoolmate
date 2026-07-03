@@ -18,7 +18,7 @@ export const Route = createFileRoute("/students/$studentId")({
     return { student };
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.student.firstName ?? "Student"} ${loaderData?.student.lastName ?? ""} · SchoolMate AU` }],
+    meta: [{ title: `${loaderData?.student.firstName ?? "Student"} ${loaderData?.student.lastName ?? ""} · skoolmate` }],
   }),
   notFoundComponent: () => (
     <AppShell>

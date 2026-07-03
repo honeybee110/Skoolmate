@@ -34,7 +34,7 @@ export function BrandMark({
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <img
         src={logoAsset.url}
-        alt="SchoolMate AU logo"
+        alt="skoolmate logo"
         className={cn(logoSize[size], "object-contain")}
       />
       {showText && (
@@ -46,7 +46,7 @@ export function BrandMark({
               textClassName,
             )}
           >
-            SchoolMate AU
+            skoolmate
           </span>
           {tagline && (
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground">

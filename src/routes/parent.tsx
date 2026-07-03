@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/parent")({
   head: () => ({ meta: [
-    { title: "Parent Portal · SchoolMate AU" },
+    { title: "Parent Portal · skoolmate" },
     { name: "description", content: "A simple, friendly view of your child's learning goals, progress and evidence." },
   ] }),
   component: ParentPortal,
@@ -54,7 +54,7 @@ function ParentPortal() {
               <Sparkles className="h-5 w-5" strokeWidth={2.5} />
             </div>
             <div className="leading-tight">
-              <p className="text-sm font-semibold tracking-tight">SchoolMate · Parent Portal</p>
+              <p className="text-sm font-semibold tracking-tight">skoolmate · Parent Portal</p>
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{classInfo.term} · {classInfo.code}</p>
             </div>
           </div>
@@ -255,7 +255,7 @@ function ParentPortal() {
         </Card>
 
         <p className="text-center text-[10px] text-muted-foreground">
-          <Link to="/dashboard" className="hover:text-foreground hover:underline">← Back to teacher view</Link> · SchoolMate AU
+          <Link to="/dashboard" className="hover:text-foreground hover:underline">← Back to teacher view</Link> · skoolmate
         </p>
       </main>
     </div>

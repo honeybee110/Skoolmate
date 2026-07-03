@@ -1,4 +1,4 @@
-// SchoolMate AU — Shared Curriculum + IEP store.
+// skoolmate — Shared Curriculum + IEP store.
 // Backed by localStorage so admin edits to the Scope & Sequence and
 // teacher IEP cell edits persist across reloads and appear in both portals.
 

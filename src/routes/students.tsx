@@ -8,7 +8,7 @@ import { BehaviourPill, AttendanceDot } from "@/components/status-chips";
 import { Filter, Plus, Search } from "lucide-react";
 
 export const Route = createFileRoute("/students")({
-  head: () => ({ meta: [{ title: "Students · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Students · skoolmate" }] }),
   component: StudentsList,
 });
 

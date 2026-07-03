@@ -12,7 +12,7 @@ import { Bell, Send, Users, ClipboardCheck, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/reminders")({
-  head: () => ({ meta: [{ title: "Reminders · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Reminders · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
       <Reminders />

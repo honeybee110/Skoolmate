@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { ModuleStub } from "@/components/module-stub";
 
 export const Route = createFileRoute("/settings")({
-  head: () => ({ meta: [{ title: "Settings · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Settings · skoolmate" }] }),
   component: () => (
     <AppShell>
       <PageHeader title="Settings" subtitle="Users, roles, system, Compass integration" />

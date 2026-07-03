@@ -1,4 +1,4 @@
-// SchoolMate AU — Lesson Planner store.
+// skoolmate — Lesson Planner store.
 // Persists 6-part lesson notes (Learning Intention, Success Criteria, Hook,
 // I do, We do, You do) plus AI output and approval status to localStorage,
 // so teachers can save drafts, reload them into the planner and see approved

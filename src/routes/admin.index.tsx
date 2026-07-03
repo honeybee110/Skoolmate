@@ -23,7 +23,7 @@ import { useAuth, roleLabel } from "@/lib/auth-context";
 import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Admin Portal · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Admin Portal · skoolmate" }] }),
   component: () => (
     <PortalGuard portal="admin">
       <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/timeclock")({
-  head: () => ({ meta: [{ title: "Clock-in · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Clock-in · skoolmate" }] }),
   component: TimeclockPage,
 });
 

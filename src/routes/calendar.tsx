@@ -6,7 +6,7 @@ import { weeklyTimetable, sessionTimes, classInfo, type WeekDay } from "@/lib/mo
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/calendar")({
-  head: () => ({ meta: [{ title: "Calendar · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Calendar · skoolmate" }] }),
   component: CalendarPage,
 });
 

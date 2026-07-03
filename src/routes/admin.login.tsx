@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Sparkles, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/admin/login")({
-  head: () => ({ meta: [{ title: "Admin Sign in · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Admin Sign in · skoolmate" }] }),
   component: AdminLogin,
 });
 

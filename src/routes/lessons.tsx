@@ -17,7 +17,7 @@ import { useLessonStore, saveLesson, setLessonStatus, LESSON_WEEKS, type LessonN
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lessons")({
-  head: () => ({ meta: [{ title: "AI Lesson Planner · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "AI Lesson Planner · skoolmate" }] }),
   component: LessonsPage,
 });
 

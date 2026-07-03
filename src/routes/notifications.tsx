@@ -9,7 +9,7 @@ import { Bell, CheckCheck, Target, BookOpen, MessageSquare, Camera, ShieldCheck,
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/notifications")({
-  head: () => ({ meta: [{ title: "Notifications · SchoolMate AU" }] }),
+  head: () => ({ meta: [{ title: "Notifications · skoolmate" }] }),
   component: NotificationsPage,
 });
 
