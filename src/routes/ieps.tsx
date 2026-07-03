@@ -32,8 +32,15 @@ import {
 import {
   useCurriculumStore, updateCell as storeUpdateCell, pickGoal as storePickGoal,
   cellKey, findRecordIn, recordsForIn, deriveFromChecks, CROSS_CHECK_LABELS,
+  MAX_EVIDENCE_ATTACHMENTS,
   type IepCellState, type IepStatus, type CrossChecks,
+  type EvidenceAttachment, type EvidenceSource,
 } from "@/lib/curriculum-store";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { useRef } from "react";
+import { Laptop, Cloud, HardDrive, Trash2, Paperclip } from "lucide-react";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEP Builder · skoolmate" }] }),
