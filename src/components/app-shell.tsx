@@ -1,10 +1,12 @@
 import { type ReactNode } from "react";
-import { Bell, Sparkles, CalendarRange } from "lucide-react";
+import { Bell, Sparkles, CalendarRange, Eye, LogIn } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/global-search";
 import { useActiveSemester, semesterShortLabel, type SemesterScope } from "@/lib/semester-context";
+import { useIsGuest, useGuestReadOnlyGuard, exitGuestMode } from "@/lib/guest-mode";
 
 function SemesterChip() {
   const { activeSemester, setActiveSemester, options } = useActiveSemester();
