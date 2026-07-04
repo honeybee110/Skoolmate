@@ -148,7 +148,7 @@ export interface ActionItem {
 }
 
 export const actionQueue: ActionItem[] = [
-  { id: "a1", kind: "medication", title: "Kristian — Asthma plan check before Swimming", due: "Thu 9:00", semester: currentSemester, urgent: true },
+  { id: "a1", kind: "medication", title: "Callum — Asthma plan check before Swimming", due: "Thu 9:00", semester: currentSemester, urgent: true },
   { id: "a2", kind: "behaviour", title: "Jack O'Brien — ABC incident form", due: "Today", semester: currentSemester, urgent: true, studentId: "s2" },
   { id: "a3", kind: "lesson", title: "Submit Wed 'Maths — Algebra' lesson plan", due: "Today", semester: currentSemester },
   { id: "a4", kind: "iep", title: "Aaliyah Tahir — IEP review meeting prep", due: "Tomorrow", semester: currentSemester },
