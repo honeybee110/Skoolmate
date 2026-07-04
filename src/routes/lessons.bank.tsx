@@ -41,7 +41,6 @@ const TERM_COLORS: Record<LessonTerm, string> = {
 function LessonBankPage() {
   const listFn = useServerFn(listWeeklyUploads);
   const query = useQuery({ queryKey: ["weekly-uploads"], queryFn: () => listFn() });
-  const [openTerm, setOpenTerm] = useState<LessonTerm | null>("Term 1");
   const [openWeek, setOpenWeek] = useState<{ term: LessonTerm; week: LessonWeek } | null>(null);
   const [q, setQ] = useState("");
 
@@ -52,22 +51,26 @@ function LessonBankPage() {
     return uploads.filter((u) => `${u.title} ${u.uploader_name ?? ""}`.toLowerCase().includes(n));
   }, [uploads, q]);
 
-  const byTerm = useMemo(() => {
-    const map: Record<LessonTerm, WeeklyUpload[]> = { "Term 1": [], "Term 2": [], "Term 3": [], "Term 4": [] };
-    for (const u of filtered) map[u.term as LessonTerm].push(u);
-    return map;
+  // Map term → week → uploads
+  const grid = useMemo(() => {
+    const m: Record<LessonTerm, Map<LessonWeek, WeeklyUpload[]>> = {
+      "Term 1": new Map(), "Term 2": new Map(), "Term 3": new Map(), "Term 4": new Map(),
+    };
+    for (const t of TERMS) for (const w of LESSON_WEEKS) m[t].set(w, []);
+    for (const u of filtered) m[u.term as LessonTerm]?.get(u.week as LessonWeek)?.push(u);
+    return m;
   }, [filtered]);
 
   return (
     <AppShell>
       <PageHeader
-        title="Weekly Lesson Bank"
-        subtitle="Term 1 – 4 folders · Week 1 – 10 subfolders · teachers upload weekly plans from computer, phone or drive · leadership approves"
+        title="Lesson Bank"
+        subtitle="Term 1 – 4 · Week 1 – 12 · click any week to attach or view weekly planners"
         actions={
           <>
             <div className="relative min-w-[240px] max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search uploaded plans…" className="h-9 pl-8" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search uploaded plans…" className="h-9 pl-8" data-guest-safe="true" />
             </div>
             <Button asChild variant="outline" size="sm">
               <Link to="/lessons"><ArrowLeft className="h-4 w-4" />Back to Planner</Link>
@@ -83,38 +86,58 @@ function LessonBankPage() {
               <Sparkles className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-semibold">Bank vs Planner</p>
+              <p className="text-sm font-semibold text-foreground">Bank vs Planner</p>
               <p className="text-xs text-muted-foreground">
-                The <strong>Lesson Planner</strong> is where teachers draft with AI and save straight to their personal Lesson Bank.
-                The <strong>Weekly Lesson Bank</strong> holds uploaded weekly plans — one folder per term, 10 week subfolders inside.
-                Teachers upload from computer, phone or drive; <strong>Leadership</strong> approves each weekly plan.
+                The <strong>Lesson Planner</strong> is where teachers draft with AI. The <strong>Lesson Bank</strong> is the
+                shared library of weekly plans, organised by term and week. Click any week cell to attach files from your
+                computer, phone or drive — <strong>Leadership</strong> reviews and approves each weekly plan.
               </p>
             </div>
           </div>
         </Card>
 
-        {/* Term folder grid */}
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {TERMS.map((t) => (
-            <TermFolderCard
-              key={t}
-              term={t}
-              count={byTerm[t].length}
-              approved={byTerm[t].filter((u) => u.status === "approved").length}
-              open={openTerm === t}
-              onToggle={() => { setOpenTerm((cur) => (cur === t ? null : t)); setOpenWeek(null); }}
-            />
-          ))}
-        </div>
-
-        {/* Weeks inside the open term */}
-        {openTerm && (
-          <TermWeekList
-            term={openTerm}
-            uploads={byTerm[openTerm]}
-            onOpenWeek={(week) => setOpenWeek({ term: openTerm, week })}
-          />
-        )}
+        {/* Grid: Terms across, Weeks down (matches sample layout) */}
+        <Card className="overflow-hidden">
+          <div className="grid grid-cols-4 border-b bg-muted/40">
+            {TERMS.map((t) => (
+              <div key={t} className={cn("px-4 py-3 text-center text-sm font-bold uppercase tracking-wide border-r last:border-r-0", "text-foreground")}>
+                {t}
+              </div>
+            ))}
+          </div>
+          <div className="divide-y">
+            {LESSON_WEEKS.map((w) => (
+              <div key={w} className="grid grid-cols-4">
+                {TERMS.map((t) => {
+                  const list = grid[t].get(w) ?? [];
+                  const approved = list.filter((u) => u.status === "approved").length;
+                  const pending = list.filter((u) => u.status === "pending").length;
+                  return (
+                    <button
+                      key={t + w}
+                      onClick={() => setOpenWeek({ term: t, week: w })}
+                      className={cn(
+                        "group flex flex-col items-center gap-1 border-r px-3 py-3 text-center transition last:border-r-0",
+                        "hover:bg-primary-soft/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <Folder className="h-4 w-4 text-primary/70 group-hover:text-primary" />
+                        <span className="text-sm font-semibold text-foreground">{w}</span>
+                      </div>
+                      {(approved > 0 || pending > 0) && (
+                        <div className="flex gap-1">
+                          {approved > 0 && <Badge className="h-4 bg-emerald-100 px-1.5 text-[9px] text-emerald-800 hover:bg-emerald-100">{approved} ✓</Badge>}
+                          {pending > 0 && <Badge className="h-4 bg-amber-100 px-1.5 text-[9px] text-amber-800 hover:bg-amber-100">{pending} ⏳</Badge>}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
 
       {openWeek && (
@@ -129,76 +152,6 @@ function LessonBankPage() {
   );
 }
 
-function TermFolderCard({ term, count, approved, open, onToggle }: {
-  term: LessonTerm; count: number; approved: number; open: boolean; onToggle: () => void;
-}) {
-  return (
-    <button
-      onClick={onToggle}
-      className={cn(
-        "flex items-center justify-between rounded-xl border bg-gradient-to-br p-4 text-left transition hover:shadow-md",
-        TERM_COLORS[term],
-        open && "ring-2 ring-offset-2 ring-primary/30",
-      )}
-    >
-      <div className="flex items-center gap-3">
-        {open ? <FolderOpen className="h-6 w-6" /> : <Folder className="h-6 w-6" />}
-        <div>
-          <p className="text-sm font-semibold">{term}</p>
-          <p className="text-[11px] opacity-80">{count} upload{count === 1 ? "" : "s"} · {approved} approved</p>
-        </div>
-      </div>
-      <ChevronRight className={cn("h-4 w-4 transition-transform", open && "rotate-90")} />
-    </button>
-  );
-}
-
-function TermWeekList({ term, uploads, onOpenWeek }: {
-  term: LessonTerm; uploads: WeeklyUpload[]; onOpenWeek: (w: LessonWeek) => void;
-}) {
-  const byWeek = useMemo(() => {
-    const map = new Map<LessonWeek, WeeklyUpload[]>();
-    for (const w of LESSON_WEEKS) map.set(w, []);
-    for (const u of uploads) map.get(u.week as LessonWeek)?.push(u);
-    return map;
-  }, [uploads]);
-
-  return (
-    <Card className="mt-4 p-5">
-      <div className="mb-4 flex items-center gap-2">
-        <FolderOpen className="h-4 w-4 text-primary" />
-        <h2 className="text-sm font-semibold tracking-tight">{term} · weekly folders</h2>
-        <Badge variant="outline" className="text-[10px]">Week 1 – Week 10</Badge>
-      </div>
-      <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-        {LESSON_WEEKS.map((w) => {
-          const list = byWeek.get(w) ?? [];
-          const approved = list.filter((u) => u.status === "approved").length;
-          const pending = list.filter((u) => u.status === "pending").length;
-          return (
-            <button
-              key={w}
-              onClick={() => onOpenWeek(w)}
-              className="group flex items-center justify-between rounded-lg border bg-card p-3 text-left transition hover:border-primary/40 hover:shadow-sm"
-            >
-              <div className="flex items-center gap-2">
-                <Folder className="h-5 w-5 text-primary/80 group-hover:text-primary" />
-                <div>
-                  <p className="text-sm font-semibold">{w}</p>
-                  <p className="text-[10px] text-muted-foreground">{list.length} file{list.length === 1 ? "" : "s"}</p>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-0.5">
-                {approved > 0 && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 text-[9px] px-1.5 py-0">{approved} ✓</Badge>}
-                {pending > 0 && <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 text-[9px] px-1.5 py-0">{pending} ⏳</Badge>}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </Card>
-  );
-}
 
 function WeekFolderDialog({ term, week, uploads, onClose }: {
   term: LessonTerm; week: LessonWeek; uploads: WeeklyUpload[]; onClose: () => void;
