@@ -107,12 +107,24 @@ function TeacherLogin() {
           <Button
             type="button"
             variant="outline"
-            className="w-full mb-4 gap-2"
+            className="w-full mb-2 gap-2"
             onClick={google}
             disabled={loading}
+            data-guest-safe="true"
           >
             <GoogleIcon />
             Continue with Google
+          </Button>
+
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full mb-4 gap-2 border border-dashed"
+            data-guest-safe="true"
+            onClick={() => { enterGuestMode("teacher"); navigate({ to: "/dashboard" }); }}
+          >
+            <Eye className="h-4 w-4" />
+            Continue as guest (view-only)
           </Button>
 
           <div className="relative my-4">
