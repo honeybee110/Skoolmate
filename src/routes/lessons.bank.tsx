@@ -13,7 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Folder, FolderOpen, Search, CheckCircle2, ArrowLeft, FileText, ChevronRight, Sparkles, Upload,
+  Folder, FolderOpen, Search, CheckCircle2, ArrowLeft, FileText, Sparkles, Upload,
   Cloud, Smartphone, HardDrive, Loader2, Clock3, XCircle, ShieldCheck, Trash2, Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,17 +26,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lessons/bank")({
-  head: () => ({ meta: [{ title: "Weekly Lesson Bank · skoolmate" }] }),
+  head: () => ({ meta: [{ title: "Lesson Bank · skoolmate" }] }),
   component: LessonBankPage,
 });
 
 const TERMS: LessonTerm[] = ["Term 1", "Term 2", "Term 3", "Term 4"];
-const TERM_COLORS: Record<LessonTerm, string> = {
-  "Term 1": "from-primary/15 to-primary/5 border-primary/20 text-primary",
-  "Term 2": "from-amber-100 to-amber-50 border-amber-200 text-amber-700",
-  "Term 3": "from-emerald-100 to-emerald-50 border-emerald-200 text-emerald-700",
-  "Term 4": "from-navy/15 to-navy/5 border-navy/20 text-navy",
-};
 
 function LessonBankPage() {
   const listFn = useServerFn(listWeeklyUploads);
