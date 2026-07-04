@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
+import { enterGuestMode } from "@/lib/guest-mode";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Sparkles, Loader2, GraduationCap } from "lucide-react";
+import { Sparkles, Loader2, GraduationCap, Eye } from "lucide-react";
 
 export const Route = createFileRoute("/teacher/login")({
   head: () => ({ meta: [{ title: "Teacher Sign in · skoolmate" }] }),
