@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Sparkles, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Sparkles, Loader2, ShieldCheck, AlertTriangle, Eye } from "lucide-react";
+import { enterGuestMode } from "@/lib/guest-mode";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({ meta: [{ title: "Admin Sign in · skoolmate" }] }),
