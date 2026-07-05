@@ -54,7 +54,7 @@ export const registerWeeklyUpload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => RegisterInput.parse(input))
   .handler(async ({ data, context }): Promise<WeeklyUpload> => {
-    const { data: row, error } = await context.supabase
+    const { data: row, error } = await (context.supabase as any)
       .from("lesson_bank_uploads")
       .insert({
         term: data.term,
@@ -64,6 +64,7 @@ export const registerWeeklyUpload = createServerFn({ method: "POST" })
         content_type: data.content_type ?? null,
         size_bytes: data.size_bytes ?? null,
         uploader_name: data.uploader_name ?? null,
+        class_name: data.class_name ?? null,
         uploaded_by: context.userId,
       })
       .select("*")
