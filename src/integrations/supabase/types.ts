@@ -50,6 +50,45 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_notifications: {
+        Row: {
+          body: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          link_url: string | null
+          priority: string
+          read_by: string[]
+          target_group: string | null
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_url?: string | null
+          priority?: string
+          read_by?: string[]
+          target_group?: string | null
+          title: string
+        }
+        Update: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_url?: string | null
+          priority?: string
+          read_by?: string[]
+          target_group?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       iep_goals: {
         Row: {
           approval: string
@@ -166,6 +205,7 @@ export type Database = {
       }
       lesson_bank_uploads: {
         Row: {
+          class_name: string | null
           content_type: string | null
           created_at: string
           id: string
@@ -183,6 +223,7 @@ export type Database = {
           week: string
         }
         Insert: {
+          class_name?: string | null
           content_type?: string | null
           created_at?: string
           id?: string
@@ -200,6 +241,7 @@ export type Database = {
           week: string
         }
         Update: {
+          class_name?: string | null
           content_type?: string | null
           created_at?: string
           id?: string
@@ -215,6 +257,48 @@ export type Database = {
           uploaded_by?: string
           uploader_name?: string | null
           week?: string
+        }
+        Relationships: []
+      }
+      profile_photos: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          role_or_year: string | null
+          size_bytes: number | null
+          storage_path: string
+          subject_id: string
+          subject_type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          role_or_year?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          subject_id: string
+          subject_type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          role_or_year?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          subject_id?: string
+          subject_type?: string
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
