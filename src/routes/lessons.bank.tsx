@@ -235,7 +235,7 @@ function WeekFolderDialog({ term, week, uploads, onClose }: {
             <div className="flex-1">
               <p className="text-sm font-semibold">Attach weekly planners</p>
               <p className="text-[11px] text-muted-foreground">
-                PDF, DOCX, PPTX, JPG or PNG — from computer, phone camera roll, Google Drive or OneDrive.
+                <strong>Preferred format: MS Word (.docx)</strong> — also accepts PDF, PPTX, JPG or PNG from computer, phone camera roll, Google Drive or OneDrive.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <input ref={fileRef} type="file" hidden multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,image/*" onChange={(e) => handleFiles(e.target.files)} />
