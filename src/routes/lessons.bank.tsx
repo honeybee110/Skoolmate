@@ -179,6 +179,7 @@ function WeekFolderDialog({ term, week, uploads, onClose }: {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Please sign in to upload.");
+      const className = window.prompt("Class this weekly plan is for (e.g. Rosella / P5 / Year 3)?", "") ?? undefined;
       for (const file of Array.from(files)) {
         const path = `${term}/${week}/${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
         const { error: upErr } = await supabase.storage.from("lesson-uploads").upload(path, file, {
@@ -190,6 +191,7 @@ function WeekFolderDialog({ term, week, uploads, onClose }: {
           term, week, title: file.name, storage_path: path,
           content_type: file.type, size_bytes: file.size,
           uploader_name: user.user_metadata?.display_name ?? user.email ?? undefined,
+          class_name: className?.trim() || undefined,
         }});
       }
       invalidate();
@@ -233,7 +235,7 @@ function WeekFolderDialog({ term, week, uploads, onClose }: {
             <div className="flex-1">
               <p className="text-sm font-semibold">Attach weekly planners</p>
               <p className="text-[11px] text-muted-foreground">
-                PDF, DOCX, PPTX, JPG or PNG — from computer, phone camera roll, Google Drive or OneDrive.
+                <strong>Preferred format: MS Word (.docx)</strong> — also accepts PDF, PPTX, JPG or PNG from computer, phone camera roll, Google Drive or OneDrive.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <input ref={fileRef} type="file" hidden multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,image/*" onChange={(e) => handleFiles(e.target.files)} />

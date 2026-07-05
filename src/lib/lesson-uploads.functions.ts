@@ -4,7 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const TERMS = ["Term 1", "Term 2", "Term 3", "Term 4"] as const;
-const WEEKS = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"] as const;
+const WEEKS = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10","Week 11","Week 12"] as const;
 
 export type UploadTerm = typeof TERMS[number];
 export type UploadWeek = typeof WEEKS[number];
@@ -20,6 +20,7 @@ export interface WeeklyUpload {
   size_bytes: number | null;
   uploaded_by: string;
   uploader_name: string | null;
+  class_name: string | null;
   status: UploadStatus;
   leadership_note: string | null;
   reviewed_by: string | null;
@@ -46,13 +47,14 @@ const RegisterInput = z.object({
   content_type: z.string().optional(),
   size_bytes: z.number().int().nonnegative().optional(),
   uploader_name: z.string().optional(),
+  class_name: z.string().max(80).optional(),
 });
 
 export const registerWeeklyUpload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => RegisterInput.parse(input))
   .handler(async ({ data, context }): Promise<WeeklyUpload> => {
-    const { data: row, error } = await context.supabase
+    const { data: row, error } = await (context.supabase as any)
       .from("lesson_bank_uploads")
       .insert({
         term: data.term,
@@ -62,6 +64,7 @@ export const registerWeeklyUpload = createServerFn({ method: "POST" })
         content_type: data.content_type ?? null,
         size_bytes: data.size_bytes ?? null,
         uploader_name: data.uploader_name ?? null,
+        class_name: data.class_name ?? null,
         uploaded_by: context.userId,
       })
       .select("*")
