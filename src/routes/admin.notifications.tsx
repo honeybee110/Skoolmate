@@ -95,7 +95,7 @@ function NotificationsPage() {
   const unreadCount = user ? combined.filter((n) => !n.read_by.includes(user.id)).length : combined.length;
 
   const create = useMutation({
-    mutationFn: (v: Parameters<typeof createFn>[0]["data"]) => createFn({ data: v }),
+    mutationFn: (v: { category: string; title: string; body?: string; priority: "low"|"normal"|"high"; target_group?: string; link_url?: string }) => createFn({ data: v }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-notifications"] }); toast.success("Notification sent."); },
     onError: (e: Error) => toast.error(e.message),
   });
