@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { RoleGate } from "@/components/role-gate";
@@ -52,16 +53,42 @@ function iconFor(node: DocNode) {
 function DocumentCentre() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [localFolders, setLocalFolders] = useState<Record<string, string[]>>({});
+  const [localFiles, setLocalFiles] = useState<Record<string, { name: string; size: number; at: string }[]>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const current = currentId ? findNode(currentId) : null;
   const crumbs = currentId ? nodePath(currentId) : [];
   const children = current?.children ?? documentCentreTree;
   const searchResults = useMemo(() => (query ? searchNodes(query) : []), [query]);
 
+  const scopeKey = currentId ?? "__root";
+  const extraFolders = localFolders[scopeKey] ?? [];
+  const extraFiles = localFiles[scopeKey] ?? [];
+
   const folders = children.filter((n) => n.kind === "folder");
   const files = children.filter((n) => n.kind === "file");
   // Pinned first
   folders.sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned));
+
+  function handleNewFolder() {
+    const name = window.prompt("New folder name?");
+    if (!name?.trim()) return;
+    setLocalFolders((m) => ({ ...m, [scopeKey]: [...(m[scopeKey] ?? []), name.trim()] }));
+    toast.success(`Folder “${name.trim()}” created here.`);
+  }
+
+  function handleUploadClick() {
+    fileInputRef.current?.click();
+  }
+
+  function handleFiles(list: FileList | null) {
+    if (!list?.length) return;
+    const added = Array.from(list).map((f) => ({ name: f.name, size: f.size, at: new Date().toLocaleString("en-AU") }));
+    setLocalFiles((m) => ({ ...m, [scopeKey]: [...(m[scopeKey] ?? []), ...added] }));
+    toast.success(`Uploaded ${added.length} file${added.length === 1 ? "" : "s"} from your device.`);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   return (
     <>
@@ -109,10 +136,17 @@ function DocumentCentre() {
               className="pl-7 h-9 w-64"
             />
           </div>
-          <Button size="sm" variant="outline" className="gap-1.5">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            hidden
+            onChange={(e) => handleFiles(e.target.files)}
+          />
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={handleNewFolder}>
             <Plus className="h-3.5 w-3.5" /> New folder
           </Button>
-          <Button size="sm" className="gap-1.5">
+          <Button size="sm" className="gap-1.5" onClick={handleUploadClick} title="Upload from computer, phone or drive">
             <Upload className="h-3.5 w-3.5" /> Upload
           </Button>
         </Card>
@@ -227,7 +261,42 @@ function DocumentCentre() {
               </div>
             )}
 
-            {folders.length === 0 && files.length === 0 && (
+            {/* Locally-added folders & files (session) */}
+            {(extraFolders.length > 0 || extraFiles.length > 0) && (
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 mt-4">Added this session</div>
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {extraFolders.map((n) => (
+                    <div key={n} className="rounded-xl border bg-card p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                          <Folder className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium truncate">{n}</div>
+                          <div className="text-[11px] text-muted-foreground mt-0.5">New folder</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {extraFiles.length > 0 && (
+                  <Card className="divide-y mt-2">
+                    {extraFiles.map((f, i) => (
+                      <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+                        <FileText className="h-4 w-4 text-primary shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium truncate">{f.name}</div>
+                          <div className="text-[11px] text-muted-foreground">{(f.size / 1024).toFixed(0)} KB · {f.at}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {folders.length === 0 && files.length === 0 && extraFolders.length === 0 && extraFiles.length === 0 && (
               <Card className="p-10 text-center">
                 <Folder className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm font-medium">This folder is empty</p>
@@ -235,8 +304,8 @@ function DocumentCentre() {
                   Upload files or create a subfolder to get started.
                 </p>
                 <div className="mt-4 flex justify-center gap-2">
-                  <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5" />New folder</Button>
-                  <Button size="sm" className="gap-1.5"><Upload className="h-3.5 w-3.5" />Upload</Button>
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={handleNewFolder}><Plus className="h-3.5 w-3.5" />New folder</Button>
+                  <Button size="sm" className="gap-1.5" onClick={handleUploadClick}><Upload className="h-3.5 w-3.5" />Upload</Button>
                 </div>
               </Card>
             )}

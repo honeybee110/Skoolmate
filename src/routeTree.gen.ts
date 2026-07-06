@@ -49,6 +49,7 @@ import { Route as AdminIepsRouteImport } from './routes/admin.ieps'
 import { Route as AdminEvidenceRouteImport } from './routes/admin.evidence'
 import { Route as AdminDocumentsRouteImport } from './routes/admin.documents'
 import { Route as AdminCurriculumRouteImport } from './routes/admin.curriculum'
+import { Route as AdminCrosscheckBuilderRouteImport } from './routes/admin.crosscheck-builder'
 import { Route as AdminClassesRouteImport } from './routes/admin.classes'
 import { Route as AdminBehaviourRouteImport } from './routes/admin.behaviour'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
@@ -257,6 +258,11 @@ const AdminCurriculumRoute = AdminCurriculumRouteImport.update({
   path: '/admin/curriculum',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCrosscheckBuilderRoute = AdminCrosscheckBuilderRouteImport.update({
+  id: '/admin/crosscheck-builder',
+  path: '/admin/crosscheck-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminClassesRoute = AdminClassesRouteImport.update({
   id: '/admin/classes',
   path: '/admin/classes',
@@ -319,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/behaviour': typeof AdminBehaviourRoute
   '/admin/classes': typeof AdminClassesRoute
+  '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/documents': typeof AdminDocumentsRoute
   '/admin/evidence': typeof AdminEvidenceRoute
@@ -368,6 +375,7 @@ export interface FileRoutesByTo {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/behaviour': typeof AdminBehaviourRoute
   '/admin/classes': typeof AdminClassesRoute
+  '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/documents': typeof AdminDocumentsRoute
   '/admin/evidence': typeof AdminEvidenceRoute
@@ -418,6 +426,7 @@ export interface FileRoutesById {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/behaviour': typeof AdminBehaviourRoute
   '/admin/classes': typeof AdminClassesRoute
+  '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/documents': typeof AdminDocumentsRoute
   '/admin/evidence': typeof AdminEvidenceRoute
@@ -469,6 +478,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/behaviour'
     | '/admin/classes'
+    | '/admin/crosscheck-builder'
     | '/admin/curriculum'
     | '/admin/documents'
     | '/admin/evidence'
@@ -518,6 +528,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/behaviour'
     | '/admin/classes'
+    | '/admin/crosscheck-builder'
     | '/admin/curriculum'
     | '/admin/documents'
     | '/admin/evidence'
@@ -567,6 +578,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/behaviour'
     | '/admin/classes'
+    | '/admin/crosscheck-builder'
     | '/admin/curriculum'
     | '/admin/documents'
     | '/admin/evidence'
@@ -617,6 +629,7 @@ export interface RootRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminBehaviourRoute: typeof AdminBehaviourRoute
   AdminClassesRoute: typeof AdminClassesRoute
+  AdminCrosscheckBuilderRoute: typeof AdminCrosscheckBuilderRoute
   AdminCurriculumRoute: typeof AdminCurriculumRoute
   AdminDocumentsRoute: typeof AdminDocumentsRoute
   AdminEvidenceRoute: typeof AdminEvidenceRoute
@@ -920,6 +933,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCurriculumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/crosscheck-builder': {
+      id: '/admin/crosscheck-builder'
+      path: '/admin/crosscheck-builder'
+      fullPath: '/admin/crosscheck-builder'
+      preLoaderRoute: typeof AdminCrosscheckBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/classes': {
       id: '/admin/classes'
       path: '/admin/classes'
@@ -1031,6 +1051,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
   AdminBehaviourRoute: AdminBehaviourRoute,
   AdminClassesRoute: AdminClassesRoute,
+  AdminCrosscheckBuilderRoute: AdminCrosscheckBuilderRoute,
   AdminCurriculumRoute: AdminCurriculumRoute,
   AdminDocumentsRoute: AdminDocumentsRoute,
   AdminEvidenceRoute: AdminEvidenceRoute,

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   GraduationCap, Search, FolderKanban, ClipboardCheck, ShieldCheck,
   FileDown, MessageSquarePlus, ArrowLeftRight, History, Pin,
-  Users, Filter, CheckCircle2, AlertCircle, Clock, ExternalLink,
+  Users, Filter, CheckCircle2, AlertCircle, Clock, ExternalLink, Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -254,28 +254,94 @@ function ClassRowItem({ row, onOpen, semester }: { row: ClassRow; onOpen: () => 
   );
 }
 
+const DEFAULT_TEMPLATES = [
+  { id: "iep",  name: "Leadership IEP Template (Word)",         category: "IEP" as const },
+  { id: "ho",   name: "Handover Template — Semester (Word)",    category: "Handover" as const },
+  { id: "ssg",  name: "SSG Meeting Template (Word)",            category: "SSG" as const },
+  { id: "ss",   name: "Semestral Scope & Sequence — Master 2026", category: "Scope & Sequence" as const },
+  { id: "cc",   name: "Cross-Check Masterlist — Literacy",      category: "Cross-Check" as const },
+  { id: "ccn",  name: "Cross-Check Masterlist — Numeracy",      category: "Cross-Check" as const },
+];
+type TemplateItem = { id: string; name: string; category: "IEP" | "Handover" | "SSG" | "Scope & Sequence" | "Cross-Check"; updatedAt?: string };
+
 function LeadershipTemplates() {
-  const items = [
-    "Leadership IEP Template (Word)",
-    "Scope & Sequence — Master 2026",
-    "Example Completed IEP — P4",
-    "Cross-Check Guide (PDF)",
-  ];
+  const [items, setItems] = useState<TemplateItem[]>(DEFAULT_TEMPLATES);
+  const [category, setCategory] = useState<TemplateItem["category"]>("IEP");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function addFromDevice(list: FileList | null) {
+    if (!list?.length) return;
+    const now = new Date().toLocaleDateString("en-AU");
+    const added: TemplateItem[] = Array.from(list).map((f) => ({
+      id: `${Date.now()}-${f.name}`, name: f.name, category, updatedAt: now,
+    }));
+    setItems((prev) => [...added, ...prev]);
+    toast.success(`Uploaded ${added.length} template${added.length === 1 ? "" : "s"} to ${category}.`);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  function renameItem(id: string) {
+    const cur = items.find((i) => i.id === id);
+    const name = window.prompt("Rename template", cur?.name ?? "");
+    if (!name?.trim()) return;
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, name: name.trim() } : i)));
+    toast.success("Template renamed.");
+  }
+  function removeItem(id: string) {
+    if (!window.confirm("Remove this pinned template from every class folder?")) return;
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    toast.success("Template removed.");
+  }
+
+  const grouped = ["IEP", "Handover", "SSG", "Scope & Sequence", "Cross-Check"] as const;
+
   return (
     <Card className="overflow-hidden border-navy/20">
       <div className="flex items-center justify-between bg-gradient-to-r from-navy/90 to-navy-light px-4 py-2.5 text-white">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider">
           <Pin className="h-3.5 w-3.5" />Pinned in every class folder
         </div>
-        <span className="text-[10px] text-white/80">Read-only for teachers</span>
+        <span className="text-[10px] text-white/80">Admin-managed · read-only for teachers</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-3 py-2">
+        <span className="text-[11px] font-medium text-muted-foreground">Upload to:</span>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as TemplateItem["category"])}
+          className="rounded-md border bg-background px-2 py-1 text-xs"
+        >
+          {grouped.map((g) => <option key={g} value={g}>{g}</option>)}
+        </select>
+        <input ref={fileRef} type="file" hidden multiple accept=".doc,.docx,.pdf,.xls,.xlsx,.ppt,.pptx" onChange={(e) => addFromDevice(e.target.files)} />
+        <Button size="sm" className="h-7 text-[11px] bg-navy text-white hover:bg-navy-light" onClick={() => fileRef.current?.click()}>
+          <Upload className="h-3 w-3" />Upload template
+        </Button>
+        <Button asChild size="sm" variant="outline" className="h-7 text-[11px]">
+          <Link to="/admin/crosscheck-builder"><ClipboardCheck className="h-3 w-3" />Cross-Check Builder</Link>
+        </Button>
       </div>
       <ul className="divide-y">
         {items.map((it) => (
-          <li key={it} className="flex items-center justify-between gap-2 px-4 py-2.5 text-sm">
-            <span className="flex items-center gap-2"><Pin className="h-3 w-3 text-navy" /> {it}</span>
-            <Button size="sm" variant="ghost" className="h-7 text-[11px]"><FileDown className="h-3 w-3" />Open</Button>
+          <li key={it.id} className="flex items-center justify-between gap-2 px-4 py-2.5 text-sm">
+            <span className="flex min-w-0 items-center gap-2">
+              <Pin className="h-3 w-3 shrink-0 text-navy" />
+              <span className="min-w-0 truncate">
+                {it.name}
+                <span className="ml-1.5 text-[10px] text-muted-foreground">· {it.category}{it.updatedAt ? ` · ${it.updatedAt}` : ""}</span>
+              </span>
+            </span>
+            <span className="flex shrink-0 items-center gap-0.5">
+              <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => toast.success(`Opening “${it.name}”…`)}><FileDown className="h-3 w-3" />Open</Button>
+              <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => renameItem(it.id)}>Rename</Button>
+              <Button size="sm" variant="ghost" className="h-7 text-[11px] text-rose-600 hover:text-rose-700" onClick={() => removeItem(it.id)}>Remove</Button>
+            </span>
           </li>
         ))}
+        {items.length === 0 && (
+          <li className="px-4 py-6 text-center text-xs text-muted-foreground">
+            No templates pinned yet. Upload to start.
+          </li>
+        )}
       </ul>
     </Card>
   );
