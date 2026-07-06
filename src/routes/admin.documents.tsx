@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { RoleGate } from "@/components/role-gate";
@@ -52,16 +53,42 @@ function iconFor(node: DocNode) {
 function DocumentCentre() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [localFolders, setLocalFolders] = useState<Record<string, string[]>>({});
+  const [localFiles, setLocalFiles] = useState<Record<string, { name: string; size: number; at: string }[]>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const current = currentId ? findNode(currentId) : null;
   const crumbs = currentId ? nodePath(currentId) : [];
   const children = current?.children ?? documentCentreTree;
   const searchResults = useMemo(() => (query ? searchNodes(query) : []), [query]);
 
+  const scopeKey = currentId ?? "__root";
+  const extraFolders = localFolders[scopeKey] ?? [];
+  const extraFiles = localFiles[scopeKey] ?? [];
+
   const folders = children.filter((n) => n.kind === "folder");
   const files = children.filter((n) => n.kind === "file");
   // Pinned first
   folders.sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned));
+
+  function handleNewFolder() {
+    const name = window.prompt("New folder name?");
+    if (!name?.trim()) return;
+    setLocalFolders((m) => ({ ...m, [scopeKey]: [...(m[scopeKey] ?? []), name.trim()] }));
+    toast.success(`Folder “${name.trim()}” created here.`);
+  }
+
+  function handleUploadClick() {
+    fileInputRef.current?.click();
+  }
+
+  function handleFiles(list: FileList | null) {
+    if (!list?.length) return;
+    const added = Array.from(list).map((f) => ({ name: f.name, size: f.size, at: new Date().toLocaleString("en-AU") }));
+    setLocalFiles((m) => ({ ...m, [scopeKey]: [...(m[scopeKey] ?? []), ...added] }));
+    toast.success(`Uploaded ${added.length} file${added.length === 1 ? "" : "s"} from your device.`);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   return (
     <>
