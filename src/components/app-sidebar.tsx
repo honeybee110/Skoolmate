@@ -88,6 +88,7 @@ const adminNav = {
     { title: "Curriculum & Scope and Sequence", url: "/admin/curriculum", icon: BookOpen },
     { title: "Resource Bank Management", url: "/admin/resources", icon: Library },
     { title: "Leadership Templates", url: "/admin/templates", icon: Pin },
+    { title: "Cross-Check Builder", url: "/admin/crosscheck-builder", icon: ClipboardCheck },
   ] as NavItem[],
   Insights: [
     { title: "Reports", url: "/admin/reports", icon: FileText },
