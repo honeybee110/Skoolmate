@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   GraduationCap, Search, FolderKanban, ClipboardCheck, ShieldCheck,
   FileDown, MessageSquarePlus, ArrowLeftRight, History, Pin,
-  Users, Filter, CheckCircle2, AlertCircle, Clock, ExternalLink,
+  Users, Filter, CheckCircle2, AlertCircle, Clock, ExternalLink, Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
