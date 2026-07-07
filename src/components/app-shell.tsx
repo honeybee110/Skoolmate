@@ -71,7 +71,7 @@ export function AppShell({
                 className="rounded-full bg-primary hover:bg-primary/90 shadow-sm gap-1.5"
               >
                 <Sparkles className="h-4 w-4" />
-                Ask AI
+                Ask Mate
               </Button>
               <Button variant="ghost" size="icon" className="rounded-full relative">
                 <Bell className="h-4 w-4" />
