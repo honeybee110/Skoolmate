@@ -53,7 +53,6 @@ const teacherNav = {
     { title: "Students", url: "/students", icon: Users },
   ] as NavItem[],
   Plan: [
-    { title: "Lesson Planner", url: "/lessons", icon: BookOpen },
     { title: "Lesson Bank", url: "/lessons/bank", icon: Library },
     { title: "IEPs", url: "/ieps", icon: Target },
     { title: "Handover Documents", url: "/handover", icon: FolderKanban },
