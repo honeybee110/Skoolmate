@@ -164,18 +164,18 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
       className={
         isAdmin
           ? "[&_[data-sidebar=sidebar]]:bg-gradient-to-b [&_[data-sidebar=sidebar]]:from-white [&_[data-sidebar=sidebar]]:via-[color:var(--navy-soft)]/40 [&_[data-sidebar=sidebar]]:to-white"
-          : ""
+          : "[&_[data-sidebar=sidebar]]:bg-gradient-to-b [&_[data-sidebar=sidebar]]:from-primary-soft/60 [&_[data-sidebar=sidebar]]:via-background [&_[data-sidebar=sidebar]]:to-background"
       }
     >
       <SidebarHeader
         className={
           isAdmin
             ? "border-b border-[color:var(--navy)]/15 bg-gradient-to-br from-[color:var(--navy)] to-[color:var(--navy-light)] text-white"
-            : "border-b border-sidebar-border"
+            : "border-b border-primary/20 bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground"
         }
       >
         <Link to={homeUrl} className="flex items-center gap-2.5 px-2 py-2">
-          <BrandMark size="sm" tagline={isAdmin ? "Admin Portal" : "Teacher Portal"} />
+          <BrandMark size="sm" tagline={isAdmin ? "Admin Portal" : "Teacher Portal"} textClassName={isAdmin ? "text-white" : "text-primary-foreground"} />
         </Link>
         {isAdmin && (
           <div className="mx-2 mb-2 flex items-center gap-1.5 rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-white/90">
