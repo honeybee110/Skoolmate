@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,8 +13,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Folder, FolderOpen, Search, CheckCircle2, ArrowLeft, FileText, Sparkles, Upload,
+  Folder, FolderOpen, Search, CheckCircle2, ArrowLeft, FileText, Upload,
   Cloud, Smartphone, HardDrive, Loader2, Clock3, XCircle, ShieldCheck, Trash2, Download,
+  Sparkles, BookOpenCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LESSON_WEEKS, type LessonWeek, type LessonTerm } from "@/lib/lesson-store";
@@ -32,9 +33,42 @@ export const Route = createFileRoute("/lessons/bank")({
 
 const TERMS: LessonTerm[] = ["Term 1", "Term 2", "Term 3", "Term 4"];
 
+// Vibrant per-term palette (still classroom-appropriate, not neon).
+const TERM_THEME: Record<LessonTerm, { grad: string; ring: string; chip: string; ink: string; accent: string }> = {
+  "Term 1": {
+    grad: "from-sky-400 via-sky-500 to-cyan-500",
+    ring: "ring-sky-200",
+    chip: "bg-sky-100 text-sky-800",
+    ink: "text-sky-900",
+    accent: "bg-sky-500",
+  },
+  "Term 2": {
+    grad: "from-emerald-400 via-teal-500 to-emerald-600",
+    ring: "ring-emerald-200",
+    chip: "bg-emerald-100 text-emerald-800",
+    ink: "text-emerald-900",
+    accent: "bg-emerald-500",
+  },
+  "Term 3": {
+    grad: "from-amber-400 via-orange-500 to-rose-500",
+    ring: "ring-amber-200",
+    chip: "bg-amber-100 text-amber-900",
+    ink: "text-amber-900",
+    accent: "bg-amber-500",
+  },
+  "Term 4": {
+    grad: "from-violet-500 via-fuchsia-500 to-pink-500",
+    ring: "ring-violet-200",
+    chip: "bg-violet-100 text-violet-800",
+    ink: "text-violet-900",
+    accent: "bg-violet-500",
+  },
+};
+
 function LessonBankPage() {
   const listFn = useServerFn(listWeeklyUploads);
   const query = useQuery({ queryKey: ["weekly-uploads"], queryFn: () => listFn() });
+  const [openTerm, setOpenTerm] = useState<LessonTerm | null>(null);
   const [openWeek, setOpenWeek] = useState<{ term: LessonTerm; week: LessonWeek } | null>(null);
   const [q, setQ] = useState("");
 
@@ -42,96 +76,185 @@ function LessonBankPage() {
   const filtered = useMemo(() => {
     if (!q.trim()) return uploads;
     const n = q.toLowerCase();
-    return uploads.filter((u) => `${u.title} ${u.uploader_name ?? ""}`.toLowerCase().includes(n));
+    return uploads.filter((u) =>
+      `${u.title} ${u.uploader_name ?? ""} ${u.class_name ?? ""}`.toLowerCase().includes(n),
+    );
   }, [uploads, q]);
 
-  // Map term → week → uploads
-  const grid = useMemo(() => {
-    const m: Record<LessonTerm, Map<LessonWeek, WeeklyUpload[]>> = {
-      "Term 1": new Map(), "Term 2": new Map(), "Term 3": new Map(), "Term 4": new Map(),
+  // Rollups per term
+  const termCounts = useMemo(() => {
+    const c: Record<LessonTerm, { total: number; approved: number; pending: number; rejected: number }> = {
+      "Term 1": { total: 0, approved: 0, pending: 0, rejected: 0 },
+      "Term 2": { total: 0, approved: 0, pending: 0, rejected: 0 },
+      "Term 3": { total: 0, approved: 0, pending: 0, rejected: 0 },
+      "Term 4": { total: 0, approved: 0, pending: 0, rejected: 0 },
     };
-    for (const t of TERMS) for (const w of LESSON_WEEKS) m[t].set(w, []);
-    for (const u of filtered) m[u.term as LessonTerm]?.get(u.week as LessonWeek)?.push(u);
-    return m;
+    for (const u of filtered) {
+      const t = c[u.term as LessonTerm]; if (!t) continue;
+      t.total += 1;
+      if (u.status === "approved") t.approved += 1;
+      else if (u.status === "rejected") t.rejected += 1;
+      else t.pending += 1;
+    }
+    return c;
   }, [filtered]);
+
+  // Week-level rollup for the active term
+  const weekMap = useMemo(() => {
+    const m = new Map<LessonWeek, WeeklyUpload[]>();
+    for (const w of LESSON_WEEKS) m.set(w, []);
+    if (openTerm) for (const u of filtered) if (u.term === openTerm) m.get(u.week as LessonWeek)?.push(u);
+    return m;
+  }, [filtered, openTerm]);
 
   return (
     <AppShell>
       <PageHeader
         title="Lesson Bank"
-        subtitle="Term 1 – 4 · Week 1 – 12 · click any week to attach or view weekly planners"
+        subtitle="Weekly lesson plans, organised by Term and Week — attach MS Word (.docx) plans from your computer, phone or drive."
         actions={
           <>
             <div className="relative min-w-[240px] max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search uploaded plans…" className="h-9 pl-8" data-guest-safe="true" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search plans, teacher, class…"
+                className="h-9 pl-8"
+                data-guest-safe="true"
+              />
             </div>
-            <Button asChild variant="outline" size="sm">
-              <Link to="/lessons"><ArrowLeft className="h-4 w-4" />Back to Planner</Link>
-            </Button>
+            {openTerm && (
+              <Button variant="outline" size="sm" onClick={() => setOpenTerm(null)}>
+                <ArrowLeft className="h-4 w-4" />All terms
+              </Button>
+            )}
           </>
         }
       />
 
-      <div className="px-4 py-6 md:px-8">
-        <Card className="mb-6 border-primary/20 bg-gradient-to-br from-primary-soft/40 via-background to-background p-4">
+      <div className="relative px-4 py-6 md:px-8">
+        {/* Decorative brand graphics */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-56 overflow-hidden opacity-70">
+          <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
+          <div className="absolute -right-20 top-10 h-64 w-64 rounded-full bg-fuchsia-300/20 blur-3xl" />
+          <div className="absolute left-1/3 -top-10 h-52 w-52 rounded-full bg-amber-200/30 blur-3xl" />
+        </div>
+
+        {/* Intro banner */}
+        <Card className="relative z-10 mb-6 overflow-hidden border-primary/20 bg-gradient-to-r from-primary-soft/60 via-background to-background p-5">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles className="h-4 w-4" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-sm">
+              <BookOpenCheck className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">Bank vs Planner</p>
-              <p className="text-xs text-muted-foreground">
-                The <strong>Lesson Planner</strong> is where teachers draft with AI. The <strong>Lesson Bank</strong> is the
-                shared library of weekly plans, organised by term and week. Click any week cell to attach files from your
-                computer, phone or drive — <strong>Leadership</strong> reviews and approves each weekly plan.
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">Four term folders · Twelve weeks each</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Open a term folder, then a week to <strong>attach or upload</strong> your weekly plan
+                (<strong>MS Word .docx recommended</strong>). Leadership reviews each plan — you'll see
+                <em> approved</em>, <em>pending</em>, <em>rejected</em> or <em>returned with comments</em> right on the folder.
               </p>
             </div>
+            <Sparkles className="hidden h-5 w-5 text-primary/60 md:block" />
           </div>
         </Card>
 
-        {/* Grid: Terms across, Weeks down (matches sample layout) */}
-        <Card className="overflow-hidden">
-          <div className="grid grid-cols-4 border-b bg-muted/40">
-            {TERMS.map((t) => (
-              <div key={t} className={cn("px-4 py-3 text-center text-sm font-bold uppercase tracking-wide border-r last:border-r-0", "text-foreground")}>
-                {t}
-              </div>
-            ))}
-          </div>
-          <div className="divide-y">
-            {LESSON_WEEKS.map((w) => (
-              <div key={w} className="grid grid-cols-4">
-                {TERMS.map((t) => {
-                  const list = grid[t].get(w) ?? [];
-                  const approved = list.filter((u) => u.status === "approved").length;
-                  const pending = list.filter((u) => u.status === "pending").length;
-                  return (
-                    <button
-                      key={t + w}
-                      onClick={() => setOpenWeek({ term: t, week: w })}
-                      className={cn(
-                        "group flex flex-col items-center gap-1 border-r px-3 py-3 text-center transition last:border-r-0",
-                        "hover:bg-primary-soft/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+        {/* Term folders (level 1) */}
+        {!openTerm && (
+          <div className="relative z-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {TERMS.map((term) => {
+              const c = termCounts[term];
+              const theme = TERM_THEME[term];
+              return (
+                <button
+                  key={term}
+                  onClick={() => setOpenTerm(term)}
+                  className={cn(
+                    "group relative overflow-hidden rounded-2xl border bg-card p-5 text-left shadow-sm transition",
+                    "hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2",
+                    theme.ring,
+                  )}
+                >
+                  <div className={cn("absolute inset-x-0 top-0 h-24 bg-gradient-to-br opacity-90", theme.grad)} />
+                  <div className="relative flex items-start justify-between">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/95 shadow-md ring-1 ring-black/5">
+                      <Folder className={cn("h-7 w-7", theme.ink)} />
+                    </div>
+                    <Badge className="bg-white/95 text-foreground hover:bg-white">{c.total} plan{c.total === 1 ? "" : "s"}</Badge>
+                  </div>
+                  <div className="relative mt-10">
+                    <p className={cn("text-lg font-bold tracking-tight", theme.ink)}>{term}</p>
+                    <p className="text-xs text-muted-foreground">Weeks 1 – 12</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px]">
+                        <CheckCircle2 className="mr-1 h-3 w-3" />{c.approved} approved
+                      </Badge>
+                      <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200 text-[10px]">
+                        <Clock3 className="mr-1 h-3 w-3" />{c.pending} pending
+                      </Badge>
+                      {c.rejected > 0 && (
+                        <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 text-[10px]">
+                          <XCircle className="mr-1 h-3 w-3" />{c.rejected} returned
+                        </Badge>
                       )}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <Folder className="h-4 w-4 text-primary/70 group-hover:text-primary" />
-                        <span className="text-sm font-semibold text-foreground">{w}</span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Week folders (level 2) */}
+        {openTerm && (
+          <div className="relative z-10">
+            <div className={cn("mb-4 flex items-center gap-3 rounded-xl bg-gradient-to-r p-4 text-white shadow-sm", TERM_THEME[openTerm].grad)}>
+              <FolderOpen className="h-6 w-6" />
+              <div>
+                <p className="text-lg font-bold">{openTerm}</p>
+                <p className="text-xs text-white/90">Click a week folder to attach or view weekly lesson plans.</p>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {LESSON_WEEKS.map((w) => {
+                const list = weekMap.get(w) ?? [];
+                const approved = list.filter((u) => u.status === "approved").length;
+                const pending = list.filter((u) => u.status === "pending").length;
+                const rejected = list.filter((u) => u.status === "rejected").length;
+                const theme = TERM_THEME[openTerm];
+                return (
+                  <button
+                    key={w}
+                    onClick={() => setOpenWeek({ term: openTerm, week: w })}
+                    className={cn(
+                      "group flex flex-col rounded-xl border bg-card p-4 text-left shadow-sm transition",
+                      "hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2",
+                      theme.ring,
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", theme.chip)}>
+                        <Folder className="h-5 w-5" />
                       </div>
-                      {(approved > 0 || pending > 0) && (
-                        <div className="flex gap-1">
-                          {approved > 0 && <Badge className="h-4 bg-emerald-100 px-1.5 text-[9px] text-emerald-800 hover:bg-emerald-100">{approved} ✓</Badge>}
-                          {pending > 0 && <Badge className="h-4 bg-amber-100 px-1.5 text-[9px] text-amber-800 hover:bg-amber-100">{pending} ⏳</Badge>}
-                        </div>
+                      {list.length > 0 && (
+                        <span className="text-[10px] font-medium text-muted-foreground">{list.length} file{list.length === 1 ? "" : "s"}</span>
                       )}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+                    </div>
+                    <p className="mt-3 text-sm font-semibold text-foreground">{w}</p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {approved > 0 && <Badge className="h-4 bg-emerald-100 px-1.5 text-[9px] text-emerald-800 hover:bg-emerald-100">{approved} approved</Badge>}
+                      {pending > 0 && <Badge className="h-4 bg-amber-100 px-1.5 text-[9px] text-amber-800 hover:bg-amber-100">{pending} pending</Badge>}
+                      {rejected > 0 && <Badge className="h-4 bg-rose-100 px-1.5 text-[9px] text-rose-700 hover:bg-rose-100">{rejected} returned</Badge>}
+                      {list.length === 0 && (
+                        <span className="text-[10px] italic text-muted-foreground">empty · click to attach</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </Card>
+        )}
       </div>
 
       {openWeek && (
@@ -145,7 +268,6 @@ function LessonBankPage() {
     </AppShell>
   );
 }
-
 
 function WeekFolderDialog({ term, week, uploads, onClose }: {
   term: LessonTerm; week: LessonWeek; uploads: WeeklyUpload[]; onClose: () => void;
@@ -213,16 +335,18 @@ function WeekFolderDialog({ term, week, uploads, onClose }: {
     }
   }
 
+  const theme = TERM_THEME[term];
+
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4 text-primary" />
-            <DialogTitle>{term} · {week}</DialogTitle>
+          <div className={cn("-mx-6 -mt-6 mb-2 flex items-center gap-2 rounded-t-lg bg-gradient-to-r px-6 py-4 text-white", theme.grad)}>
+            <FolderOpen className="h-5 w-5" />
+            <DialogTitle className="text-white">{term} · {week}</DialogTitle>
           </div>
           <DialogDescription>
-            Upload your weekly plan from computer, phone or drive. Leadership will review and approve each plan.
+            Attach weekly lesson plans from your computer, phone or drive. Leadership will review and approve each plan.
           </DialogDescription>
         </DialogHeader>
 
@@ -289,7 +413,10 @@ function UploadRow({ upload, onOpen, onReview, onDelete }: {
   const StatusIcon =
     upload.status === "approved" ? CheckCircle2 :
     upload.status === "rejected" ? XCircle : Clock3;
-  const statusText = upload.status === "approved" ? "Approved" : upload.status === "rejected" ? "Rejected" : "Pending leadership review";
+  const statusText =
+    upload.status === "approved" ? "Approved" :
+    upload.status === "rejected" ? (upload.leadership_note ? "Returned with comments" : "Rejected") :
+    "Pending leadership review";
 
   return (
     <div className={cn("rounded-lg border p-3", tone)}>
@@ -300,7 +427,10 @@ function UploadRow({ upload, onOpen, onReview, onDelete }: {
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{upload.title}</p>
           <p className="text-[10px] text-muted-foreground">
-            {upload.uploader_name ?? "Teacher"} · {new Date(upload.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+            {upload.uploader_name ?? "Teacher"}
+            {upload.class_name ? ` · ${upload.class_name}` : ""}
+            {" · "}
+            {new Date(upload.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
             {upload.size_bytes ? ` · ${(upload.size_bytes / 1024).toFixed(0)} KB` : ""}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -322,11 +452,11 @@ function UploadRow({ upload, onOpen, onReview, onDelete }: {
       </div>
       {reviewing ? (
         <div className="mt-3 space-y-2 rounded-md border bg-background p-2">
-          <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Leadership note (optional)…" className="text-xs" />
+          <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Leadership note or return-with-comments feedback…" className="text-xs" />
           <div className="flex justify-end gap-1.5">
             <Button size="sm" variant="ghost" onClick={() => setReviewing(false)}>Cancel</Button>
             <Button size="sm" variant="outline" className="text-rose-700" onClick={() => { onReview({ id: upload.id, status: "rejected", leadership_note: note }); setReviewing(false); }}>
-              <XCircle className="h-3.5 w-3.5" />Reject
+              <XCircle className="h-3.5 w-3.5" />Return
             </Button>
             <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-600/90" onClick={() => { onReview({ id: upload.id, status: "approved", leadership_note: note }); setReviewing(false); }}>
               <CheckCircle2 className="h-3.5 w-3.5" />Approve
