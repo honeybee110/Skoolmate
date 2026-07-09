@@ -28,6 +28,7 @@ import { Route as BehaviourRouteImport } from './routes/behaviour'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LessonsIndexRouteImport } from './routes/lessons.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
@@ -152,6 +153,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LessonsIndexRoute = LessonsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LessonsRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin/': typeof AdminIndexRoute
+  '/lessons/': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesByTo {
@@ -360,7 +367,6 @@ export interface FileRoutesByTo {
   '/evidence': typeof EvidenceRoute
   '/handover': typeof HandoverRoute
   '/ieps': typeof IepsRouteWithChildren
-  '/lessons': typeof LessonsRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/reports': typeof ReportsRoute
@@ -397,6 +403,7 @@ export interface FileRoutesByTo {
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin': typeof AdminIndexRoute
+  '/lessons': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesById {
@@ -448,6 +455,7 @@ export interface FileRoutesById {
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin/': typeof AdminIndexRoute
+  '/lessons/': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRouteTypes {
@@ -500,6 +508,7 @@ export interface FileRouteTypes {
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin/'
+    | '/lessons/'
     | '/ieps/$goalId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -513,7 +522,6 @@ export interface FileRouteTypes {
     | '/evidence'
     | '/handover'
     | '/ieps'
-    | '/lessons'
     | '/notifications'
     | '/parent'
     | '/reports'
@@ -550,6 +558,7 @@ export interface FileRouteTypes {
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin'
+    | '/lessons'
     | '/ieps/$goalId/print'
   id:
     | '__root__'
@@ -600,6 +609,7 @@ export interface FileRouteTypes {
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin/'
+    | '/lessons/'
     | '/ieps/$goalId/print'
   fileRoutesById: FileRoutesById
 }
@@ -785,6 +795,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/lessons/': {
+      id: '/lessons/'
+      path: '/'
+      fullPath: '/lessons/'
+      preLoaderRoute: typeof LessonsIndexRouteImport
+      parentRoute: typeof LessonsRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -1004,10 +1021,12 @@ const IepsRouteWithChildren = IepsRoute._addFileChildren(IepsRouteChildren)
 
 interface LessonsRouteChildren {
   LessonsBankRoute: typeof LessonsBankRoute
+  LessonsIndexRoute: typeof LessonsIndexRoute
 }
 
 const LessonsRouteChildren: LessonsRouteChildren = {
   LessonsBankRoute: LessonsBankRoute,
+  LessonsIndexRoute: LessonsIndexRoute,
 }
 
 const LessonsRouteWithChildren =
@@ -1075,13 +1094,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
