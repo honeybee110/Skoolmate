@@ -131,10 +131,14 @@ function persist() {
 }
 function emit() { persist(); for (const l of listeners) l(); }
 function subscribe(fn: () => void) { listeners.add(fn); return () => { listeners.delete(fn); }; }
-const getServer = () => ({ lessons: seed });
+// Stable snapshot references — returning a fresh object each call causes
+// useSyncExternalStore to loop ("The result of getServerSnapshot should be cached").
+const serverSnapshot: State = { lessons: seed };
+const getServer = () => serverSnapshot;
+const getSnapshot = () => state;
 
 export function useLessonStore(): State {
-  return useSyncExternalStore(subscribe, () => state, getServer);
+  return useSyncExternalStore(subscribe, getSnapshot, getServer);
 }
 
 export function saveLesson(input: Omit<SavedLesson, "id" | "createdAt" | "updatedAt" | "status"> & { id?: string; status?: LessonStatus }): SavedLesson {

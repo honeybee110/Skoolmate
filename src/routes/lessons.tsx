@@ -1,10 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-// The AI Lesson Planner has been retired. Lesson planning now lives entirely
-// inside the Lesson Bank — teachers attach/upload MS Word plans into the
-// Term & Week folders, and leadership reviews them there.
+// Layout route for /lessons/* — child routes render inside <Outlet />.
+// The redirect to /lessons/bank now lives on the index leaf so it does
+// not fire when the browser navigates to the child bank route
+// (which would create an infinite redirect loop).
 export const Route = createFileRoute("/lessons")({
-  beforeLoad: () => {
-    throw redirect({ to: "/lessons/bank" });
-  },
+  component: () => <Outlet />,
 });

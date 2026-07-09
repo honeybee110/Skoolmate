@@ -181,10 +181,13 @@ function subscribe(fn: () => void) {
   };
 }
 
-const getServerSnapshot = () => initialState();
+// Cache the SSR snapshot so useSyncExternalStore doesn't loop.
+const serverSnapshot: StoreState = initialState();
+const getServerSnapshot = () => serverSnapshot;
+const getSnapshot = () => state;
 
 export function useCurriculumStore(): StoreState {
-  return useSyncExternalStore(subscribe, () => state, getServerSnapshot);
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 // ---------- Curriculum mutations ----------
