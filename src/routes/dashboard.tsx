@@ -27,6 +27,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { subjectFromTitle } from "@/lib/subject-colors";
 
 import { PortalGuard } from "@/components/portal-guard";
 import { ProfileHeader } from "@/components/profile-header";
