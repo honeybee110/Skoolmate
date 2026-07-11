@@ -125,12 +125,14 @@ function Dashboard() {
               <Button variant="ghost" size="sm" className="text-xs">Open calendar <ChevronRight className="h-3 w-3" /></Button>
             </div>
             <div className="mt-4 space-y-1.5">
-              {todayTimetable.map((b, i) => (
+              {todayTimetable.map((b, i) => {
+                const tone = subjectFromTitle(b.title, b.type);
+                return (
                 <div
                   key={i}
                   className={cn(
                     "flex items-center gap-4 rounded-lg border-l-4 px-3 py-2.5",
-                    blockColor[b.type]
+                    tone.cell
                   )}
                 >
                   <div className="flex w-20 shrink-0 flex-col text-[11px] text-muted-foreground">
@@ -141,11 +143,12 @@ function Dashboard() {
                     <div className="truncate text-sm font-medium">{b.title}</div>
                     <div className="text-[11px] text-muted-foreground">{b.room}</div>
                   </div>
-                  {b.type === "therapy" && (
-                    <span className="text-[10px] uppercase tracking-wider text-success">Therapy</span>
-                  )}
+                  <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", tone.chip)}>
+                    {tone.label}
+                  </span>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </Card>
 
