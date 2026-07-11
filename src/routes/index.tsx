@@ -516,7 +516,7 @@ function Landing() {
 
       {/* ───────────────────────── Final CTA ───────────────────────── */}
       <section
-        id="demo"
+        id="book-demo"
         className="relative overflow-hidden bg-[color:var(--navy)] text-primary-foreground"
       >
         <div
@@ -539,8 +539,10 @@ function Landing() {
             planning, IEP writing and neurodivergent learner support.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" className="rounded-full bg-primary px-6 hover:bg-primary/90">
-              Book a Demo <ArrowRight className="ml-1 h-4 w-4" />
+            <Button asChild size="lg" className="rounded-full bg-primary px-6 hover:bg-primary/90">
+              <Link to="/auth">
+                Book a Demo <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
             </Button>
             <Button
               asChild
