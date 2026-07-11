@@ -16,7 +16,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import teacherShot from "@/assets/landing-teacher.jpg";
+import demoVideo from "@/assets/skoolmate-demo.mp4.asset.json";
+import demoPoster from "@/assets/skoolmate-demo-poster.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -248,22 +249,37 @@ function Landing() {
         </div>
 
         {/* Product mockup band */}
-        <div className="relative mx-auto max-w-6xl px-6 pb-24">
+        <div id="demo" className="relative mx-auto max-w-6xl px-6 pb-24">
           <div className="relative">
             <div
               aria-hidden
-              className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/15 via-accent/10 to-transparent blur-2xl"
+              className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/15 via-accent/10 to-transparent blur-2xl"
             />
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
-              <img
-                src={teacherShot}
-                alt="skoolmate teacher dashboard preview"
+            <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+              <video
+                className="block h-auto w-full"
+                src={demoVideo.url}
+                poster={demoPoster.url}
                 width={1280}
-                height={800}
-                loading="lazy"
-                className="h-auto w-full"
-              />
-            </div>
+                height={580}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                controls
+                controlsList="nodownload"
+                aria-label="skoolmate product tour: lesson planner, IEP writer, behaviour analytics heatmap and Victorian Curriculum 2.0 crosscheck shown in the teacher dashboard"
+              >
+                Your browser does not support the video tag. View a
+                <a href={demoPoster.url}> screenshot of the skoolmate dashboard</a> instead.
+              </video>
+              <figcaption className="sr-only">
+                Silent product tour of the skoolmate teacher dashboard, cycling through
+                lesson planning, IEP writing, curriculum crosscheck and the behaviour
+                analytics heatmap.
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
@@ -500,7 +516,7 @@ function Landing() {
 
       {/* ───────────────────────── Final CTA ───────────────────────── */}
       <section
-        id="demo"
+        id="book-demo"
         className="relative overflow-hidden bg-[color:var(--navy)] text-primary-foreground"
       >
         <div
@@ -523,8 +539,10 @@ function Landing() {
             planning, IEP writing and neurodivergent learner support.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" className="rounded-full bg-primary px-6 hover:bg-primary/90">
-              Book a Demo <ArrowRight className="ml-1 h-4 w-4" />
+            <Button asChild size="lg" className="rounded-full bg-primary px-6 hover:bg-primary/90">
+              <Link to="/auth">
+                Book a Demo <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
             </Button>
             <Button
               asChild
@@ -579,10 +597,9 @@ function Landing() {
             <FooterCol
               heading="Company"
               items={[
-                { label: "About", href: "#" },
-                { label: "Careers", href: "#" },
-                { label: "Contact", href: "#" },
-                { label: "Privacy Policy", href: "#" },
+                { label: "Book a demo", href: "/auth" },
+                { label: "Sign in", href: "/auth" },
+                { label: "Contact", href: "mailto:hello@skoolmate.com.au", external: true },
               ]}
             />
           </div>
@@ -590,11 +607,6 @@ function Landing() {
           <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row">
             <div>
               © {new Date().getFullYear()} skoolmate Pty Ltd. Made in Melbourne, Australia.
-            </div>
-            <div className="flex gap-5">
-              <a href="#" className="hover:text-foreground">Terms</a>
-              <a href="#" className="hover:text-foreground">Privacy</a>
-              <a href="#" className="hover:text-foreground">Cookies</a>
             </div>
           </div>
         </div>
