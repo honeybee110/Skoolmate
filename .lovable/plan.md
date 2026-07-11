@@ -1,74 +1,70 @@
-## Scope
+# Admin Portal Production Build — Plan
 
-Rebuild `src/routes/index.tsx` to match the Figma video's structure, adapted to the current brand system. No changes to `/pricing`, auth, sidebar, or any app routes.
+Scope is large; I'll ship it as one coordinated milestone using shared building blocks so modules stay in sync. Existing data, auth, RLS, and unrelated pages will not be touched.
 
-- **Kept from current tokens:** moss primary, brick accent, sage/sand backgrounds, Fraunces (brand/display), Public Sans (body), existing `BrandMark` logo.
-- **Not applied:** the video's indigo/purple/cyan gradient palette and its Poppins-style sans. Gradient accents (in the headline and dark bands) become moss → brick.
-- **Not built:** the pricing section. The "Pricing" nav item and any "Explore Pricing" CTAs are hidden until pricing is ready to surface. The `/pricing` route stays live but unlinked from the landing page.
+## Foundations (build first, reuse everywhere)
 
-## Sections (top → bottom)
+- **Directory store** (`src/lib/directory-store.ts`) — one client-side source of truth for teachers, classes, students, timetable, school years. Persisted to `localStorage`, seeded from existing `mock-data.ts`. Cross-module events so edits in one screen refresh others.
+- **Reusable UI**: `DirectoryToolbar` (search + filter chips), `DataTable`, `PersonCard` (avatar + role chips), `AssignmentDropzone` (drag-and-drop), `StatusPill`, `YearSelector`.
+- **Types**: `Teacher`, `EducationSupport`, `ClassRoom`, `StudentRecord`, `TimetableSession`, `SchoolYear`, `TimetableStatus` (`draft | submitted | in_review | approved | published | returned`).
 
-1. **Sticky top nav**
-   - Left: `BrandMark` wordmark.
-   - Center (desktop): Features · Curriculum · Behaviour Analytics · Schools.
-   - Right: `Sign in` (→ `/auth`) + solid `Get Started Free` pill CTA (→ `/teacher/login`).
+## 1. Teacher Directory — `/admin/teachers`
 
-2. **Hero**
-   - Eyebrow pill: "Purpose-built for Australian schools · Victorian Curriculum 2.0" (sage bg, moss text).
-   - Headline (Fraunces): "The smarter way to run" / "Australian classrooms." Second line rendered in a moss → brick text gradient.
-   - Sub: existing 2-sentence pitch, tightened.
-   - Two CTAs: solid `Start Free Trial` (→ `/teacher/login`) + outline `Watch Demo` (→ `#demo`).
-   - Trust row: three checks — "No credit card required", "Free 30-day trial", "Victorian Curriculum 2.0 ready".
+Replaces current stub. Full CRUD with:
+- Grid + list toggle, search, filter by role/status/class.
+- Profile drawer: photo (reuses `profile-photos` bucket), employee ID, role, classes, email, phone, employment status, clock in/out history (reads existing `timeclock` mock).
+- Actions: Add, Edit, Archive, Assign to class (opens class picker).
 
-3. **Product mockup band**
-   - Reuses the existing `teacherShot` image inside a soft-shadowed rounded card on a sand gradient background. Keeps the visual weight of the Figma dashboard frame without recreating a fake UI.
+## 2. School-Wide Class List — `/admin/classes`
 
-4. **Schools trust strip**
-   - Sage-tinted band, "Trusted by leading Victorian schools", 6 school names in muted Fraunces. Uses the existing `schools` array.
+Replaces stub. Class builder for upcoming year:
+- Grid of class cards (Prep 1–5, Primary 6–15, Secondary 1–10) grouped by band.
+- Class editor drawer: name, year level, room, classroom teacher, multiple ES staff, students, timetable link.
+- Drag-and-drop assignment (react-dnd-lite via HTML5 native DnD) for teachers, ES, students from side panel to class.
+- Writes propagate to directory store → student directory, timetable, teacher directory refresh live.
 
-5. **Feature grid — "One platform. Every classroom need."**
-   - 3-column grid, 6 cards: AI-Powered Lesson Planner (Core), IEP Writer & Tracker (Inclusion), Victorian Curriculum 2.0 Crosscheck (VC 2.0), Behaviour Analytics Heatmap (Neurodivergent), Student Profiles & Cohort View (Students), Privacy & Compliance (Security).
-   - Each card: colored icon tile (moss/brick/sage variants), title, 2-line body, small category chip top-right.
+## 3. Whole-School Student Directory — `/admin/students`
 
-6. **Behaviour heatmap spotlight**
-   - Dark moss-ink band with the "World-first feature" eyebrow.
-   - Split layout: copy + 4 bullet points + `See it in action` CTA on the left; a static heatmap grid (Wk 1–4 × Mon–Fri, "Calm/Moderate/Elevated/Distressed" chips) + a moss "AI Pattern Insight" callout on the right. Rendered in CSS, no image asset.
+Replaces stub. Powerful filter bar (class, year, teacher, semester, behaviour band, attendance band, IEP completion). Student card shows photo, name, class, teacher, ES, year, attendance %, behaviour flag, IEP status, CrossCheck progress, medical alerts, wellbeing note pill. Row click → existing `/students/$studentId` route.
 
-7. **Stats band**
-   - Full-width moss → moss-dark gradient. 4 KPIs: 120+ Victorian schools · 28K+ Students supported · 2,400+ IEPs generated · 4.9★ Teacher satisfaction. Cream/sand text.
+## 4. Whole-School Timetable — `/admin/timetable`
 
-8. **Testimonials**
-   - 3 cards with initial-avatars (moss/brick/sage), name, role, colored role chip. Uses the existing 2 testimonials plus one new (Rachel Stafford, Year 6 Teacher) so the row balances.
+Rebuilds existing stub. Two views:
+- **Review queue** — teachers' submitted timetables with Return / Request revision / Approve / Publish actions and comment thread.
+- **Master timetable** — grouped by Prep / Primary / Secondary, per class grid (Mon–Fri × periods), showing teacher, ES, students count, room, subject. Approved = read-only lock icon; republish clones a new version.
 
-9. **Final CTA**
-   - Dark ink-navy band. Fraunces headline "Ready to give every student the support they deserve?" with the second line in the moss → brick text gradient. Sub, then solid `Book a Demo` + outline `See the product` (→ `/dashboard`). Small `BrandMark` above the heading.
+Status machine: Draft → Submitted → In Review → Approved → Published, with Returned branch.
 
-10. **Footer**
-    - 4 columns: Product (Lesson Planner, IEP Writer, Behaviour Heatmap, VC 2.0 Crosscheck) · Schools (Primary, Secondary, Special, Catholic, Independent) · Resources (existing links: DSE 2005, NCCD, NDIS, Australian Curriculum – Student Diversity) · Company (About, Careers, Contact, Privacy). Left rail: brand mark, one-line tagline, "All systems operational" status dot. Bottom bar: copyright + Terms/Privacy/Cookies.
-    - "Pricing" is intentionally omitted from the Product column.
+## 5. Leadership Planning — `/admin/year-setup`
 
-## Design tokens & motion
+New route. Wizard:
+1. Create/activate school year.
+2. Duplicate previous year's classes (checkbox list).
+3. Bulk assign teachers, ES, students (drag from unassigned pool).
+4. Move students / teachers between classes.
+5. Archive previous year, activate new year.
+Sidebar entry under Admin → "Year Setup".
 
-- All colors reference existing CSS variables (`--primary`, `--primary-soft`, `--accent`, `--accent-soft`, `--background`, `--foreground`, `--muted`, `--border`, `--navy`). No hex literals in JSX.
-- Gradient headline uses `bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent`.
-- Keeps the existing `drift-a/b/c/d` floating shapes on the hero for continuity.
-- Every heading uses `font-brand` (Fraunces); body stays on the default sans (Public Sans).
+## 6. CrossCheck Builder rename
 
-## Files
+Global rename "Extended CrossCheck Builder" → "CrossCheck Builder" across routes, sidebar, headings, meta titles, and any strings. File `admin.crosscheck-builder.tsx` already named correctly; just update copy.
 
-- **Edit:** `src/routes/index.tsx` — replace the current Landing component with the new section stack; keep the `Route = createFileRoute(...)` head unchanged. Remove references to `#pricing` and the "Explore Pricing" outline button. Keep imports of `teacherShot` (used in section 3); drop the unused `adminShot` import if it becomes orphan.
-- **No other files touched.** `src/styles.css`, `BrandMark`, and `/pricing` remain as-is.
+## 7. Integration hooks
 
-## Out of scope
+- Directory store exposes selectors used by Lesson Planner, IEPs, Reports, Evidence Hub, Behaviour, Attendance, Analytics (they already read `mock-data`; add a compatibility shim so their existing imports return live directory data).
+- No DB migration this pass — everything persists client-side to keep the existing Supabase schema untouched. Server-side persistence can follow once the UI is validated.
 
-- No pricing section, no pricing CTAs, no changes to `/pricing`.
-- No new image assets — the dashboard mockup reuses `teacherShot`; the heatmap is CSS only.
-- No changes to sidebar, auth, or app routes.
-- No copy changes to school names or resource links beyond what's listed above.
+## Technical notes
 
-## Verification
+- All new routes use `AppShell variant="admin"` + `RoleGate` (leadership/it).
+- Drag-and-drop: native HTML5 DnD to avoid new dependencies.
+- Reusable `EntityDrawer` component built on existing `Dialog`.
+- Existing brand tokens (`--primary`, `--accent`, `--navy`) used throughout.
+- Typecheck (`bunx tsgo --noEmit`) must pass at the end.
 
-- Build passes, no TS errors.
-- Visual check on `/` at desktop (≥1024px) and mobile (≤640px): nav collapses, hero CTAs stack, feature grid becomes single column, footer columns wrap.
-- No hex color literals introduced; all styling via Tailwind semantic tokens.
-- No link to `/pricing` from the landing page; the route itself still resolves if visited directly.
+## Out of scope (explicit)
+
+- No changes to auth, RLS, Supabase schema, or unrelated pages.
+- No new database tables in this pass (state is local + reactive). If you want durable persistence, I'll add migrations in a follow-up milestone.
+
+Reply "go" to build, or tell me which module to tackle first if you'd rather stage it.
