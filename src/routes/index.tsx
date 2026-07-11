@@ -109,7 +109,7 @@ function Landing() {
             <a href="#features" className="transition hover:text-foreground">Features</a>
             <a href="#teachers" className="transition hover:text-foreground">For Teachers</a>
             <a href="#admins" className="transition hover:text-foreground">For Admins</a>
-            <a href="#pricing" className="transition hover:text-foreground">Pricing</a>
+            <Link to="/pricing" className="transition hover:text-foreground">Pricing</Link>
             <Link to="/teacher/login" className="transition hover:text-foreground">Teacher Login</Link>
             <Link to="/admin/login" className="transition hover:text-foreground">Admin Login</Link>
           </nav>
@@ -324,7 +324,7 @@ function Landing() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" className="rounded-full bg-primary px-6 hover:bg-primary/90">Book a Demo</Button>
             <Button asChild size="lg" variant="outline" className="rounded-full border-white/40 bg-transparent px-6 text-white hover:bg-white/10 hover:text-white">
-              <a href="#pricing">Explore Pricing</a>
+              <Link to="/pricing">Explore Pricing</Link>
             </Button>
           </div>
         </div>
