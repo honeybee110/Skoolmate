@@ -56,13 +56,6 @@ const kindIcon = {
   report: FileText,
 } as const;
 
-const blockColor: Record<string, string> = {
-  literacy: "border-l-primary bg-primary-soft/40",
-  numeracy: "border-l-[oklch(0.58_0.12_280)] bg-[oklch(0.96_0.03_280)]/40",
-  specialist: "border-l-accent bg-accent-soft/40",
-  therapy: "border-l-[oklch(0.65_0.13_155)] bg-[oklch(0.95_0.04_155)]/40",
-  break: "border-l-muted-foreground/40 bg-muted/40",
-};
 
 function Dashboard() {
   const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(currentSemester);
