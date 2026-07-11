@@ -15,6 +15,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ScopeSequenceRouteImport } from './routes/scope-sequence'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LessonsRouteImport } from './routes/lessons'
@@ -88,6 +89,11 @@ const ResourcesRoute = ResourcesRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentRoute = ParentRouteImport.update({
@@ -325,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/lessons': typeof LessonsRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
+  '/pricing': typeof PricingRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/scope-sequence': typeof ScopeSequenceRoute
@@ -376,6 +383,7 @@ export interface FileRoutesByTo {
   '/ieps': typeof IepsRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
+  '/pricing': typeof PricingRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/scope-sequence': typeof ScopeSequenceRoute
@@ -429,6 +437,7 @@ export interface FileRoutesById {
   '/lessons': typeof LessonsRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
+  '/pricing': typeof PricingRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/scope-sequence': typeof ScopeSequenceRoute
@@ -483,6 +492,7 @@ export interface FileRouteTypes {
     | '/lessons'
     | '/notifications'
     | '/parent'
+    | '/pricing'
     | '/reports'
     | '/resources'
     | '/scope-sequence'
@@ -534,6 +544,7 @@ export interface FileRouteTypes {
     | '/ieps'
     | '/notifications'
     | '/parent'
+    | '/pricing'
     | '/reports'
     | '/resources'
     | '/scope-sequence'
@@ -586,6 +597,7 @@ export interface FileRouteTypes {
     | '/lessons'
     | '/notifications'
     | '/parent'
+    | '/pricing'
     | '/reports'
     | '/resources'
     | '/scope-sequence'
@@ -639,6 +651,7 @@ export interface RootRouteChildren {
   LessonsRoute: typeof LessonsRouteWithChildren
   NotificationsRoute: typeof NotificationsRoute
   ParentRoute: typeof ParentRoute
+  PricingRoute: typeof PricingRoute
   ReportsRoute: typeof ReportsRoute
   ResourcesRoute: typeof ResourcesRoute
   ScopeSequenceRoute: typeof ScopeSequenceRoute
@@ -715,6 +728,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent': {
@@ -1079,6 +1099,7 @@ const rootRouteChildren: RootRouteChildren = {
   LessonsRoute: LessonsRouteWithChildren,
   NotificationsRoute: NotificationsRoute,
   ParentRoute: ParentRoute,
+  PricingRoute: PricingRoute,
   ReportsRoute: ReportsRoute,
   ResourcesRoute: ResourcesRoute,
   ScopeSequenceRoute: ScopeSequenceRoute,
