@@ -29,6 +29,8 @@ import {
 import { cn } from "@/lib/utils";
 
 import { PortalGuard } from "@/components/portal-guard";
+import { ProfileHeader } from "@/components/profile-header";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
