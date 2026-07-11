@@ -162,42 +162,26 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
   return (
     <Sidebar
       collapsible="icon"
-      className={
-        isAdmin
-          ? "[&_[data-sidebar=sidebar]]:bg-gradient-to-b [&_[data-sidebar=sidebar]]:from-white [&_[data-sidebar=sidebar]]:via-[color:var(--navy-soft)]/40 [&_[data-sidebar=sidebar]]:to-white"
-          : "[&_[data-sidebar=sidebar]]:bg-gradient-to-b [&_[data-sidebar=sidebar]]:from-primary-soft/60 [&_[data-sidebar=sidebar]]:via-background [&_[data-sidebar=sidebar]]:to-background"
-      }
+      className="[&_[data-sidebar=sidebar]]:bg-gradient-to-b [&_[data-sidebar=sidebar]]:from-[color:var(--navy)] [&_[data-sidebar=sidebar]]:via-[color:var(--navy)] [&_[data-sidebar=sidebar]]:to-[color:var(--navy-light)] [&_[data-sidebar=sidebar]]:text-white [&_[data-sidebar=sidebar]]:border-r [&_[data-sidebar=sidebar]]:border-white/5"
     >
-      <SidebarHeader
-        className={
-          isAdmin
-            ? "border-b border-[color:var(--navy)]/15 bg-gradient-to-br from-[color:var(--navy)] to-[color:var(--navy-light)] text-white"
-            : "border-b border-primary/20 bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground"
-        }
-      >
+      <SidebarHeader className="border-b border-white/10 bg-gradient-to-br from-[color:var(--navy-light)] via-[color:var(--navy)] to-[color:var(--navy)] text-white">
         <Link to={homeUrl} className="flex items-center gap-2.5 px-2 py-2">
-          <BrandMark size="sm" tagline={isAdmin ? "Admin Portal" : "Teacher Portal"} textClassName={isAdmin ? "text-white" : "text-primary-foreground"} />
+          <BrandMark size="sm" tagline={isAdmin ? "Admin Portal" : "Teacher Portal"} textClassName="text-white" />
         </Link>
         {isAdmin && (
-          <div className="mx-2 mb-2 flex items-center gap-1.5 rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-white/90">
+          <div className="mx-2 mb-2 flex items-center gap-1.5 rounded-md bg-gradient-to-r from-[color:var(--primary)]/30 to-[color:var(--accent)]/20 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-white ring-1 ring-white/10">
             <ShieldCheck className="h-3 w-3" />
             Leadership access
           </div>
         )}
       </SidebarHeader>
-      <SidebarContent className={isAdmin ? "gap-0" : ""}>
+      <SidebarContent className="gap-0">
         {Object.entries(nav).map(([label, items]) => renderGroup(label, items))}
       </SidebarContent>
-      <SidebarFooter
-        className={
-          isAdmin
-            ? "border-t border-[color:var(--navy)]/15 bg-[color:var(--navy-soft)]/40"
-            : "border-t border-sidebar-border"
-        }
-      >
+      <SidebarFooter className="border-t border-white/10 bg-black/20">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild className="text-white/75 hover:bg-white/5 hover:text-white">
               <Link to={settingsUrl} className="flex items-center gap-3">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
@@ -206,7 +190,7 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
           </SidebarMenuItem>
           {user && (
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => signOut()} className="flex items-center gap-3">
+              <SidebarMenuButton onClick={() => signOut()} className="flex items-center gap-3 text-white/75 hover:bg-white/5 hover:text-white">
                 <LogOut className="h-4 w-4" />
                 <span>Sign out</span>
               </SidebarMenuButton>
@@ -215,24 +199,18 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
         </SidebarMenu>
         <div className="flex items-center gap-2.5 rounded-lg p-2">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white ring-2 ring-white/15"
             style={{
-              backgroundColor: isAdmin
-                ? "var(--navy)"
-                : `hsl(${profile?.avatar_hue ?? 200} 60% 50%)`,
+              backgroundImage: `linear-gradient(135deg, hsl(${profile?.avatar_hue ?? 260} 70% 55%), hsl(${(profile?.avatar_hue ?? 260) + 40} 75% 60%))`,
             }}
           >
             {initials || "SM"}
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-xs font-medium">
+            <span className="text-xs font-medium text-white">
               {profile?.display_name ?? user?.email?.split("@")[0] ?? "Guest"}
             </span>
-            <span
-              className={`text-[10px] ${
-                isAdmin ? "text-[color:var(--navy-light)] font-medium" : "text-muted-foreground"
-              }`}
-            >
+            <span className="text-[10px] text-white/55 font-medium">
               {primaryRole ? roleLabel(primaryRole) : "Not signed in"}
             </span>
           </div>
@@ -241,3 +219,4 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
     </Sidebar>
   );
 }
+
