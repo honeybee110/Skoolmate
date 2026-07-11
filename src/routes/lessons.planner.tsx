@@ -41,6 +41,7 @@ import { CURRICULUM_SUBJECTS } from "@/lib/curriculum-db";
 import { generateLessonPlan } from "@/lib/lessons.functions";
 import { registerWeeklyUpload } from "@/lib/lesson-uploads.functions";
 import { useAuth } from "@/lib/auth-context";
+import { useDirectory, getApprovedOrPublishedTimetable, statusLabel } from "@/lib/directory-store";
 
 export const Route = createFileRoute("/lessons/planner")({
   head: () => ({
