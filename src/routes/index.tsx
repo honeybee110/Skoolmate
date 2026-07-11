@@ -254,41 +254,41 @@ function Landing() {
           </ul>
         </div>
 
-        {/* Product mockup band */}
-        <div id="demo" className="relative mx-auto max-w-6xl px-6 pb-24">
-          <div className="relative">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/15 via-accent/10 to-transparent blur-2xl"
+        {/* For Teachers / For Admins */}
+        <div id="demo" className="relative mx-auto max-w-7xl px-6 pb-24">
+          <div className="grid gap-6 md:grid-cols-2">
+            <AudienceCard
+              badge="For Teachers"
+              icon={GraduationCap}
+              title="Spend less time on paperwork, more time teaching."
+              body="AI-drafted lesson plans, IEPs and progress notes — all aligned to the Victorian Curriculum 2.0."
+              items={[
+                { icon: BookOpen, label: "AI Lesson Planner" },
+                { icon: ClipboardList, label: "IEP Writer & Tracker" },
+                { icon: Activity, label: "Behaviour Heatmap" },
+                { icon: Users, label: "Student Profiles" },
+              ]}
+              cta={{ label: "Start Free Trial", to: "/teacher/login" }}
+              tone="primary"
             />
-            <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
-              <video
-                className="block h-auto w-full"
-                src={demoVideo.url}
-                poster={demoPoster.url}
-                width={1280}
-                height={580}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                controls
-                controlsList="nodownload"
-                aria-label="skoolmate product tour: lesson planner, IEP writer, behaviour analytics heatmap and Victorian Curriculum 2.0 crosscheck shown in the teacher dashboard"
-              >
-                Your browser does not support the video tag. View a
-                <a href={demoPoster.url}> screenshot of the skoolmate dashboard</a> instead.
-              </video>
-              <figcaption className="sr-only">
-                Silent product tour of the skoolmate teacher dashboard, cycling through
-                lesson planning, IEP writing, curriculum crosscheck and the behaviour
-                analytics heatmap.
-              </figcaption>
-            </figure>
+            <AudienceCard
+              badge="For Admins"
+              icon={Building2}
+              title="Whole-school visibility, compliance and reporting."
+              body="Real-time dashboards across cohorts, curriculum coverage, IEP compliance and staff workload."
+              items={[
+                { icon: LineChart, label: "Analytics & Reports" },
+                { icon: ShieldAlert, label: "Compliance & Audit" },
+                { icon: Settings2, label: "Roles & Permissions" },
+                { icon: BellRing, label: "Reminders & Approvals" },
+              ]}
+              cta={{ label: "Explore Admin Console", to: "/admin" }}
+              tone="accent"
+            />
           </div>
         </div>
       </section>
+
 
       {/* ───────────────────────── Schools trust strip ───────────────────────── */}
       <section id="schools" className="border-y border-border/60 bg-primary-soft/40">
