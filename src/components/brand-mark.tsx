@@ -1,4 +1,4 @@
-import logoAsset from "@/assets/skoolmate-logo.png.asset.json";
+import logoAsset from "@/assets/skoolmate-mark.png.asset.json";
 import { cn } from "@/lib/utils";
 
 type Size = "sm" | "md" | "lg" | "xl";
