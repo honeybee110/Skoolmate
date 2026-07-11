@@ -206,10 +206,24 @@ function load(): DirectoryState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return seed();
-    return JSON.parse(raw) as DirectoryState;
+    const parsed = JSON.parse(raw) as DirectoryState;
+    return { ...parsed, auditLog: parsed.auditLog ?? [] };
   } catch {
     return seed();
   }
+}
+
+function logAudit(action: AuditAction, summary: string, targetId?: string, meta?: Record<string, unknown>) {
+  const entry: AuditEntry = {
+    id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : `a-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    at: new Date().toISOString(),
+    actor: "Leadership",
+    action,
+    summary,
+    targetId,
+    meta,
+  };
+  state = { ...state, auditLog: [entry, ...state.auditLog].slice(0, 500) };
 }
 
 function persist() {
