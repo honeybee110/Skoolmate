@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { weeklyTimetable, sessionTimes, classInfo, type WeekDay } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { subjectFromTitle, subjectTones } from "@/lib/subject-colors";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({ meta: [{ title: "Calendar · skoolmate" }] }),
