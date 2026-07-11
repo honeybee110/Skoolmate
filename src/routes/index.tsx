@@ -14,10 +14,16 @@ import {
   Star,
   FileCheck,
   Sparkles,
+  GraduationCap,
+  Building2,
+  ClipboardList,
+  BookOpen,
+  LineChart,
+  Settings2,
+  BellRing,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import demoVideo from "@/assets/skoolmate-demo.mp4.asset.json";
-import demoPoster from "@/assets/skoolmate-demo-poster.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -248,41 +254,41 @@ function Landing() {
           </ul>
         </div>
 
-        {/* Product mockup band */}
-        <div id="demo" className="relative mx-auto max-w-6xl px-6 pb-24">
-          <div className="relative">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/15 via-accent/10 to-transparent blur-2xl"
+        {/* For Teachers / For Admins */}
+        <div id="demo" className="relative mx-auto max-w-7xl px-6 pb-24">
+          <div className="grid gap-6 md:grid-cols-2">
+            <AudienceCard
+              badge="For Teachers"
+              icon={GraduationCap}
+              title="Spend less time on paperwork, more time teaching."
+              body="AI-drafted lesson plans, IEPs and progress notes — all aligned to the Victorian Curriculum 2.0."
+              items={[
+                { icon: BookOpen, label: "AI Lesson Planner" },
+                { icon: ClipboardList, label: "IEP Writer & Tracker" },
+                { icon: Activity, label: "Behaviour Heatmap" },
+                { icon: Users, label: "Student Profiles" },
+              ]}
+              cta={{ label: "Start Free Trial", to: "/teacher/login" }}
+              tone="primary"
             />
-            <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
-              <video
-                className="block h-auto w-full"
-                src={demoVideo.url}
-                poster={demoPoster.url}
-                width={1280}
-                height={580}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                controls
-                controlsList="nodownload"
-                aria-label="skoolmate product tour: lesson planner, IEP writer, behaviour analytics heatmap and Victorian Curriculum 2.0 crosscheck shown in the teacher dashboard"
-              >
-                Your browser does not support the video tag. View a
-                <a href={demoPoster.url}> screenshot of the skoolmate dashboard</a> instead.
-              </video>
-              <figcaption className="sr-only">
-                Silent product tour of the skoolmate teacher dashboard, cycling through
-                lesson planning, IEP writing, curriculum crosscheck and the behaviour
-                analytics heatmap.
-              </figcaption>
-            </figure>
+            <AudienceCard
+              badge="For Admins"
+              icon={Building2}
+              title="Whole-school visibility, compliance and reporting."
+              body="Real-time dashboards across cohorts, curriculum coverage, IEP compliance and staff workload."
+              items={[
+                { icon: LineChart, label: "Analytics & Reports" },
+                { icon: ShieldAlert, label: "Compliance & Audit" },
+                { icon: Settings2, label: "Roles & Permissions" },
+                { icon: BellRing, label: "Reminders & Approvals" },
+              ]}
+              cta={{ label: "Explore Admin Console", to: "/admin" }}
+              tone="accent"
+            />
           </div>
         </div>
       </section>
+
 
       {/* ───────────────────────── Schools trust strip ───────────────────────── */}
       <section id="schools" className="border-y border-border/60 bg-primary-soft/40">
@@ -652,5 +658,79 @@ function FooterCol({
         ))}
       </ul>
     </div>
+  );
+}
+
+function AudienceCard({
+  badge,
+  icon: Icon,
+  title,
+  body,
+  items,
+  cta,
+  tone,
+}: {
+  badge: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  body: string;
+  items: { icon: React.ComponentType<{ className?: string }>; label: string }[];
+  cta: { label: string; to: string };
+  tone: "primary" | "accent";
+}) {
+  const tint =
+    tone === "primary"
+      ? {
+          chip: "bg-primary-soft text-primary",
+          iconBg: "bg-primary text-primary-foreground",
+          ring: "border-primary/20",
+          glow: "from-primary/15 to-accent/10",
+        }
+      : {
+          chip: "bg-accent-soft text-accent",
+          iconBg: "bg-accent text-accent-foreground",
+          ring: "border-accent/25",
+          glow: "from-accent/15 to-primary/10",
+        };
+
+  return (
+    <article
+      className={`relative overflow-hidden rounded-2xl border ${tint.ring} bg-card p-8 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg`}
+    >
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br ${tint.glow} blur-2xl`}
+      />
+      <div className="relative flex items-center gap-3">
+        <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${tint.iconBg}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tint.chip}`}>
+          {badge}
+        </span>
+      </div>
+      <h3 className="relative mt-5 font-brand text-2xl font-medium tracking-tight md:text-[1.6rem]">
+        {title}
+      </h3>
+      <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground">{body}</p>
+      <ul className="relative mt-6 grid grid-cols-2 gap-3">
+        {items.map((it) => (
+          <li
+            key={it.label}
+            className="flex items-center gap-2 rounded-lg border border-border bg-background/60 px-3 py-2 text-sm text-foreground"
+          >
+            <it.icon className="h-4 w-4 text-primary" />
+            {it.label}
+          </li>
+        ))}
+      </ul>
+      <div className="relative mt-7">
+        <Button asChild className="rounded-full bg-primary px-5 hover:bg-primary/90">
+          <Link to={cta.to}>
+            {cta.label} <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+    </article>
   );
 }
