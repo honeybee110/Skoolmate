@@ -385,11 +385,8 @@ function Landing() {
                 </span>
               ))}
               {heatmapWeeks.map((row) => (
-                <>
-                  <span
-                    key={`${row.week}-label`}
-                    className="pr-2 text-right font-semibold text-primary-foreground/70"
-                  >
+                <Fragment key={row.week}>
+                  <span className="pr-2 text-right font-semibold text-primary-foreground/70">
                     {row.week}
                   </span>
                   {row.cells.map((state, i) => (
@@ -400,7 +397,7 @@ function Landing() {
                       {state}
                     </span>
                   ))}
-                </>
+                </Fragment>
               ))}
             </div>
             <div className="mt-5 rounded-xl border border-primary/40 bg-primary/15 p-4 text-sm">
