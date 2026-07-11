@@ -35,6 +35,7 @@ import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
 import { Route as LessonsPlannerRouteImport } from './routes/lessons.planner'
 import { Route as LessonsBankRouteImport } from './routes/lessons.bank'
+import { Route as AdminYearSetupRouteImport } from './routes/admin.year-setup'
 import { Route as AdminWellbeingRouteImport } from './routes/admin.wellbeing'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTimetableRouteImport } from './routes/admin.timetable'
@@ -190,6 +191,11 @@ const LessonsBankRoute = LessonsBankRouteImport.update({
   id: '/bank',
   path: '/bank',
   getParentRoute: () => LessonsRoute,
+} as any)
+const AdminYearSetupRoute = AdminYearSetupRouteImport.update({
+  id: '/admin/year-setup',
+  path: '/admin/year-setup',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminWellbeingRoute = AdminWellbeingRouteImport.update({
   id: '/admin/wellbeing',
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
+  '/admin/year-setup': typeof AdminYearSetupRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -414,6 +421,7 @@ export interface FileRoutesByTo {
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
+  '/admin/year-setup': typeof AdminYearSetupRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -468,6 +476,7 @@ export interface FileRoutesById {
   '/admin/timetable': typeof AdminTimetableRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
+  '/admin/year-setup': typeof AdminYearSetupRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -523,6 +532,7 @@ export interface FileRouteTypes {
     | '/admin/timetable'
     | '/admin/users'
     | '/admin/wellbeing'
+    | '/admin/year-setup'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -575,6 +585,7 @@ export interface FileRouteTypes {
     | '/admin/timetable'
     | '/admin/users'
     | '/admin/wellbeing'
+    | '/admin/year-setup'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -628,6 +639,7 @@ export interface FileRouteTypes {
     | '/admin/timetable'
     | '/admin/users'
     | '/admin/wellbeing'
+    | '/admin/year-setup'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -682,6 +694,7 @@ export interface RootRouteChildren {
   AdminTimetableRoute: typeof AdminTimetableRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminWellbeingRoute: typeof AdminWellbeingRoute
+  AdminYearSetupRoute: typeof AdminYearSetupRoute
   TeacherLoginRoute: typeof TeacherLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -869,6 +882,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lessons/bank'
       preLoaderRoute: typeof LessonsBankRouteImport
       parentRoute: typeof LessonsRoute
+    }
+    '/admin/year-setup': {
+      id: '/admin/year-setup'
+      path: '/admin/year-setup'
+      fullPath: '/admin/year-setup'
+      preLoaderRoute: typeof AdminYearSetupRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/wellbeing': {
       id: '/admin/wellbeing'
@@ -1130,6 +1150,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminTimetableRoute: AdminTimetableRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminWellbeingRoute: AdminWellbeingRoute,
+  AdminYearSetupRoute: AdminYearSetupRoute,
   TeacherLoginRoute: TeacherLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

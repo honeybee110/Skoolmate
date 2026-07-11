@@ -83,12 +83,13 @@ const adminNav = {
     { title: "My Classes", url: "/admin/classes", icon: GraduationCap },
     { title: "My Students", url: "/admin/students", icon: Users },
     { title: "Whole School Timetable", url: "/admin/timetable", icon: CalendarClock },
+    { title: "Year Setup", url: "/admin/year-setup", icon: CalendarClock },
   ] as NavItem[],
   Curriculum: [
     { title: "Curriculum & Scope and Sequence", url: "/admin/curriculum", icon: BookOpen },
     { title: "Resource Bank Management", url: "/admin/resources", icon: Library },
     { title: "Leadership Templates", url: "/admin/templates", icon: Pin },
-    { title: "Cross-Check Builder", url: "/admin/crosscheck-builder", icon: ClipboardCheck },
+    { title: "CrossCheck Builder", url: "/admin/crosscheck-builder", icon: ClipboardCheck },
   ] as NavItem[],
   Insights: [
     { title: "Reports", url: "/admin/reports", icon: FileText },
