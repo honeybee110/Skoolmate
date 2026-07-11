@@ -60,6 +60,7 @@ import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAlliedHealthRouteImport } from './routes/admin.allied-health'
+import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 import { Route as IepsGoalIdPrintRouteImport } from './routes/ieps.$goalId.print'
 
 const TimeclockRoute = TimeclockRouteImport.update({
@@ -317,6 +318,11 @@ const AdminAlliedHealthRoute = AdminAlliedHealthRouteImport.update({
   path: '/admin/allied-health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminActivityRoute = AdminActivityRouteImport.update({
+  id: '/admin/activity',
+  path: '/admin/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IepsGoalIdPrintRoute = IepsGoalIdPrintRouteImport.update({
   id: '/$goalId/print',
   path: '/$goalId/print',
@@ -344,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/admin/allied-health': typeof AdminAlliedHealthRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -397,6 +404,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/admin/allied-health': typeof AdminAlliedHealthRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/admin/allied-health': typeof AdminAlliedHealthRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -508,6 +517,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/students'
     | '/timeclock'
+    | '/admin/activity'
     | '/admin/allied-health'
     | '/admin/analytics'
     | '/admin/approvals'
@@ -561,6 +571,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/students'
     | '/timeclock'
+    | '/admin/activity'
     | '/admin/allied-health'
     | '/admin/analytics'
     | '/admin/approvals'
@@ -615,6 +626,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/students'
     | '/timeclock'
+    | '/admin/activity'
     | '/admin/allied-health'
     | '/admin/analytics'
     | '/admin/approvals'
@@ -670,6 +682,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
   TimeclockRoute: typeof TimeclockRoute
+  AdminActivityRoute: typeof AdminActivityRoute
   AdminAlliedHealthRoute: typeof AdminAlliedHealthRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
@@ -1058,6 +1071,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAlliedHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/activity': {
+      id: '/admin/activity'
+      path: '/admin/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AdminActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ieps/$goalId/print': {
       id: '/ieps/$goalId/print'
       path: '/$goalId/print'
@@ -1126,6 +1146,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StudentsRoute: StudentsRouteWithChildren,
   TimeclockRoute: TimeclockRoute,
+  AdminActivityRoute: AdminActivityRoute,
   AdminAlliedHealthRoute: AdminAlliedHealthRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
