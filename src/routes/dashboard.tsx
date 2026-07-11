@@ -29,6 +29,8 @@ import {
 import { cn } from "@/lib/utils";
 
 import { PortalGuard } from "@/components/portal-guard";
+import { ProfileHeader } from "@/components/profile-header";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -70,11 +72,23 @@ function Dashboard() {
   return (
     <AppShell>
       <div className="px-4 py-6 md:px-8">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm text-muted-foreground">Monday, 29 June 2026 · Semester 1 · Week 8</p>
-          <h1 className="text-3xl font-semibold tracking-tight">Good morning, Honey</h1>
-          <p className="mt-1 text-xs text-muted-foreground">P7 · ES Priya · <span className="text-accent font-medium">Medical alert — Callum: Asthma Plan</span></p>
-        </div>
+        <ProfileHeader
+          eyebrow="Monday, 29 June 2026 · Semester 1 · Week 8"
+          subtitle={
+            <>
+              P7 · ES Priya ·{" "}
+              <span className="font-semibold text-[color:var(--accent)]">
+                Medical alert — Callum: Asthma Plan
+              </span>
+            </>
+          }
+          actions={
+            <Button className="rounded-full bg-gradient-to-r from-[color:var(--primary)] to-[color:var(--accent)] px-5 text-white shadow-lg hover:opacity-95">
+              <Sparkles className="h-4 w-4" /> AI Daily Brief
+            </Button>
+          }
+        />
+
 
         {/* AI Daily Snapshot */}
         <Card className="mt-6 overflow-hidden border-primary/20 bg-gradient-to-br from-primary-soft/50 via-background to-background p-0">

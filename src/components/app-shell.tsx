@@ -68,11 +68,12 @@ export function AppShell({
               <SemesterChip />
               <Button
                 size="sm"
-                className="rounded-full bg-primary hover:bg-primary/90 shadow-sm gap-1.5"
+                className="rounded-full bg-gradient-to-r from-[color:var(--primary)] to-[color:var(--accent)] px-4 text-white shadow-md hover:opacity-95 gap-1.5"
               >
                 <Sparkles className="h-4 w-4" />
                 Ask Mate
               </Button>
+
               <Button variant="ghost" size="icon" className="rounded-full relative">
                 <Bell className="h-4 w-4" />
                 <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent" />
