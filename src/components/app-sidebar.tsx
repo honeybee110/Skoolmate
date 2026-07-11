@@ -103,6 +103,7 @@ const adminNav = {
   Admin: [
     { title: "Time & Attendance", url: "/admin/timeclock", icon: Timer },
     { title: "User Management", url: "/admin/users", icon: UserCog },
+    { title: "Activity Log", url: "/admin/activity", icon: History },
     { title: "Override Audit", url: "/admin/audit", icon: Archive },
   ] as NavItem[],
 };
