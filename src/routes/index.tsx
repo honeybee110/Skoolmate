@@ -14,10 +14,16 @@ import {
   Star,
   FileCheck,
   Sparkles,
+  GraduationCap,
+  Building2,
+  ClipboardList,
+  BookOpen,
+  LineChart,
+  Settings2,
+  BellRing,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import demoVideo from "@/assets/skoolmate-demo.mp4.asset.json";
-import demoPoster from "@/assets/skoolmate-demo-poster.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
