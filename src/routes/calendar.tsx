@@ -62,12 +62,13 @@ function CalendarPage() {
                 </div>
                 {days.map((d) => {
                   const cell = weeklyTimetable[d][i];
+                  const tone = subjectFromTitle(cell.title, cell.type);
                   return (
                     <div key={d} className="border-l p-2">
                       <div
                         className={cn(
                           "h-full rounded-md border-l-4 px-3 py-2 text-sm leading-snug",
-                          typeTone[cell.type],
+                          tone.cell,
                         )}
                       >
                         {cell.title}
