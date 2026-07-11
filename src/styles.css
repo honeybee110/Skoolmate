@@ -141,6 +141,19 @@
   --sidebar-accent-foreground: oklch(0.97 0.005 258);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.62 0.19 275);
+
+  /* SchoolMate subject palette — solid hues (pair with /10 or /15 opacity for soft surfaces) */
+  --subj-startofday: oklch(0.85 0.14 92);   /* Soft Yellow */
+  --subj-literacy: oklch(0.72 0.15 150);    /* Soft Green */
+  --subj-maths: oklch(0.65 0.14 240);       /* Soft Blue */
+  --subj-science: oklch(0.68 0.11 195);     /* Teal */
+  --subj-history: oklch(0.62 0.15 45);      /* Burnt Orange */
+  --subj-geography: oklch(0.78 0.13 200);   /* Aqua */
+  --subj-specialist: oklch(0.72 0.16 25);   /* Coral */
+  --subj-music: oklch(0.55 0.14 330);       /* Plum */
+  --subj-personalsocial: oklch(0.72 0.10 300); /* Lavender */
+  --subj-selfcare: oklch(0.80 0.11 165);    /* Mint */
+  --subj-assembly: oklch(0.78 0.13 85);     /* Gold */
 }
 
 .dark {
