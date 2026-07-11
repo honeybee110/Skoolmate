@@ -24,11 +24,6 @@ const breaks = [
   { after: 4, label: "Lunch · Lunch Play", time: "1:00 – 2:00" },
 ];
 
-const breaks = [
-  { after: 2, label: "Morning Tea · Morning Play", time: "10:30 – 11:30" },
-  { after: 4, label: "Lunch · Lunch Play", time: "1:00 – 2:00" },
-];
-
 function CalendarPage() {
   const days: WeekDay[] = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
