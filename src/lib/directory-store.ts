@@ -193,7 +193,7 @@ function seed(): DirectoryState {
       updatedAt: "Today",
     }));
 
-  return { years, activeYearId: yearId, teachers, classes, studentClass, timetables };
+  return { years, activeYearId: yearId, teachers, classes, studentClass, timetables, auditLog: [] };
 }
 
 // ---------- Store ----------
