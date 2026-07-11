@@ -100,6 +100,14 @@ function AdminCurriculumPage() {
     return { total, bySubject, totalCells, orphaned };
   }, [records, cells]);
 
+  const usageByRecord = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const c of Object.values(cells)) {
+      if (c.curriculumId) m[c.curriculumId] = (m[c.curriculumId] ?? 0) + 1;
+    }
+    return m;
+  }, [cells]);
+
   // Recent teacher edits (student cells) for the admin oversight card.
   const recentEdits = useMemo(() => {
     return Object.entries(cells)
