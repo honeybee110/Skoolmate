@@ -26,7 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Sparkles, Plus, Save, Send, Trash2, Copy, History, FileDown,
   CheckCircle2, Clock3, RotateCcw, XCircle, PencilLine, Loader2,
-  Filter,
+  Filter, CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
