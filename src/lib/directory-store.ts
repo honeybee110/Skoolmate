@@ -271,15 +271,22 @@ export const directoryActions = {
       archived: false,
       clock: [],
     };
+    logAudit("teacher.add", `Added ${t.firstName} ${t.lastName} (${t.role})`, t.id);
     set({ ...state, teachers: [...state.teachers, t] });
   },
   updateTeacher(id: string, patch: Partial<Teacher>) {
+    const before = state.teachers.find((t) => t.id === id);
+    logAudit("teacher.update", `Updated ${before?.firstName ?? ""} ${before?.lastName ?? id}`, id, { patch });
     set({ ...state, teachers: state.teachers.map((t) => t.id === id ? { ...t, ...patch } : t) });
   },
   archiveTeacher(id: string) {
+    const t = state.teachers.find((x) => x.id === id);
+    logAudit("teacher.archive", `Archived ${t?.firstName ?? ""} ${t?.lastName ?? id}`, id);
     set({ ...state, teachers: state.teachers.map((t) => t.id === id ? { ...t, archived: true, employment: "Archived" as EmploymentStatus } : t) });
   },
   restoreTeacher(id: string) {
+    const t = state.teachers.find((x) => x.id === id);
+    logAudit("teacher.restore", `Restored ${t?.firstName ?? ""} ${t?.lastName ?? id}`, id);
     set({ ...state, teachers: state.teachers.map((t) => t.id === id ? { ...t, archived: false, employment: "Full-time" as EmploymentStatus } : t) });
   },
   clockIn(id: string) {
@@ -304,20 +311,21 @@ export const directoryActions = {
       studentIds: [],
       yearId: input.yearId ?? state.activeYearId,
     };
+    logAudit("class.create", `Created class ${c.name}`, c.id);
     set({ ...state, classes: [...state.classes, c] });
   },
   updateClass(id: string, patch: Partial<ClassRoom>) {
+    const c = state.classes.find((x) => x.id === id);
+    logAudit("class.update", `Updated class ${c?.name ?? id}`, id, { patch });
     set({ ...state, classes: state.classes.map((c) => c.id === id ? { ...c, ...patch } : c) });
   },
   assignTeacher(classId: string, teacherId: string | undefined) {
     const cls = state.classes.find((c) => c.id === classId);
     if (!cls) return;
-    // remove teacher from other classes if being assigned as classroom teacher
+    const t = teacherId ? state.teachers.find((x) => x.id === teacherId) : undefined;
+    logAudit("class.assignTeacher", teacherId ? `Assigned ${t?.firstName} ${t?.lastName} to ${cls.name}` : `Unassigned teacher from ${cls.name}`, classId, { teacherId });
     const teachers = teacherId
-      ? state.teachers.map((t) => {
-          if (t.id === teacherId) return { ...t, classIds: Array.from(new Set([...t.classIds, classId])) };
-          return t;
-        })
+      ? state.teachers.map((t) => t.id === teacherId ? { ...t, classIds: Array.from(new Set([...t.classIds, classId])) } : t)
       : state.teachers;
     set({
       ...state,
@@ -328,6 +336,8 @@ export const directoryActions = {
   addES(classId: string, teacherId: string) {
     const cls = state.classes.find((c) => c.id === classId);
     if (!cls || cls.esStaffIds.includes(teacherId)) return;
+    const t = state.teachers.find((x) => x.id === teacherId);
+    logAudit("class.addES", `Added ES ${t?.firstName} ${t?.lastName} to ${cls.name}`, classId, { teacherId });
     set({
       ...state,
       classes: state.classes.map((c) => c.id === classId ? { ...c, esStaffIds: [...c.esStaffIds, teacherId] } : c),
@@ -335,6 +345,9 @@ export const directoryActions = {
     });
   },
   removeES(classId: string, teacherId: string) {
+    const cls = state.classes.find((c) => c.id === classId);
+    const t = state.teachers.find((x) => x.id === teacherId);
+    logAudit("class.removeES", `Removed ES ${t?.firstName} ${t?.lastName} from ${cls?.name ?? classId}`, classId, { teacherId });
     set({
       ...state,
       classes: state.classes.map((c) => c.id === classId ? { ...c, esStaffIds: c.esStaffIds.filter((x) => x !== teacherId) } : c),
@@ -343,6 +356,8 @@ export const directoryActions = {
   },
   moveStudent(studentId: string, toClassId: string) {
     const fromClassId = state.studentClass[studentId];
+    const to = state.classes.find((c) => c.id === toClassId);
+    logAudit("student.move", `Moved student ${studentId} → ${to?.name ?? toClassId}`, studentId, { fromClassId, toClassId });
     const classes = state.classes.map((c) => {
       if (c.id === fromClassId) return { ...c, studentIds: c.studentIds.filter((x) => x !== studentId) };
       if (c.id === toClassId) return { ...c, studentIds: Array.from(new Set([...c.studentIds, studentId])) };
@@ -363,17 +378,29 @@ export const directoryActions = {
     }
     return tt;
   },
-  submitTimetable(classId: string) { directoryActions.updateTimetable(classId, { status: "submitted" }); },
+  submitTimetable(classId: string) {
+    const cls = state.classes.find((c) => c.id === classId);
+    logAudit("timetable.submit", `Submitted timetable for ${cls?.name ?? classId}`, classId);
+    directoryActions.updateTimetable(classId, { status: "submitted" });
+  },
   reviewTimetable(classId: string) { directoryActions.updateTimetable(classId, { status: "in_review" }); },
-  approveTimetable(classId: string) { directoryActions.updateTimetable(classId, { status: "approved" }); },
+  approveTimetable(classId: string) {
+    const cls = state.classes.find((c) => c.id === classId);
+    logAudit("timetable.approve", `Approved timetable for ${cls?.name ?? classId}`, classId);
+    directoryActions.updateTimetable(classId, { status: "approved" });
+  },
   publishTimetable(classId: string) {
     const tt = state.timetables.find((t) => t.classId === classId);
     if (!tt) return;
+    const cls = state.classes.find((c) => c.id === classId);
+    logAudit("timetable.publish", `Published v${tt.version + 1} timetable for ${cls?.name ?? classId}`, classId, { version: tt.version + 1 });
     directoryActions.updateTimetable(classId, { status: "published", version: tt.version + 1 });
   },
   returnTimetable(classId: string, comment: string, author = "Leadership") {
     const tt = state.timetables.find((t) => t.classId === classId);
     if (!tt) return;
+    const cls = state.classes.find((c) => c.id === classId);
+    logAudit("timetable.return", `Returned timetable for ${cls?.name ?? classId}`, classId, { comment });
     directoryActions.updateTimetable(classId, {
       status: "returned",
       comments: [...tt.comments, { id: crypto.randomUUID(), author, at: "Just now", body: comment }],
@@ -390,9 +417,12 @@ export const directoryActions = {
   createYear(label: string) {
     const id = `yr-${label}`;
     if (state.years.find((y) => y.id === id)) return;
+    logAudit("year.create", `Created school year ${label}`, id);
     set({ ...state, years: [...state.years, { id, label, status: "planning" }] });
   },
   activateYear(id: string) {
+    const y = state.years.find((yr) => yr.id === id);
+    logAudit("year.activate", `Activated year ${y?.label ?? id}`, id);
     set({
       ...state,
       activeYearId: id,
@@ -400,10 +430,13 @@ export const directoryActions = {
     });
   },
   archiveYear(id: string) {
+    const y = state.years.find((yr) => yr.id === id);
+    logAudit("year.archive", `Archived year ${y?.label ?? id}`, id);
     set({ ...state, years: state.years.map((y) => y.id === id ? { ...y, status: "archived" } : y) });
   },
   duplicateClassesToYear(sourceYearId: string, targetYearId: string) {
     const source = state.classes.filter((c) => c.yearId === sourceYearId);
+    logAudit("year.duplicate", `Duplicated ${source.length} classes from ${sourceYearId} → ${targetYearId}`, targetYearId, { count: source.length });
     const clones = source.map((c) => ({
       ...c,
       id: `c-${crypto.randomUUID().slice(0, 8)}`,
@@ -415,6 +448,30 @@ export const directoryActions = {
     set({ ...state, classes: [...state.classes, ...clones] });
   },
 };
+
+// ---------- Cross-module selectors ----------
+
+export function getClassForStudent(studentId: string): ClassRoom | undefined {
+  const id = state.studentClass[studentId];
+  return id ? state.classes.find((c) => c.id === id) : undefined;
+}
+export function getStudentsForClass(classId: string): string[] {
+  return state.classes.find((c) => c.id === classId)?.studentIds ?? [];
+}
+export function getTeacherForClass(classId: string): Teacher | undefined {
+  const cls = state.classes.find((c) => c.id === classId);
+  return cls?.teacherId ? state.teachers.find((t) => t.id === cls.teacherId) : undefined;
+}
+export function getClassesForTeacher(teacherId: string): ClassRoom[] {
+  return state.classes.filter((c) => c.teacherId === teacherId || c.esStaffIds.includes(teacherId));
+}
+export function getPublishedTimetable(classId: string): Timetable | undefined {
+  return state.timetables.find((t) => t.classId === classId && t.status === "published");
+}
+export function getApprovedOrPublishedTimetable(classId: string): Timetable | undefined {
+  return state.timetables.find((t) => t.classId === classId && (t.status === "published" || t.status === "approved"));
+}
+
 
 // ---------- Selectors ----------
 
