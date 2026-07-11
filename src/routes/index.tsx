@@ -660,3 +660,77 @@ function FooterCol({
     </div>
   );
 }
+
+function AudienceCard({
+  badge,
+  icon: Icon,
+  title,
+  body,
+  items,
+  cta,
+  tone,
+}: {
+  badge: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  body: string;
+  items: { icon: React.ComponentType<{ className?: string }>; label: string }[];
+  cta: { label: string; to: string };
+  tone: "primary" | "accent";
+}) {
+  const tint =
+    tone === "primary"
+      ? {
+          chip: "bg-primary-soft text-primary",
+          iconBg: "bg-primary text-primary-foreground",
+          ring: "border-primary/20",
+          glow: "from-primary/15 to-accent/10",
+        }
+      : {
+          chip: "bg-accent-soft text-accent",
+          iconBg: "bg-accent text-accent-foreground",
+          ring: "border-accent/25",
+          glow: "from-accent/15 to-primary/10",
+        };
+
+  return (
+    <article
+      className={`relative overflow-hidden rounded-2xl border ${tint.ring} bg-card p-8 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg`}
+    >
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br ${tint.glow} blur-2xl`}
+      />
+      <div className="relative flex items-center gap-3">
+        <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${tint.iconBg}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tint.chip}`}>
+          {badge}
+        </span>
+      </div>
+      <h3 className="relative mt-5 font-brand text-2xl font-medium tracking-tight md:text-[1.6rem]">
+        {title}
+      </h3>
+      <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground">{body}</p>
+      <ul className="relative mt-6 grid grid-cols-2 gap-3">
+        {items.map((it) => (
+          <li
+            key={it.label}
+            className="flex items-center gap-2 rounded-lg border border-border bg-background/60 px-3 py-2 text-sm text-foreground"
+          >
+            <it.icon className="h-4 w-4 text-primary" />
+            {it.label}
+          </li>
+        ))}
+      </ul>
+      <div className="relative mt-7">
+        <Button asChild className="rounded-full bg-primary px-5 hover:bg-primary/90">
+          <Link to={cta.to}>
+            {cta.label} <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+    </article>
+  );
+}
