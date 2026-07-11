@@ -32,6 +32,7 @@ import { Route as LessonsIndexRouteImport } from './routes/lessons.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
+import { Route as LessonsPlannerRouteImport } from './routes/lessons.planner'
 import { Route as LessonsBankRouteImport } from './routes/lessons.bank'
 import { Route as AdminWellbeingRouteImport } from './routes/admin.wellbeing'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -173,6 +174,11 @@ const StudentsStudentIdRoute = StudentsStudentIdRouteImport.update({
   id: '/$studentId',
   path: '/$studentId',
   getParentRoute: () => StudentsRoute,
+} as any)
+const LessonsPlannerRoute = LessonsPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
+  getParentRoute: () => LessonsRoute,
 } as any)
 const LessonsBankRoute = LessonsBankRouteImport.update({
   id: '/bank',
@@ -350,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/lessons/bank': typeof LessonsBankRoute
+  '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -400,6 +407,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/lessons/bank': typeof LessonsBankRoute
+  '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin': typeof AdminIndexRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/lessons/bank': typeof LessonsBankRoute
+  '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -505,6 +514,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/wellbeing'
     | '/lessons/bank'
+    | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin/'
@@ -555,6 +565,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/wellbeing'
     | '/lessons/bank'
+    | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin'
@@ -606,6 +617,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/wellbeing'
     | '/lessons/bank'
+    | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
     | '/admin/'
@@ -824,6 +836,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentsStudentIdRouteImport
       parentRoute: typeof StudentsRoute
     }
+    '/lessons/planner': {
+      id: '/lessons/planner'
+      path: '/planner'
+      fullPath: '/lessons/planner'
+      preLoaderRoute: typeof LessonsPlannerRouteImport
+      parentRoute: typeof LessonsRoute
+    }
     '/lessons/bank': {
       id: '/lessons/bank'
       path: '/bank'
@@ -1021,11 +1040,13 @@ const IepsRouteWithChildren = IepsRoute._addFileChildren(IepsRouteChildren)
 
 interface LessonsRouteChildren {
   LessonsBankRoute: typeof LessonsBankRoute
+  LessonsPlannerRoute: typeof LessonsPlannerRoute
   LessonsIndexRoute: typeof LessonsIndexRoute
 }
 
 const LessonsRouteChildren: LessonsRouteChildren = {
   LessonsBankRoute: LessonsBankRoute,
+  LessonsPlannerRoute: LessonsPlannerRoute,
   LessonsIndexRoute: LessonsIndexRoute,
 }
 
@@ -1094,13 +1115,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

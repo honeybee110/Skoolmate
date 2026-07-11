@@ -1,85 +1,58 @@
-# SchoolMate AU — Phase 3: Portal Split, IEP English, Document Centre
+Two-phase repair. Each phase is scoped to keep the change reviewable and reversible.
 
-Delivered in four milestones. I'll pause after each for review.
+## Phase 1 — Lesson Planner module
 
----
+Bring back a real `/lessons/planner` surface so teachers can compose, save and submit weekly plans (currently `/lessons` just forwards to the Bank).
 
-## Milestone A — Separate Portals & VIC Terminology
+### Pages / routes
+- `src/routes/lessons.planner.tsx` — new page (list + editor).
+- `src/routes/lessons.index.tsx` — flip the fallback to `/lessons/planner` (Planner becomes the module landing).
+- Sidebar: expose "Lesson Planner" and "Lesson Bank" as sibling teacher links.
 
-**Auth split**
-- New `/teacher/login` — teacher-branded, redirects to `/dashboard` on success.
-- New `/admin/login` — admin-branded, redirects to `/admin` on success; blocks users without a leadership/allied-health/wellbeing/IT role with a clear "wrong portal" message and a link to `/teacher/login`.
-- Existing `/auth` becomes a chooser page ("I'm a Teacher" / "I'm an Admin").
-- Landing page "Login" CTA becomes two buttons.
+### Planner UI (preserves existing branding, cards, buttons, Tailwind tokens)
+- Left rail: teacher's saved lessons grouped by Term / Week, with status chips (Draft / Pending / Returned / Approved) and a "Duplicate to draft" action.
+- Right pane: 6-part editor (Learning Intention, Success Criteria, Hook, I do, We do, You do) + subject/strand/topic/duration/ability/VC code + Term & Week selector.
+- Curriculum alignment: subject + strand pickers pull from `curriculum-db` / `useCurriculumStore`, so alignment stays in sync with the Scope & Sequence admin edits.
+- "Generate with Mate" button — calls the existing `generateLessonPlan` server fn and pre-fills the 6 sections (kept behind a button, not auto-run).
+- Actions: Save draft, Submit for approval, Export .docx (client-side via the same download path Bank uses), Delete.
+- Version history: each save appends a snapshot to `SavedLesson.history[]`; a "History" popover lets teachers restore a prior version into the editor.
 
-**Route guards**
-- Teachers hitting `/admin/*` → redirected to `/dashboard`.
-- Admins hitting `/dashboard` → redirected to `/admin`.
-- "Switch to Admin" shortcut removed from the teacher sidebar entirely — portals feel like separate apps.
+### Approval → Bank wiring
+- `Submit for approval` sets `status: "pending"` on the lesson AND registers a `lesson_bank_uploads` row (via existing `registerWeeklyUpload`) so it appears in the Admin Approval Centre and the Bank's pending folder.
+- When admin approves in Approval Centre, the existing `reviewWeeklyUpload` flow already flips status; Planner mirrors that back onto the local `SavedLesson` on next load by matching on `id`.
+- Rejections carry the reviewer comment back into the Planner card as a "Returned with comments" banner.
 
-**Teacher sidebar (final 15 items)**
-Dashboard · Calendar · My Classes · Students · Lesson Planner · IEPs · **Handover Documents (new)** · Evidence Hub · Behaviour · Reports · Resource Bank · Scope & Sequence · Notifications · Time & Attendance · Settings
+### State
+- Extend `lesson-store.ts`: add `history: LessonSnapshot[]`, `reviewerComment?: string`, `submittedAt?: string`. Keep existing localStorage key + seed so nothing breaks.
+- No DB migration required — the `lesson_bank_uploads` table already covers the server side.
 
-**Admin sidebar (final 19 items)**
-Dashboard · Approval Centre · **Document Centre (new)** · Teachers · My Classes · My Students · Whole School Timetable · Resource Bank Management · Curriculum & Scope and Sequence · Reports · Evidence Hub · Behaviour Analytics · Wellbeing · Allied Health · **Leadership Templates (new)** · Notifications · Time & Attendance · User Management · Settings
+### Removed / not rebuilt
+- The old "Ask AI / lesson brief / draft in seconds" marketing surface stays gone (per your earlier direction).
 
-**Terminology sweep**
-Replace remaining US/international labels with Victorian DE conventions (e.g. "Grade" → "Year", "Class Roster" → "Class List", "Homeroom" → "Class", ensure "Semester 1/2" everywhere, "Learning Area", "Curriculum").
+## Phase 2 — IEP ↔ Scope & Sequence relational rewiring
 
----
+Fix the two modules so goals reference curriculum records by id instead of free-text, and Scope & Sequence edits propagate live to IEP cells.
 
-## Milestone B — IEP English Restructure
+### Data model (client store, no DB migration)
+- Every `IepCellState` already has `curriculumId`. Enforce it: goal picker writes only ids; free-text override moves to a dedicated `entrySkillsOverride` field (already present).
+- Add a derived selector `useCurriculumLinkedGoals(studentId)` that joins `cells` → `records` at read time, so renaming a Scope & Sequence goal auto-updates every IEP that points at it.
+- Deleting a curriculum record marks linked cells as `orphaned` (banner + "Reassign goal" CTA) instead of silently breaking them.
 
-- Drop **Phonics** as an IEP learning area. English learning areas become **Reading & Viewing / Speaking & Listening / Writing** only.
-- Update `LearningArea` type, mock data, Scope & Sequence descriptors, Cross-Check grid, IEP print view, admin approval filters.
-- Phonics kept as a Resource Bank tag and a lesson-plan focus category (not a goal domain).
-- Migration: rename/remove phonics rows in `iep_goals`; update DB triggers' allowed learning-area list.
+### UI
+- IEP goal cell: replace free-text entry with a searchable picker sourced from `useCurriculumStore().records`, filtered by subject/strand/semester.
+- Scope & Sequence admin: show a "Used by N IEPs" badge per row; clicking it opens a drill-down list.
+- Print / report views read the joined title, so admin edits are visible everywhere.
 
----
+### Guardrails
+- Keep the existing semester-lock trigger and RLS untouched.
+- Audit log entries already exist (`OverrideEvent`) — extend to record `goal-relink` events when a cell's `curriculumId` changes.
 
-## Milestone C — Admin Document Centre
+## Out of scope for this pass
+- Pagination on the Bank (can follow separately).
+- Any redesign of sidebar / colours / cards / tables / branding.
+- Supabase schema changes.
 
-**New module `/admin/documents`** — cloud-drive UX (breadcrumbs, folder grid + list toggle, search, filters, upload, rename, move, archive, download, permissions dialog).
-
-**Backend**
-- Tables: `document_folders` (id, parent_id, name, path, class_code, semester, is_pinned, is_system, created_by), `documents` (id, folder_id, name, storage_path, mime, size, uploaded_by, replaces_id, archived_at), `document_permissions` (folder_id, role/user, can_read/upload/manage).
-- Storage bucket `documents` (private) with RLS matching table policies.
-- Leadership roles can CRUD everything; teachers can read all + upload only into `Teacher Uploads` subfolders + folders they're granted; **Leadership Templates folders are undeletable** by teachers (RLS + `is_pinned` flag).
-
-**Seeded folder tree**
-19 top-level folders: IEPs, Weekly Lesson Plans, Handover Documents, Reports, Evidence Hub, Behaviour, Wellbeing, Student Assessments, Curriculum & Scope and Sequence, Resource Bank, School Policies, Professional Development, Timetables, Meeting Minutes, School Events, Student Permissions, Transition Reports, Templates, Start Right.
-
-Under **IEPs**, **Weekly Lesson Plans**, **Handover Documents** — auto-generate:
-```
-<Folder>/
-  Primary/
-    P1..P15/
-      Semester 1/
-        Leadership Templates   (pinned, is_system)
-        Teacher Uploads
-      Semester 2/ ...
-  Secondary/
-    S1..S10/ (same pattern)
-```
-= 3 × (15+10) × 2 × 2 = **300 seeded subfolders**, plus the class/section folders themselves.
-
----
-
-## Milestone D — Teacher Handover Documents
-
-- New `/handover` route on the teacher portal.
-- Auto-scoped to the signed-in teacher's class (P7 for Honey in the demo).
-- Reuses Document Centre APIs; shows the two-semester structure with pinned Leadership Templates at the top and a Teacher Uploads drop zone.
-
----
-
-## Technical Notes
-
-- New tables ship with `GRANT` + RLS in the same migration; Leadership Templates protected via `is_pinned=true` + role check in DELETE policy.
-- Storage bucket `documents` created via `storage_create_bucket` (private), with `storage.objects` policies mirroring `document_permissions`.
-- File uploads capped at 20 MB (PDF/DOCX/PPTX/XLSX/PNG/JPG/MP4) with server-side mime validation.
-- Route restructure: `admin.documents.tsx`, `admin.documents.$folderId.tsx`, `admin.templates.tsx` (Leadership Templates view), `admin.teachers.tsx`, `admin.classes.tsx`, `admin.students.tsx`, `admin.resources.tsx`, `admin.curriculum.tsx`, `admin.evidence.tsx`, `admin.behaviour.tsx`, `admin.reports.tsx`, `admin.notifications.tsx`, `admin.settings.tsx`, `handover.tsx`, `teacher.login.tsx`, `admin.login.tsx`.
-- Existing `/auth` kept as a chooser to preserve any OAuth `redirect_uri` allowlist entries.
-- All existing tests re-run after each milestone.
-
-Reply **"go"** to start with **Milestone A**, or tell me to reorder (e.g. "Document Centre first").
+## Verification
+- Build passes, no TS errors.
+- Playwright: `/lessons/planner` loads, create → save draft → submit shows a matching pending row in `/admin/approvals` and `/lessons/bank`.
+- `/ieps` and `/scope-sequence` still load; editing a Scope & Sequence goal title updates the IEP cell that references it.

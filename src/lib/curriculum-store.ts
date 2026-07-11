@@ -249,6 +249,7 @@ export function updateCell(key: string, patch: Partial<IepCellState>, actor: "te
 }
 
 export function pickGoal(key: string, curriculumId: string, actor: "teacher" | "admin" = "teacher") {
+  const prev = state.cells[key]?.curriculumId;
   updateCell(
     key,
     {
@@ -260,6 +261,14 @@ export function pickGoal(key: string, curriculumId: string, actor: "teacher" | "
     },
     actor,
   );
+  if (prev && prev !== curriculumId) {
+    pushAudit({
+      actor,
+      kind: "cell-override",
+      targetId: key,
+      detail: `Goal relinked: ${prev} → ${curriculumId}`,
+    });
+  }
 }
 
 /**

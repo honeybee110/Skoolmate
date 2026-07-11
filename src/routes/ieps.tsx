@@ -345,7 +345,17 @@ function MatrixCell({
   }
   const { records } = useCurriculumStore();
   const rec = findRecordIn(records, cell.curriculumId);
-  if (!rec) return null;
+  if (!rec) {
+    // Curriculum record was deleted by admin — surface an orphan banner so
+    // the teacher can reassign instead of the cell silently disappearing.
+    return (
+      <button onClick={onClick}
+        className="w-full rounded-md border border-dashed border-rose-300 bg-rose-50 px-2 py-2 text-left text-[11px] text-rose-800 transition hover:border-rose-400">
+        <p className="font-medium">Goal removed from Scope & Sequence</p>
+        <p className="mt-0.5 text-[10px] text-rose-700/80">Click to reassign a current goal.</p>
+      </button>
+    );
+  }
   const level = cell.levelOverride ?? rec.level;
   const status = STATUS_META[cell.status];
   return (

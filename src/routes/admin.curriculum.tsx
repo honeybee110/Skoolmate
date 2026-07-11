@@ -100,6 +100,14 @@ function AdminCurriculumPage() {
     return { total, bySubject, totalCells, orphaned };
   }, [records, cells]);
 
+  const usageByRecord = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const c of Object.values(cells)) {
+      if (c.curriculumId) m[c.curriculumId] = (m[c.curriculumId] ?? 0) + 1;
+    }
+    return m;
+  }, [cells]);
+
   // Recent teacher edits (student cells) for the admin oversight card.
   const recentEdits = useMemo(() => {
     return Object.entries(cells)
@@ -218,18 +226,21 @@ function AdminCurriculumPage() {
                   <th className="px-3 py-2 font-semibold w-[70px] text-center">Level</th>
                   <th className="px-3 py-2 font-semibold w-[110px]">Semester</th>
                   <th className="px-3 py-2 font-semibold w-[70px]">Year</th>
+                  <th className="px-3 py-2 font-semibold w-[90px] text-center">Used by</th>
                   <th className="px-3 py-2 font-semibold w-[100px] text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    <td colSpan={9} className="px-4 py-10 text-center text-sm text-muted-foreground">
                       No curriculum entries match your filters.
                     </td>
                   </tr>
                 )}
-                {filtered.map((r) => (
+                {filtered.map((r) => {
+                  const used = usageByRecord[r.id] ?? 0;
+                  return (
                   <tr key={r.id} className="border-b last:border-b-0 hover:bg-secondary/30 align-top">
                     <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground">{r.curriculumCode}</td>
                     <td className="px-3 py-2">
@@ -243,6 +254,15 @@ function AdminCurriculumPage() {
                     </td>
                     <td className="px-3 py-2 text-[11px]"><Badge variant="outline">{r.semester}</Badge></td>
                     <td className="px-3 py-2 text-[11px] text-muted-foreground">{r.yearLevel}</td>
+                    <td className="px-3 py-2 text-center">
+                      {used > 0 ? (
+                        <Badge variant="secondary" className="text-[10px]" title={`${used} IEP cell${used === 1 ? "" : "s"} reference this goal`}>
+                          {used} IEP{used === 1 ? "" : "s"}
+                        </Badge>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground/60">—</span>
+                      )}
+                    </td>
                     <td className="px-3 py-2 text-right">
                       <div className="inline-flex gap-1">
                         <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditing(r)}>
@@ -252,7 +272,8 @@ function AdminCurriculumPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
