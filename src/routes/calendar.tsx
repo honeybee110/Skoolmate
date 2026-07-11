@@ -97,11 +97,10 @@ function CalendarPage() {
           ))}
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-secondary/30 px-4 py-3 text-[11px] text-muted-foreground">
-            <div className="flex items-center gap-3">
-              <Legend swatch="bg-primary" label="Literacy" />
-              <Legend swatch="bg-[oklch(0.58_0.12_280)]" label="Maths" />
-              <Legend swatch="bg-accent" label="Specialist" />
-              <Legend swatch="bg-[oklch(0.65_0.13_155)]" label="Therapy" />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {(["startofday","literacy","maths","science","history","geography","specialist","music","personalsocial","selfcare","assembly"] as const).map((k) => (
+                <Legend key={k} swatch={subjectTones[k].swatch} label={subjectTones[k].label} />
+              ))}
             </div>
             <div className="font-medium text-accent">
               Medical alert · Callum — Asthma Plan
