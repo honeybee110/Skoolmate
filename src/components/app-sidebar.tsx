@@ -117,9 +117,10 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
   const homeUrl = isAdmin ? "/admin" : "/dashboard";
   const settingsUrl = isAdmin ? "/admin/settings" : "/settings";
 
-  const activeClasses = isAdmin
-    ? "data-[active=true]:bg-[color:var(--navy-soft)] data-[active=true]:text-[color:var(--navy)] data-[active=true]:font-semibold data-[active=true]:border-l-2 data-[active=true]:border-[color:var(--navy)]"
-    : "data-[active=true]:bg-primary-soft data-[active=true]:text-primary data-[active=true]:font-medium data-[active=true]:border-l-2 data-[active=true]:border-primary";
+  // Unified rich-navy sidebar for both teacher & admin portals
+  const activeClasses =
+    "data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:border-l-2 data-[active=true]:border-[color:var(--accent)] data-[active=true]:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] text-white/75 hover:bg-white/5 hover:text-white";
+
 
   const primaryRole = roles[0];
   const initials = (profile?.display_name || user?.email || "SM")
