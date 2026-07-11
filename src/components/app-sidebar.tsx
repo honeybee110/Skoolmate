@@ -133,12 +133,11 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
   const renderGroup = (label: string, items: NavItem[]) => (
     <SidebarGroup key={label}>
       <SidebarGroupLabel
-        className={`text-[10px] uppercase tracking-[0.14em] font-semibold ${
-          isAdmin ? "text-[color:var(--navy-light)]/80" : "text-muted-foreground/70"
-        }`}
+        className="text-[10px] uppercase tracking-[0.14em] font-semibold text-white/45"
       >
         {label}
       </SidebarGroupLabel>
+
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
