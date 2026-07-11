@@ -153,13 +153,24 @@ export function useLessonStore(): State {
 export function saveLesson(input: Omit<SavedLesson, "id" | "createdAt" | "updatedAt" | "status"> & { id?: string; status?: LessonStatus }): SavedLesson {
   const now = new Date().toISOString();
   const existing = input.id ? state.lessons.find((l) => l.id === input.id) : undefined;
+  let history = existing?.history ?? [];
+  if (existing) {
+    const snap: LessonSnapshot = {
+      at: existing.updatedAt,
+      notes: existing.notes,
+      title: existing.title,
+      vcCode: existing.vcCode,
+    };
+    history = [snap, ...history].slice(0, 20);
+  }
   const lesson: SavedLesson = existing
-    ? { ...existing, ...input, id: existing.id, status: input.status ?? existing.status, updatedAt: now }
+    ? { ...existing, ...input, id: existing.id, status: input.status ?? existing.status, updatedAt: now, history }
     : {
         ...input,
         id: `l-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
         status: input.status ?? "draft",
         createdAt: now, updatedAt: now,
+        history: [],
       };
   state = {
     lessons: existing
@@ -170,9 +181,49 @@ export function saveLesson(input: Omit<SavedLesson, "id" | "createdAt" | "update
   return lesson;
 }
 
-export function setLessonStatus(id: string, status: LessonStatus) {
-  state = { lessons: state.lessons.map((l) => (l.id === id ? { ...l, status, updatedAt: new Date().toISOString() } : l)) };
+export function setLessonStatus(id: string, status: LessonStatus, reviewerComment?: string) {
+  state = {
+    lessons: state.lessons.map((l) =>
+      l.id === id
+        ? {
+            ...l,
+            status,
+            reviewerComment: reviewerComment ?? l.reviewerComment,
+            submittedAt: status === "pending" ? new Date().toISOString() : l.submittedAt,
+            updatedAt: new Date().toISOString(),
+          }
+        : l,
+    ),
+  };
   emit();
+}
+
+export function duplicateLesson(id: string): SavedLesson | undefined {
+  const src = state.lessons.find((l) => l.id === id);
+  if (!src) return;
+  const now = new Date().toISOString();
+  const copy: SavedLesson = {
+    ...src,
+    id: `l-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+    title: `${src.title} (copy)`,
+    status: "draft",
+    reviewerComment: undefined,
+    submittedAt: undefined,
+    history: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  state = { lessons: [copy, ...state.lessons] };
+  emit();
+  return copy;
+}
+
+export function restoreLessonSnapshot(id: string, snapshotAt: string) {
+  const l = state.lessons.find((x) => x.id === id);
+  if (!l?.history) return;
+  const snap = l.history.find((s) => s.at === snapshotAt);
+  if (!snap) return;
+  saveLesson({ ...l, notes: snap.notes, title: snap.title, vcCode: snap.vcCode });
 }
 
 export function deleteLesson(id: string) {
