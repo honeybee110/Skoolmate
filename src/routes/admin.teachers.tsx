@@ -136,7 +136,7 @@ function TeacherDirectory() {
                 <TabsContent value="profile" className="space-y-3 pt-3">
                   <div className="flex items-center gap-2 text-sm"><Mail className="h-4 w-4 text-muted-foreground" />{selected.email}</div>
                   {selected.phone && <div className="flex items-center gap-2 text-sm"><Phone className="h-4 w-4 text-muted-foreground" />{selected.phone}</div>}
-                  <div className="flex items-center gap-2 text-sm"><IdCard className="h-4 w-4 text-muted-foreground" />{selected.employmentStatus ?? selected.employment}</div>
+                  <div className="flex items-center gap-2 text-sm"><IdCard className="h-4 w-4 text-muted-foreground" />{selected.employment}</div>
                   <div className="flex gap-2 pt-3">
                     <Button size="sm" variant="outline" onClick={() => { setEditing(selected); setDialogOpen(true); }} className="gap-1.5"><Pencil className="h-3.5 w-3.5" />Edit</Button>
                     {selected.archived ? (
