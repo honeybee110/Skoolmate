@@ -597,10 +597,9 @@ function Landing() {
             <FooterCol
               heading="Company"
               items={[
-                { label: "About", href: "#" },
-                { label: "Careers", href: "#" },
-                { label: "Contact", href: "#" },
-                { label: "Privacy Policy", href: "#" },
+                { label: "Book a demo", href: "/auth" },
+                { label: "Sign in", href: "/auth" },
+                { label: "Contact", href: "mailto:hello@skoolmate.com.au", external: true },
               ]}
             />
           </div>
@@ -608,11 +607,6 @@ function Landing() {
           <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row">
             <div>
               © {new Date().getFullYear()} skoolmate Pty Ltd. Made in Melbourne, Australia.
-            </div>
-            <div className="flex gap-5">
-              <a href="#" className="hover:text-foreground">Terms</a>
-              <a href="#" className="hover:text-foreground">Privacy</a>
-              <a href="#" className="hover:text-foreground">Cookies</a>
             </div>
           </div>
         </div>
