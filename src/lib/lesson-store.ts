@@ -6,7 +6,7 @@
 
 import { useSyncExternalStore } from "react";
 
-export type LessonStatus = "draft" | "pending" | "approved";
+export type LessonStatus = "draft" | "pending" | "approved" | "returned";
 export type LessonTerm = "Term 1" | "Term 2" | "Term 3" | "Term 4";
 export type LessonWeek =
   | "Week 1" | "Week 2" | "Week 3" | "Week 4" | "Week 5" | "Week 6"
@@ -25,6 +25,13 @@ export interface LessonNotes {
   youDo: string;
 }
 
+export interface LessonSnapshot {
+  at: string;
+  notes: LessonNotes;
+  title: string;
+  vcCode?: string;
+}
+
 export interface SavedLesson {
   id: string;
   title: string;
@@ -38,11 +45,13 @@ export interface SavedLesson {
   vcCode?: string;
   status: LessonStatus;
   notes: LessonNotes;
-  /** Optional AI-generated payload, JSON-stringified snapshot. */
   aiPlan?: unknown;
   author: string;
   createdAt: string;
   updatedAt: string;
+  submittedAt?: string;
+  reviewerComment?: string;
+  history?: LessonSnapshot[];
 }
 
 interface State {
