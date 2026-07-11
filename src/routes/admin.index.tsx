@@ -55,42 +55,53 @@ const quickActions: Array<{ label: string; to: string; icon: typeof Bell }> = [
 
 
 function AdminHome() {
-  const { profile, roles } = useAuth();
+  const { profile } = useAuth();
+  void profile;
   return (
     <AppShell variant="admin">
-      <PageHeader
-        title={`Good morning, ${profile?.display_name?.split(" ")[0] ?? "Admin"}`}
-        subtitle={
-          roles.length
-            ? `Signed in as ${roles.map(roleLabel).join(" · ")}`
-            : "Admin Portal overview"
-        }
-        actions={
-          <Button className="rounded-full gap-1.5">
-            <Sparkles className="h-4 w-4" /> AI Brief
-          </Button>
-        }
-      />
-
+      <div className="px-4 pt-6 md:px-8">
+        <ProfileHeader
+          variant="admin"
+          eyebrow="Admin Portal · Monday, 29 June 2026"
+          subtitle="School-wide overview"
+          actions={
+            <Button className="rounded-full bg-gradient-to-r from-[color:var(--primary)] to-[color:var(--accent)] px-5 text-white shadow-lg hover:opacity-95">
+              <Sparkles className="h-4 w-4" /> AI Brief
+            </Button>
+          }
+        />
+      </div>
 
       <div className="px-4 py-6 md:px-8 space-y-6">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
-            <Card key={s.label} className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
+            <Card
+              key={s.label}
+              className="group relative overflow-hidden p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(15,23,42,0.25)]"
+            >
+              <div
+                aria-hidden
+                className={`absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br ${s.gradient} opacity-15 blur-2xl transition-opacity group-hover:opacity-25`}
+              />
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     {s.label}
                   </div>
-                  <div className="mt-1 text-2xl font-semibold">{s.value}</div>
+                  <div className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
+                    {s.value}
+                  </div>
                 </div>
-                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${s.tone}`}>
-                  <s.icon className="h-4 w-4" />
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${s.gradient} text-white shadow-md ring-4 ${s.ring}/40`}
+                >
+                  <s.icon className="h-5 w-5" />
                 </div>
               </div>
             </Card>
           ))}
         </div>
+
 
         <Card className="p-5">
           <div className="mb-3 flex items-center justify-between">
