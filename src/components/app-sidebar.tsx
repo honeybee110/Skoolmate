@@ -27,6 +27,7 @@ import {
   Pin,
   UserCheck,
   Archive,
+  History,
 } from "lucide-react";
 
 import {
