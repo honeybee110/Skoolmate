@@ -16,7 +16,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import teacherShot from "@/assets/landing-teacher.jpg";
+import demoVideo from "@/assets/skoolmate-demo.mp4.asset.json";
+import demoPoster from "@/assets/skoolmate-demo-poster.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
