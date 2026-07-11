@@ -76,6 +76,23 @@ export interface SchoolYear {
   status: YearStatus;
 }
 
+export type AuditAction =
+  | "teacher.add" | "teacher.update" | "teacher.archive" | "teacher.restore"
+  | "class.create" | "class.update" | "class.assignTeacher" | "class.addES" | "class.removeES"
+  | "student.move"
+  | "timetable.submit" | "timetable.approve" | "timetable.return" | "timetable.publish"
+  | "year.create" | "year.activate" | "year.archive" | "year.duplicate";
+
+export interface AuditEntry {
+  id: string;
+  at: string;
+  actor: string;
+  action: AuditAction;
+  summary: string;
+  targetId?: string;
+  meta?: Record<string, unknown>;
+}
+
 export interface DirectoryState {
   years: SchoolYear[];
   activeYearId: string;
@@ -83,6 +100,7 @@ export interface DirectoryState {
   classes: ClassRoom[];
   studentClass: Record<string, string>; // studentId -> classId
   timetables: Timetable[];
+  auditLog: AuditEntry[];
 }
 
 const STORAGE_KEY = "skoolmate.directory.v1";
