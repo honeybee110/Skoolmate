@@ -27,6 +27,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { subjectFromTitle } from "@/lib/subject-colors";
 
 import { PortalGuard } from "@/components/portal-guard";
 import { ProfileHeader } from "@/components/profile-header";
@@ -55,13 +56,6 @@ const kindIcon = {
   report: FileText,
 } as const;
 
-const blockColor: Record<string, string> = {
-  literacy: "border-l-primary bg-primary-soft/40",
-  numeracy: "border-l-[oklch(0.58_0.12_280)] bg-[oklch(0.96_0.03_280)]/40",
-  specialist: "border-l-accent bg-accent-soft/40",
-  therapy: "border-l-[oklch(0.65_0.13_155)] bg-[oklch(0.95_0.04_155)]/40",
-  break: "border-l-muted-foreground/40 bg-muted/40",
-};
 
 function Dashboard() {
   const [semesterFilter, setSemesterFilter] = useState<Semester | "all">(currentSemester);
@@ -131,12 +125,14 @@ function Dashboard() {
               <Button variant="ghost" size="sm" className="text-xs">Open calendar <ChevronRight className="h-3 w-3" /></Button>
             </div>
             <div className="mt-4 space-y-1.5">
-              {todayTimetable.map((b, i) => (
+              {todayTimetable.map((b, i) => {
+                const tone = subjectFromTitle(b.title, b.type);
+                return (
                 <div
                   key={i}
                   className={cn(
                     "flex items-center gap-4 rounded-lg border-l-4 px-3 py-2.5",
-                    blockColor[b.type]
+                    tone.cell
                   )}
                 >
                   <div className="flex w-20 shrink-0 flex-col text-[11px] text-muted-foreground">
@@ -147,11 +143,12 @@ function Dashboard() {
                     <div className="truncate text-sm font-medium">{b.title}</div>
                     <div className="text-[11px] text-muted-foreground">{b.room}</div>
                   </div>
-                  {b.type === "therapy" && (
-                    <span className="text-[10px] uppercase tracking-wider text-success">Therapy</span>
-                  )}
+                  <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", tone.chip)}>
+                    {tone.label}
+                  </span>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </Card>
 

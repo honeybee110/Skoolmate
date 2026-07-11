@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { weeklyTimetable, sessionTimes, classInfo, type WeekDay } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { subjectFromTitle, subjectTones } from "@/lib/subject-colors";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({ meta: [{ title: "Calendar · skoolmate" }] }),
@@ -16,14 +17,6 @@ const dayLabels: Record<WeekDay, string> = {
   Wed: "Wednesday",
   Thu: "Thursday",
   Fri: "Friday",
-};
-
-const typeTone: Record<string, string> = {
-  literacy: "bg-primary-soft/60 border-l-primary text-foreground",
-  numeracy: "bg-[oklch(0.96_0.03_280)]/70 border-l-[oklch(0.58_0.12_280)]",
-  specialist: "bg-accent-soft/60 border-l-accent",
-  therapy: "bg-[oklch(0.95_0.04_155)]/70 border-l-[oklch(0.65_0.13_155)]",
-  break: "bg-muted/60 border-l-muted-foreground/40 text-muted-foreground",
 };
 
 const breaks = [
@@ -69,12 +62,13 @@ function CalendarPage() {
                 </div>
                 {days.map((d) => {
                   const cell = weeklyTimetable[d][i];
+                  const tone = subjectFromTitle(cell.title, cell.type);
                   return (
                     <div key={d} className="border-l p-2">
                       <div
                         className={cn(
                           "h-full rounded-md border-l-4 px-3 py-2 text-sm leading-snug",
-                          typeTone[cell.type],
+                          tone.cell,
                         )}
                       >
                         {cell.title}
@@ -103,11 +97,10 @@ function CalendarPage() {
           ))}
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-secondary/30 px-4 py-3 text-[11px] text-muted-foreground">
-            <div className="flex items-center gap-3">
-              <Legend swatch="bg-primary" label="Literacy" />
-              <Legend swatch="bg-[oklch(0.58_0.12_280)]" label="Maths" />
-              <Legend swatch="bg-accent" label="Specialist" />
-              <Legend swatch="bg-[oklch(0.65_0.13_155)]" label="Therapy" />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {(["startofday","literacy","maths","science","history","geography","specialist","music","personalsocial","selfcare","assembly"] as const).map((k) => (
+                <Legend key={k} swatch={subjectTones[k].swatch} label={subjectTones[k].label} />
+              ))}
             </div>
             <div className="font-medium text-accent">
               Medical alert · Callum — Asthma Plan
