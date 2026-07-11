@@ -19,13 +19,10 @@ const dayLabels: Record<WeekDay, string> = {
   Fri: "Friday",
 };
 
-const typeTone: Record<string, string> = {
-  literacy: "bg-primary-soft/60 border-l-primary text-foreground",
-  numeracy: "bg-[oklch(0.96_0.03_280)]/70 border-l-[oklch(0.58_0.12_280)]",
-  specialist: "bg-accent-soft/60 border-l-accent",
-  therapy: "bg-[oklch(0.95_0.04_155)]/70 border-l-[oklch(0.65_0.13_155)]",
-  break: "bg-muted/60 border-l-muted-foreground/40 text-muted-foreground",
-};
+const breaks = [
+  { after: 2, label: "Morning Tea · Morning Play", time: "10:30 – 11:30" },
+  { after: 4, label: "Lunch · Lunch Play", time: "1:00 – 2:00" },
+];
 
 const breaks = [
   { after: 2, label: "Morning Tea · Morning Play", time: "10:30 – 11:30" },
