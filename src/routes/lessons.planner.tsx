@@ -703,3 +703,25 @@ function buildMarkdown(d: Draft): string {
     `## You do`, d.notes.youDo, ``,
   ].filter(Boolean).join("\n");
 }
+
+function PublishedTimetableBanner() {
+  const { classes, timetables } = useDirectory();
+  void timetables;
+  // Find the first class with an approved/published timetable — teacher's class in mock.
+  const cls = classes.find((c) => c.teacherId === "t-honey") ?? classes.find((c) => !!c.teacherId);
+  const tt = cls ? getApprovedOrPublishedTimetable(cls.id) : undefined;
+  if (!cls || !tt) return null;
+  const totalCells = Object.values(tt.grid).reduce((n, day) => n + Object.values(day).filter((c) => c.subject).length, 0);
+  return (
+    <div className="mx-4 mt-3 md:mx-6">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[color:var(--primary)]/20 bg-gradient-to-r from-[color:var(--primary)]/5 to-[color:var(--accent)]/5 px-4 py-3 text-sm">
+        <CalendarClock className="h-4 w-4 text-[color:var(--primary)]" />
+        <div className="flex-1">
+          <div className="font-medium">Approved timetable synced · {cls.name}</div>
+          <div className="text-xs text-muted-foreground">Leadership {statusLabel(tt.status).toLowerCase()} v{tt.version} · {totalCells} sessions imported into your planner.</div>
+        </div>
+        <span className="rounded-full bg-[color:var(--primary)]/10 px-2 py-0.5 text-[10px] font-medium text-[color:var(--primary)]">Auto-sync</span>
+      </div>
+    </div>
+  );
+}
