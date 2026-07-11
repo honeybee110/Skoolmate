@@ -317,7 +317,7 @@ function LeadershipTemplates() {
           <Upload className="h-3 w-3" />Upload template
         </Button>
         <Button asChild size="sm" variant="outline" className="h-7 text-[11px]">
-          <Link to="/admin/crosscheck-builder"><ClipboardCheck className="h-3 w-3" />Cross-Check Builder</Link>
+          <Link to="/admin/crosscheck-builder"><ClipboardCheck className="h-3 w-3" />CrossCheck Builder</Link>
         </Button>
       </div>
       <ul className="divide-y">

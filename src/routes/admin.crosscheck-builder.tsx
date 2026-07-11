@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/crosscheck-builder")({
-  head: () => ({ meta: [{ title: "Cross-Check Builder · skoolmate" }] }),
+  head: () => ({ meta: [{ title: "CrossCheck Builder · skoolmate" }] }),
   component: () => (
     <RoleGate groups={["leadership"]}>
       <AppShell variant="admin">
@@ -174,7 +174,7 @@ function CrossCheckBuilder() {
   return (
     <>
       <PageHeader
-        title="Cross-Check Builder"
+        title="CrossCheck Builder"
         subtitle="Build the semester Cross-Checks Masterlist by strand → skill → success criteria (Developing → Extended)."
         actions={
           <>
