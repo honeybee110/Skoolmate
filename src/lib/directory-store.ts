@@ -214,12 +214,8 @@ function getSnapshot(): DirectoryState {
   return state;
 }
 
-export function useDirectory<T>(selector: (s: DirectoryState) => T): T {
-  return useSyncExternalStore(
-    (l) => { const u = subscribe(l); return () => { u; }; },
-    () => selector(state),
-    () => selector(state),
-  );
+export function useDirectory(): DirectoryState {
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
 // ---------- Mutations ----------
