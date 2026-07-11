@@ -308,6 +308,10 @@ function LessonPlannerPage() {
         }
       />
 
+      <PublishedTimetableBanner />
+
+
+
       <div className="grid gap-4 p-4 md:grid-cols-[320px_1fr] md:p-6">
         {/* Left rail */}
         <aside className="flex flex-col gap-3">
