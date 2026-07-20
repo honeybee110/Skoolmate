@@ -34,14 +34,14 @@ export const Route = createFileRoute("/admin/")({
 });
 
 const stats = [
-  { label: "Pending Lesson Plans", value: 7, icon: ClipboardCheck, gradient: "from-amber-400 to-orange-500", ring: "ring-amber-200" },
-  { label: "Pending IEP Approvals", value: 4, icon: Target, gradient: "from-[color:var(--primary)] to-indigo-400", ring: "ring-indigo-200" },
-  { label: "Reports Due", value: 12, icon: FileText, gradient: "from-rose-400 to-pink-500", ring: "ring-rose-200" },
-  { label: "Behaviour Incidents", value: 3, icon: Activity, gradient: "from-orange-400 to-red-500", ring: "ring-orange-200" },
-  { label: "Attendance Today", value: "94%", icon: Users, gradient: "from-emerald-400 to-teal-500", ring: "ring-emerald-200" },
-  { label: "Upcoming Meetings", value: 5, icon: CalendarClock, gradient: "from-indigo-400 to-violet-500", ring: "ring-violet-200" },
-  { label: "Teacher Absences", value: 2, icon: Users, gradient: "from-slate-400 to-slate-600", ring: "ring-slate-200" },
-  { label: "Today's Clock-ins", value: 38, icon: Timer, gradient: "from-[color:var(--accent)] to-cyan-500", ring: "ring-cyan-200" },
+  { label: "Pending Lesson Plans", value: 7, icon: ClipboardCheck, gradient: "from-amber-400 to-orange-500", ring: "ring-amber-200", accent: "border-l-amber-400", status: { text: "Needs review", tone: "bg-amber-100 text-amber-800" } },
+  { label: "Pending IEP Approvals", value: 4, icon: Target, gradient: "from-[color:var(--primary)] to-indigo-400", ring: "ring-indigo-200", accent: "border-l-indigo-400", status: { text: "In queue", tone: "bg-indigo-100 text-indigo-800" } },
+  { label: "Reports Due", value: 12, icon: FileText, gradient: "from-rose-400 to-pink-500", ring: "ring-rose-200", accent: "border-l-rose-400", status: { text: "Due this week", tone: "bg-rose-100 text-rose-800" } },
+  { label: "Behaviour Incidents", value: 3, icon: Activity, gradient: "from-orange-400 to-red-500", ring: "ring-orange-200", accent: "border-l-orange-400", status: { text: "Monitor", tone: "bg-orange-100 text-orange-800" } },
+  { label: "Attendance Today", value: "94%", icon: Users, gradient: "from-emerald-400 to-teal-500", ring: "ring-emerald-200", accent: "border-l-emerald-400", status: { text: "On track", tone: "bg-emerald-100 text-emerald-800" } },
+  { label: "Upcoming Meetings", value: 5, icon: CalendarClock, gradient: "from-indigo-400 to-violet-500", ring: "ring-violet-200", accent: "border-l-violet-400", status: { text: "Scheduled", tone: "bg-violet-100 text-violet-800" } },
+  { label: "Teacher Absences", value: 2, icon: Users, gradient: "from-slate-400 to-slate-600", ring: "ring-slate-200", accent: "border-l-slate-400", status: { text: "Covered", tone: "bg-slate-100 text-slate-800" } },
+  { label: "Today's Clock-ins", value: 38, icon: Timer, gradient: "from-[color:var(--accent)] to-cyan-500", ring: "ring-cyan-200", accent: "border-l-cyan-400", status: { text: "Live", tone: "bg-cyan-100 text-cyan-800" } },
 ];
 
 const quickActions: Array<{ label: string; to: string; icon: typeof Bell }> = [
