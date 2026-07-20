@@ -77,7 +77,7 @@ function AdminHome() {
           {stats.map((s) => (
             <Card
               key={s.label}
-              className="group relative overflow-hidden p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(15,23,42,0.25)]"
+              className={`group relative overflow-hidden border-l-4 ${s.accent} p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(15,23,42,0.25)]`}
             >
               <div
                 aria-hidden
@@ -91,6 +91,9 @@ function AdminHome() {
                   <div className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                     {s.value}
                   </div>
+                  <span className={`mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${s.status.tone}`}>
+                    {s.status.text}
+                  </span>
                 </div>
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${s.gradient} text-white shadow-md ring-4 ${s.ring}/40`}
