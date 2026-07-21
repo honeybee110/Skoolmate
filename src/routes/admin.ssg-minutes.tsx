@@ -65,8 +65,8 @@ function AdminSSGMinutes() {
   const load = async () => {
     setLoading(true);
     setError(null);
-    const { data, error: err } = await supabase
-      .from("ssg_minutes" as never)
+    const { data, error: err } = await (supabase as unknown as { from: (t: string) => any })
+      .from("ssg_minutes")
       .select("*")
       .eq("status", "Submitted")
       .order("meeting_date", { ascending: false });

@@ -98,8 +98,8 @@ function TeacherSSGMinutes() {
     if (!user) return;
     setLoading(true);
     setLoadError(null);
-    const { data, error } = await supabase
-      .from("ssg_minutes" as never)
+    const { data, error } = await (supabase as unknown as { from: (t: string) => any })
+      .from("ssg_minutes")
       .select("*")
       .eq("submitted_by", user.id)
       .order("meeting_date", { ascending: false });
@@ -184,7 +184,8 @@ function TeacherSSGMinutes() {
       submitted_at: nextStatus === "Submitted" ? new Date().toISOString() : null,
     };
 
-    const table = supabase.from("ssg_minutes" as never);
+    // Cast the client to any to bypass generated types until they regenerate.
+    const table = (supabase as unknown as { from: (t: string) => any }).from("ssg_minutes");
     const res = form.id
       ? await table.update(payload).eq("id", form.id).select().single()
       : await table.insert(payload).select().single();
