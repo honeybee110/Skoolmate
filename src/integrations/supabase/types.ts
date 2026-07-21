@@ -376,6 +376,63 @@ export type Database = {
           },
         ]
       }
+      ssg_minutes: {
+        Row: {
+          action_items: Json
+          apologies: string | null
+          attendees: Json
+          class_level: string
+          created_at: string
+          discussion_summary: string | null
+          id: string
+          meeting_date: string
+          meeting_type: string
+          next_meeting_date: string | null
+          semester: string
+          status: string
+          student_name: string
+          submitted_at: string | null
+          submitted_by: string
+          updated_at: string
+        }
+        Insert: {
+          action_items?: Json
+          apologies?: string | null
+          attendees?: Json
+          class_level: string
+          created_at?: string
+          discussion_summary?: string | null
+          id?: string
+          meeting_date: string
+          meeting_type: string
+          next_meeting_date?: string | null
+          semester: string
+          status?: string
+          student_name: string
+          submitted_at?: string | null
+          submitted_by: string
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json
+          apologies?: string | null
+          attendees?: Json
+          class_level?: string
+          created_at?: string
+          discussion_summary?: string | null
+          id?: string
+          meeting_date?: string
+          meeting_type?: string
+          next_meeting_date?: string | null
+          semester?: string
+          status?: string
+          student_name?: string
+          submitted_at?: string | null
+          submitted_by?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
