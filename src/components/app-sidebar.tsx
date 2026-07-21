@@ -65,6 +65,7 @@ const teacherNav = {
     { title: "Daily Attendance", url: "/attendance", icon: UserCheck },
     { title: "Evidence Hub", url: "/evidence", icon: Camera },
     { title: "Behaviour", url: "/behaviour", icon: Activity },
+    { title: "SSG Minutes", url: "/teacher/ssg-minutes", icon: ClipboardCheck },
     { title: "Reports", url: "/reports", icon: FileText },
     { title: "Notifications", url: "/notifications", icon: Bell },
     { title: "Time & Attendance", url: "/timeclock", icon: Timer },
@@ -75,6 +76,7 @@ const adminNav = {
   Overview: [
     { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
     { title: "IEP Management", url: "/admin/ieps", icon: Target },
+    { title: "SSG Minutes", url: "/admin/ssg-minutes", icon: ClipboardCheck },
     { title: "Approval Centre", url: "/admin/approvals", icon: ClipboardCheck },
     { title: "Document Centre", url: "/admin/documents", icon: FolderKanban },
     { title: "Notifications", url: "/admin/notifications", icon: Bell },

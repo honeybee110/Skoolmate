@@ -31,6 +31,7 @@ import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LessonsIndexRouteImport } from './routes/lessons.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TeacherSsgMinutesRouteImport } from './routes/teacher.ssg-minutes'
 import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
 import { Route as LessonsPlannerRouteImport } from './routes/lessons.planner'
@@ -43,6 +44,7 @@ import { Route as AdminTimeclockRouteImport } from './routes/admin.timeclock'
 import { Route as AdminTemplatesRouteImport } from './routes/admin.templates'
 import { Route as AdminTeachersRouteImport } from './routes/admin.teachers'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
+import { Route as AdminSsgMinutesRouteImport } from './routes/admin.ssg-minutes'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminResourcesRouteImport } from './routes/admin.resources'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
@@ -173,6 +175,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherSsgMinutesRoute = TeacherSsgMinutesRouteImport.update({
+  id: '/teacher/ssg-minutes',
+  path: '/teacher/ssg-minutes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherLoginRoute = TeacherLoginRouteImport.update({
   id: '/teacher/login',
   path: '/teacher/login',
@@ -231,6 +238,11 @@ const AdminTeachersRoute = AdminTeachersRouteImport.update({
 const AdminStudentsRoute = AdminStudentsRouteImport.update({
   id: '/admin/students',
   path: '/admin/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSsgMinutesRoute = AdminSsgMinutesRouteImport.update({
+  id: '/admin/ssg-minutes',
+  path: '/admin/ssg-minutes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -368,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/ssg-minutes': typeof AdminSsgMinutesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/admin/templates': typeof AdminTemplatesRoute
@@ -380,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
+  '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin/': typeof AdminIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
@@ -422,6 +436,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/ssg-minutes': typeof AdminSsgMinutesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/admin/templates': typeof AdminTemplatesRoute
@@ -434,6 +449,7 @@ export interface FileRoutesByTo {
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
+  '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin': typeof AdminIndexRoute
   '/lessons': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
@@ -478,6 +494,7 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/ssg-minutes': typeof AdminSsgMinutesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/admin/templates': typeof AdminTemplatesRoute
@@ -490,6 +507,7 @@ export interface FileRoutesById {
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
+  '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin/': typeof AdminIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
@@ -535,6 +553,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/resources'
     | '/admin/settings'
+    | '/admin/ssg-minutes'
     | '/admin/students'
     | '/admin/teachers'
     | '/admin/templates'
@@ -547,6 +566,7 @@ export interface FileRouteTypes {
     | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
+    | '/teacher/ssg-minutes'
     | '/admin/'
     | '/lessons/'
     | '/ieps/$goalId/print'
@@ -589,6 +609,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/resources'
     | '/admin/settings'
+    | '/admin/ssg-minutes'
     | '/admin/students'
     | '/admin/teachers'
     | '/admin/templates'
@@ -601,6 +622,7 @@ export interface FileRouteTypes {
     | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
+    | '/teacher/ssg-minutes'
     | '/admin'
     | '/lessons'
     | '/ieps/$goalId/print'
@@ -644,6 +666,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/resources'
     | '/admin/settings'
+    | '/admin/ssg-minutes'
     | '/admin/students'
     | '/admin/teachers'
     | '/admin/templates'
@@ -656,6 +679,7 @@ export interface FileRouteTypes {
     | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
+    | '/teacher/ssg-minutes'
     | '/admin/'
     | '/lessons/'
     | '/ieps/$goalId/print'
@@ -700,6 +724,7 @@ export interface RootRouteChildren {
   AdminReportsRoute: typeof AdminReportsRoute
   AdminResourcesRoute: typeof AdminResourcesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSsgMinutesRoute: typeof AdminSsgMinutesRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminTeachersRoute: typeof AdminTeachersRoute
   AdminTemplatesRoute: typeof AdminTemplatesRoute
@@ -709,6 +734,7 @@ export interface RootRouteChildren {
   AdminWellbeingRoute: typeof AdminWellbeingRoute
   AdminYearSetupRoute: typeof AdminYearSetupRoute
   TeacherLoginRoute: typeof TeacherLoginRoute
+  TeacherSsgMinutesRoute: typeof TeacherSsgMinutesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -868,6 +894,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/ssg-minutes': {
+      id: '/teacher/ssg-minutes'
+      path: '/teacher/ssg-minutes'
+      fullPath: '/teacher/ssg-minutes'
+      preLoaderRoute: typeof TeacherSsgMinutesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/login': {
       id: '/teacher/login'
       path: '/teacher/login'
@@ -950,6 +983,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/students'
       fullPath: '/admin/students'
       preLoaderRoute: typeof AdminStudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/ssg-minutes': {
+      id: '/admin/ssg-minutes'
+      path: '/admin/ssg-minutes'
+      fullPath: '/admin/ssg-minutes'
+      preLoaderRoute: typeof AdminSsgMinutesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/settings': {
@@ -1164,6 +1204,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   AdminResourcesRoute: AdminResourcesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSsgMinutesRoute: AdminSsgMinutesRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminTeachersRoute: AdminTeachersRoute,
   AdminTemplatesRoute: AdminTemplatesRoute,
@@ -1173,6 +1214,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminWellbeingRoute: AdminWellbeingRoute,
   AdminYearSetupRoute: AdminYearSetupRoute,
   TeacherLoginRoute: TeacherLoginRoute,
+  TeacherSsgMinutesRoute: TeacherSsgMinutesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
