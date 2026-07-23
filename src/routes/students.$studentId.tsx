@@ -168,3 +168,55 @@ function StudentProfile() {
     </AppShell>
   );
 }
+
+function EntrySkillsPanel() {
+  const { activeSemester } = useActiveSemester();
+  const semester = activeSemester === "all" ? currentSemester : activeSemester;
+  const groups = getAllEntrySkills(semester);
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold">Entry skills</h3>
+          <p className="text-xs text-muted-foreground">
+            Semester-aware substrands used to seed IEP success criteria.
+          </p>
+        </div>
+        <span className="text-[11px] text-muted-foreground">Active: {semester}</span>
+      </div>
+      {groups.map((group) => (
+        <Card key={group.area} className="p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold">{group.area}</h3>
+            <span className="text-[11px] text-muted-foreground">
+              {group.area === "Personal & Social"
+                ? "Scope & Sequence · constant"
+                : group.area === "Maths"
+                  ? `Victorian Curriculum 2.0 · ${semester === "Semester 1 · 2026" ? "Sem 1 strands" : "Sem 2 strands"}`
+                  : "Victorian Curriculum 2.0"}
+            </span>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {group.skills.map((skill, i) => {
+              const progress = [30, 55, 75][i % 3];
+              return (
+                <div key={skill.substrand} className="rounded-lg border bg-card p-3">
+                  <div className="text-xs font-semibold">{skill.substrand}</div>
+                  <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{skill.descriptor}</p>
+                  <div className="mt-2 h-1.5 w-full rounded-full bg-muted">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+                  </div>
+                  <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+                    <span>{skill.source === "scope-sequence" ? "S&S" : "VC 2.0"}</span>
+                    <span>T1 · T2 · T3 · T4</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      ))}
+    </>
+  );
+}
+
