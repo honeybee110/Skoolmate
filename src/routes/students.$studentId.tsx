@@ -3,13 +3,17 @@ import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { students, curriculumStrands } from "@/lib/mock-data";
+import { students } from "@/lib/mock-data";
+import { getAllEntrySkills } from "@/lib/entry-skills";
+import { useActiveSemester } from "@/lib/semester-context";
+import { currentSemester } from "@/lib/mock-data";
 import { BehaviourPill, AttendanceDot } from "@/components/status-chips";
 import {
   Sparkles, ChevronLeft, Pill, MessageSquareText, Calendar, FileText,
-  Camera, Activity, Target, BookOpen, GraduationCap, Heart,
+  Camera, Activity, Target, BookOpen, GraduationCap, Heart, ShieldCheck, ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/students/$studentId")({
   loader: ({ params }) => {
@@ -63,9 +67,25 @@ function StudentProfile() {
                   <AttendanceDot status={student.attendance} /> <span className="capitalize">{student.attendance}</span>
                 </span>
                 <BehaviourPill status={student.behaviour} />
+                <span className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]",
+                  student.ndisFunded ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" : "bg-muted text-muted-foreground",
+                )}>
+                  <ShieldCheck className="h-3 w-3" />NDIS {student.ndisFunded ? "funded" : "not funded"}
+                </span>
+                <span className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]",
+                  student.dipStatus === "Funded" ? "bg-primary/15 text-primary"
+                  : student.dipStatus === "Pending Review" ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                  : "bg-muted text-muted-foreground",
+                )}>
+                  <ClipboardList className="h-3 w-3" />DIP · {student.dipStatus}
+                  {student.dipMeetingDate ? ` · Mtg ${student.dipMeetingDate}` : ""}
+                </span>
                 {student.aacUser && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px]"><MessageSquareText className="h-3 w-3" />AAC user</span>
                 )}
+
                 {student.medicalAlerts.map((m: string) => (
                   <span key={m} className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] text-destructive">
                     <Pill className="h-3 w-3" />{m}
@@ -108,31 +128,9 @@ function StudentProfile() {
           </TabsList>
 
           <TabsContent value="learning" className="mt-4 space-y-4">
-            {Object.entries(curriculumStrands).map(([subject, strands]) => (
-              <Card key={subject} className="p-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">{subject}</h3>
-                  <span className="text-[11px] text-muted-foreground">Victorian Curriculum 2.0</span>
-                </div>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {strands.map((strand, i) => {
-                    const progress = [20, 45, 70, 90][i % 4];
-                    return (
-                      <div key={strand} className="rounded-lg border bg-card p-3">
-                        <div className="text-xs font-medium">{strand}</div>
-                        <div className="mt-2 h-1.5 w-full rounded-full bg-muted">
-                          <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
-                        </div>
-                        <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-                          <span>Level A.{i + 1}</span><span>T1 · T2 · T3 · T4</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            ))}
+            <EntrySkillsPanel />
           </TabsContent>
+
 
           <TabsContent value="iep" className="mt-4">
             <Card className="p-5">
@@ -170,3 +168,55 @@ function StudentProfile() {
     </AppShell>
   );
 }
+
+function EntrySkillsPanel() {
+  const { activeSemester } = useActiveSemester();
+  const semester = activeSemester === "all" ? currentSemester : activeSemester;
+  const groups = getAllEntrySkills(semester);
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold">Entry skills</h3>
+          <p className="text-xs text-muted-foreground">
+            Semester-aware substrands used to seed IEP success criteria.
+          </p>
+        </div>
+        <span className="text-[11px] text-muted-foreground">Active: {semester}</span>
+      </div>
+      {groups.map((group) => (
+        <Card key={group.area} className="p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold">{group.area}</h3>
+            <span className="text-[11px] text-muted-foreground">
+              {group.area === "Personal & Social"
+                ? "Scope & Sequence · constant"
+                : group.area === "Maths"
+                  ? `Victorian Curriculum 2.0 · ${semester === "Semester 1 · 2026" ? "Sem 1 strands" : "Sem 2 strands"}`
+                  : "Victorian Curriculum 2.0"}
+            </span>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {group.skills.map((skill, i) => {
+              const progress = [30, 55, 75][i % 3];
+              return (
+                <div key={skill.substrand} className="rounded-lg border bg-card p-3">
+                  <div className="text-xs font-semibold">{skill.substrand}</div>
+                  <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{skill.descriptor}</p>
+                  <div className="mt-2 h-1.5 w-full rounded-full bg-muted">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+                  </div>
+                  <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+                    <span>{skill.source === "scope-sequence" ? "S&S" : "VC 2.0"}</span>
+                    <span>T1 · T2 · T3 · T4</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      ))}
+    </>
+  );
+}
+
