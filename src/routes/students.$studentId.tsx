@@ -3,13 +3,17 @@ import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { students, curriculumStrands } from "@/lib/mock-data";
+import { students } from "@/lib/mock-data";
+import { getAllEntrySkills } from "@/lib/entry-skills";
+import { useActiveSemester } from "@/lib/semester-context";
+import { currentSemester } from "@/lib/mock-data";
 import { BehaviourPill, AttendanceDot } from "@/components/status-chips";
 import {
   Sparkles, ChevronLeft, Pill, MessageSquareText, Calendar, FileText,
-  Camera, Activity, Target, BookOpen, GraduationCap, Heart,
+  Camera, Activity, Target, BookOpen, GraduationCap, Heart, ShieldCheck, ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/students/$studentId")({
   loader: ({ params }) => {
