@@ -67,9 +67,25 @@ function StudentProfile() {
                   <AttendanceDot status={student.attendance} /> <span className="capitalize">{student.attendance}</span>
                 </span>
                 <BehaviourPill status={student.behaviour} />
+                <span className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]",
+                  student.ndisFunded ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" : "bg-muted text-muted-foreground",
+                )}>
+                  <ShieldCheck className="h-3 w-3" />NDIS {student.ndisFunded ? "funded" : "not funded"}
+                </span>
+                <span className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]",
+                  student.dipStatus === "Funded" ? "bg-primary/15 text-primary"
+                  : student.dipStatus === "Pending Review" ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                  : "bg-muted text-muted-foreground",
+                )}>
+                  <ClipboardList className="h-3 w-3" />DIP · {student.dipStatus}
+                  {student.dipMeetingDate ? ` · Mtg ${student.dipMeetingDate}` : ""}
+                </span>
                 {student.aacUser && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px]"><MessageSquareText className="h-3 w-3" />AAC user</span>
                 )}
+
                 {student.medicalAlerts.map((m: string) => (
                   <span key={m} className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] text-destructive">
                     <Pill className="h-3 w-3" />{m}
