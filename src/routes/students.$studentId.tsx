@@ -128,31 +128,9 @@ function StudentProfile() {
           </TabsList>
 
           <TabsContent value="learning" className="mt-4 space-y-4">
-            {Object.entries(curriculumStrands).map(([subject, strands]) => (
-              <Card key={subject} className="p-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">{subject}</h3>
-                  <span className="text-[11px] text-muted-foreground">Victorian Curriculum 2.0</span>
-                </div>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {strands.map((strand, i) => {
-                    const progress = [20, 45, 70, 90][i % 4];
-                    return (
-                      <div key={strand} className="rounded-lg border bg-card p-3">
-                        <div className="text-xs font-medium">{strand}</div>
-                        <div className="mt-2 h-1.5 w-full rounded-full bg-muted">
-                          <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
-                        </div>
-                        <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-                          <span>Level A.{i + 1}</span><span>T1 · T2 · T3 · T4</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            ))}
+            <EntrySkillsPanel />
           </TabsContent>
+
 
           <TabsContent value="iep" className="mt-4">
             <Card className="p-5">
