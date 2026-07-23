@@ -3,6 +3,8 @@
 export type BehaviourStatus = "calm" | "settled" | "alert" | "incident";
 export type AttendanceStatus = "present" | "late" | "absent" | "partial";
 
+export type DipStatus = "Funded" | "Pending Review" | "Not Funded";
+
 export interface Student {
   id: string;
   firstName: string;
@@ -20,7 +22,11 @@ export interface Student {
   dob: string;
   aacUser: boolean;
   funding: string;
+  ndisFunded: boolean;
+  dipStatus: DipStatus;
+  dipMeetingDate: string | null;
 }
+
 
 const palette = [
   "bg-[oklch(0.85_0.08_192)]",
