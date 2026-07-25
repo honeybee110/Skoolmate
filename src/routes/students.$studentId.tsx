@@ -75,13 +75,14 @@ function StudentProfile() {
                 </span>
                 <span className={cn(
                   "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]",
-                  student.dipStatus === "Funded" ? "bg-primary/15 text-primary"
-                  : student.dipStatus === "Pending Review" ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                  student.dipStatus === "NDIS Funded" ? "bg-primary/15 text-primary"
+                  : student.dipStatus === "Potentially Funded (DIP Meeting Scheduled)" ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
                   : "bg-muted text-muted-foreground",
                 )}>
                   <ClipboardList className="h-3 w-3" />DIP · {student.dipStatus}
-                  {student.dipMeetingDate ? ` · Mtg ${student.dipMeetingDate}` : ""}
+                  {student.dipStatus === "Potentially Funded (DIP Meeting Scheduled)" && student.dipMeetingDate ? ` · Mtg ${student.dipMeetingDate}` : ""}
                 </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px]">Level {student.level}</span>
                 {student.aacUser && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px]"><MessageSquareText className="h-3 w-3" />AAC user</span>
                 )}
