@@ -29,6 +29,7 @@ export interface Student {
   ndisFunded: boolean;
   dipStatus: DipStatus;
   dipMeetingDate: string | null;
+  level: CohortLevel;
 }
 
 
