@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { students } from "@/lib/mock-data";
-import { getAllEntrySkills } from "@/lib/entry-skills";
+import { getEntrySkillsForStudent, shouldPrepareEntrySkills, type EntrySkillGroup } from "@/lib/entry-skills";
 import { useActiveSemester } from "@/lib/semester-context";
 import { currentSemester } from "@/lib/mock-data";
 import { BehaviourPill, AttendanceDot } from "@/components/status-chips";
