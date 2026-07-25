@@ -3,7 +3,11 @@
 export type BehaviourStatus = "calm" | "settled" | "alert" | "incident";
 export type AttendanceStatus = "present" | "late" | "absent" | "partial";
 
-export type DipStatus = "Funded" | "Pending Review" | "Not Funded";
+export type DipStatus =
+  | "Not NDIS Funded"
+  | "Potentially Funded (DIP Meeting Scheduled)"
+  | "NDIS Funded";
+export type CohortLevel = "B" | "C" | "D";
 
 export interface Student {
   id: string;
