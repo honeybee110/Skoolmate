@@ -129,7 +129,7 @@ function StudentProfile() {
           </TabsList>
 
           <TabsContent value="learning" className="mt-4 space-y-4">
-            <EntrySkillsPanel />
+            <EntrySkillsPanel student={student} />
           </TabsContent>
 
 
