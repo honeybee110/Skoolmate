@@ -497,7 +497,7 @@ function LessonPlannerPage() {
               </div>
             </div>
 
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div className="mt-3 grid gap-3 md:grid-cols-4">
               <div>
                 <Label className="text-xs">Topic</Label>
                 <Input
@@ -506,6 +506,17 @@ function LessonPlannerPage() {
                   placeholder="e.g. Blend and read CVC words"
                   className="mt-1 h-9"
                 />
+              </div>
+              <div>
+                <Label className="text-xs">Cohort level</Label>
+                <Select value={draft.level} onValueChange={(v) => patchDraft({ level: v as CohortLevel })}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="B">Level B</SelectItem>
+                    <SelectItem value="C">Level C</SelectItem>
+                    <SelectItem value="D">Level D</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-xs">Duration</Label>
