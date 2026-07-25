@@ -71,6 +71,8 @@ const STATUS_META: Record<LessonStatus, { label: string; className: string; Icon
   returned: { label: "Returned", className: "bg-rose-100 text-rose-800 border-rose-200", Icon: RotateCcw },
 };
 
+type CohortLevel = "B" | "C" | "D";
+
 interface Draft {
   id?: string;
   title: string;
@@ -79,6 +81,7 @@ interface Draft {
   topic: string;
   duration: string;
   abilityRange: string;
+  level: CohortLevel;
   term: LessonTerm;
   week?: LessonWeek;
   vcCode?: string;
@@ -92,6 +95,7 @@ const NEW_DRAFT: Draft = {
   topic: "",
   duration: "45 min",
   abilityRange: "Towards Foundation A–D",
+  level: "C",
   term: "Term 1",
   week: "Week 1",
   vcCode: "",
