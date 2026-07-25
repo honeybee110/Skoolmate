@@ -756,3 +756,62 @@ function PublishedTimetableBanner() {
     </div>
   );
 }
+
+// -------- Local mock generator --------
+// Produces a full 6-part sample lesson so the "Generate with Mate" button
+// always works in the prototype, even without the AI gateway wired up.
+// For English strands we include Colourful Semantics colour-coding cues
+// (Who = orange, Has = yellow, What = green, Where = blue, When = purple).
+function mockGenerateLesson(input: {
+  subject: string; strand: string; topic: string;
+  level: CohortLevel; duration: string;
+}) {
+  const { subject, strand, topic, level, duration } = input;
+  const isEnglish = /english|literacy|reading|writing|speak/i.test(subject);
+  const isMaths = /math/i.test(subject);
+  const support = { B: "hand-over-hand + AAC symbols", C: "visual scaffolds + AAC choice board", D: "worded prompts + short model" }[level];
+  const criteriaByLevel: Record<CohortLevel, string[]> = {
+    B: ["I can attend to the activity with an adult.", "I can make a choice using symbols or eye gaze.", "I can join the routine with support."],
+    C: ["I can respond to a 1-step instruction.", "I can complete the task with a visual scaffold.", "I can show my answer to a partner."],
+    D: ["I can complete the task independently.", "I can explain my thinking with 1–2 sentences.", "I can check my work against the success criteria."],
+  };
+  const csNote = isEnglish
+    ? "\nColourful Semantics: colour-code sentences as WHO (orange) · HAS/IS DOING (yellow) · WHAT (green) · WHERE (blue) · WHEN (purple)."
+    : "";
+  const iDo = isEnglish
+    ? `Teacher models the target sentence using Colourful Semantics strips — orange WHO, yellow verb, green WHAT — while reading '${topic}' aloud (${support}).${csNote}`
+    : isMaths
+      ? `Teacher models '${topic}' using manipulatives (10-frames / MAB / counters) on the IWB, thinking aloud one step at a time (${support}).`
+      : `Teacher demonstrates '${topic}' step by step with visuals (${support}).`;
+  const weDo = isEnglish
+    ? `Small group co-constructs a sentence about '${topic}' by dragging colour-coded cards into WHO · HAS · WHAT order. Staff prompt with the colour cue only.`
+    : `Guided small-group practice on '${topic}'. Staff prompt Student A, Student B and Student C in turn, fading prompts as confidence grows.`;
+  const youDo = isEnglish
+    ? `Each learner builds their own Colourful Semantics sentence about '${topic}' using pre-cut cards, then reads it to a partner.`
+    : `Learners complete an applied task on '${topic}' at their level with a visual checklist. Extension: apply to a new example.`;
+  return {
+    title: `${strand} — ${topic}`,
+    vcCode: isMaths ? "VC2M" : isEnglish ? "VC2E" : "VC2",
+    learningIntention: `We are learning to engage with ${topic.toLowerCase()} in ${strand.toLowerCase()}.`,
+    successCriteria: criteriaByLevel[level],
+    hook: isEnglish
+      ? `Sensory hook: pass around a prop from '${topic}'. Model an orange-WHO / yellow-verb / green-WHAT sentence about it.`
+      : `Short warm-up linked to '${topic}' — 3 minutes, whole class, high-engagement (song, movement or mystery bag).`,
+    iDo,
+    weDo,
+    youDo,
+    narrative: `Level ${level} · ${duration}. ${iDo} ${weDo} ${youDo}`,
+    sessions: [],
+    differentiation: {
+      support: `Reduce steps, offer a 2-choice board, use ${support}.`,
+      extension: "Increase quantity, ask for reasoning, apply in a new context.",
+    },
+    aacSupports: ["Core-word board", "Symbol schedule", ...(isEnglish ? ["Colourful Semantics cards"] : [])],
+    sensorySupports: ["Movement break", "Fidget / weighted lap-pad"],
+    resources: [
+      { name: "Teacher-made visuals", source: "In-house" },
+      { name: isEnglish ? "Colourful Semantics card set" : "Twinkl AU", source: isEnglish ? "SLT resource pack" : "Twinkl" },
+    ],
+    assessment: "Observation checklist + one work sample per learner against the 3 success criteria.",
+  };
+}
