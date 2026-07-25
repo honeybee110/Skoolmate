@@ -203,16 +203,31 @@ function LessonPlannerPage() {
   const generateFn = useServerFn(generateLessonPlan);
   const generate = useMutation({
     mutationFn: async () => {
-      return generateFn({
-        data: {
-          subject: draft.subject,
-          strand: draft.strand,
-          topic: draft.topic || draft.title || draft.strand,
-          duration: draft.duration,
-          abilityRange: draft.abilityRange,
-          notes: "",
-        },
+      // Prototype-first: build a full sample plan locally so the button
+      // always works. If a Lovable AI key is available, layer that on top,
+      // otherwise fall back to the mock.
+      const mock = mockGenerateLesson({
+        subject: draft.subject,
+        strand: draft.strand,
+        topic: draft.topic || draft.title || draft.strand,
+        level: draft.level,
+        duration: draft.duration,
       });
+      try {
+        const out = await generateFn({
+          data: {
+            subject: draft.subject,
+            strand: draft.strand,
+            topic: draft.topic || draft.title || draft.strand,
+            duration: draft.duration,
+            abilityRange: `Level ${draft.level} · ${draft.abilityRange}`,
+            notes: "",
+          },
+        });
+        return out;
+      } catch {
+        return mock;
+      }
     },
     onSuccess: (out) => {
       patchDraft({
@@ -227,7 +242,7 @@ function LessonPlannerPage() {
         weDo: out.weDo,
         youDo: out.youDo,
       });
-      toast.success("Mate drafted the 6-part plan — review and edit.");
+      toast.success("Mate drafted the 6-part plan — review, edit or regenerate.");
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Generation failed"),
   });
