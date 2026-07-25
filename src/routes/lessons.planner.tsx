@@ -150,6 +150,7 @@ function LessonPlannerPage() {
       topic: l.topic,
       duration: l.duration,
       abilityRange: l.abilityRange,
+      level: "C",
       term: l.term,
       week: l.week,
       vcCode: l.vcCode,
