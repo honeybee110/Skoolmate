@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { students } from "@/lib/mock-data";
-import { getAllEntrySkills } from "@/lib/entry-skills";
+import { getEntrySkillsForStudent, shouldPrepareEntrySkills, type EntrySkillGroup } from "@/lib/entry-skills";
 import { useActiveSemester } from "@/lib/semester-context";
 import { currentSemester } from "@/lib/mock-data";
 import { BehaviourPill, AttendanceDot } from "@/components/status-chips";
@@ -75,13 +75,14 @@ function StudentProfile() {
                 </span>
                 <span className={cn(
                   "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]",
-                  student.dipStatus === "Funded" ? "bg-primary/15 text-primary"
-                  : student.dipStatus === "Pending Review" ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                  student.dipStatus === "NDIS Funded" ? "bg-primary/15 text-primary"
+                  : student.dipStatus === "Potentially Funded (DIP Meeting Scheduled)" ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
                   : "bg-muted text-muted-foreground",
                 )}>
                   <ClipboardList className="h-3 w-3" />DIP · {student.dipStatus}
-                  {student.dipMeetingDate ? ` · Mtg ${student.dipMeetingDate}` : ""}
+                  {student.dipStatus === "Potentially Funded (DIP Meeting Scheduled)" && student.dipMeetingDate ? ` · Mtg ${student.dipMeetingDate}` : ""}
                 </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px]">Level {student.level}</span>
                 {student.aacUser && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px]"><MessageSquareText className="h-3 w-3" />AAC user</span>
                 )}
@@ -128,7 +129,7 @@ function StudentProfile() {
           </TabsList>
 
           <TabsContent value="learning" className="mt-4 space-y-4">
-            <EntrySkillsPanel />
+            <EntrySkillsPanel student={student} />
           </TabsContent>
 
 
@@ -169,54 +170,85 @@ function StudentProfile() {
   );
 }
 
-function EntrySkillsPanel() {
+function EntrySkillsPanel({ student }: { student: (typeof students)[number] }) {
   const { activeSemester } = useActiveSemester();
   const semester = activeSemester === "all" ? currentSemester : activeSemester;
-  const groups = getAllEntrySkills(semester);
+  const prepare = shouldPrepareEntrySkills(student);
+  const groups: EntrySkillGroup[] = getEntrySkillsForStudent(student, semester);
+
+  if (!prepare) {
+    return (
+      <Card className="p-6">
+        <h3 className="text-sm font-semibold">Entry skills</h3>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Entry skills are prepared automatically when a student's DIP status is
+          <span className="mx-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-amber-800">
+            Potentially Funded (DIP Meeting Scheduled)
+          </span>
+          — this readies 3 Success Criteria per substrand ahead of the DIP meeting.
+          Current status: <span className="font-medium">{student.dipStatus}</span>.
+        </p>
+      </Card>
+    );
+  }
+
+  // Group by area for display.
+  const english = groups.filter((g) => g.area === "English");
+  const maths = groups.filter((g) => g.area === "Maths");
+  const personal = groups.filter((g) => g.area === "Personal & Social");
+
   return (
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold">Entry skills</h3>
+          <h3 className="text-sm font-semibold">Entry skills · Level {student.level}</h3>
           <p className="text-xs text-muted-foreground">
-            Semester-aware substrands used to seed IEP success criteria.
+            3 Success Criteria per substrand — pulled from Crosschecks (English &amp; Maths) and Scope &amp; Sequence (Personal &amp; Social).
           </p>
         </div>
         <span className="text-[11px] text-muted-foreground">Active: {semester}</span>
       </div>
-      {groups.map((group) => (
-        <Card key={group.area} className="p-5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold">{group.area}</h3>
-            <span className="text-[11px] text-muted-foreground">
-              {group.area === "Personal & Social"
-                ? "Scope & Sequence · constant"
-                : group.area === "Maths"
-                  ? `Victorian Curriculum 2.0 · ${semester === "Semester 1 · 2026" ? "Sem 1 strands" : "Sem 2 strands"}`
-                  : "Victorian Curriculum 2.0"}
-            </span>
-          </div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {group.skills.map((skill, i) => {
-              const progress = [30, 55, 75][i % 3];
-              return (
-                <div key={skill.substrand} className="rounded-lg border bg-card p-3">
-                  <div className="text-xs font-semibold">{skill.substrand}</div>
-                  <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{skill.descriptor}</p>
-                  <div className="mt-2 h-1.5 w-full rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
-                  </div>
-                  <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-                    <span>{skill.source === "scope-sequence" ? "S&S" : "VC 2.0"}</span>
-                    <span>T1 · T2 · T3 · T4</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      ))}
+
+      <AreaBlock title="English" source="Crosschecks" groups={english} />
+      <AreaBlock
+        title="Maths"
+        source={`Crosschecks · ${semester === "Semester 1 · 2026" ? "Semester 1 (Number, Measurement, Space)" : "Semester 2 (Number, Algebra, Statistics)"}`}
+        groups={maths}
+      />
+      <AreaBlock title="Personal & Social" source="Scope & Sequence · constant" groups={personal} />
     </>
+  );
+}
+
+function AreaBlock({ title, source, groups }: { title: string; source: string; groups: EntrySkillGroup[] }) {
+  if (!groups.length) return null;
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">{title}</h3>
+        <span className="text-[11px] text-muted-foreground">{source}</span>
+      </div>
+      <div className="mt-3 grid gap-3 md:grid-cols-3">
+        {groups.map((g) => (
+          <div key={`${g.area}-${g.substrand}`} className="rounded-lg border bg-card p-3">
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-semibold">{g.substrand}</div>
+              <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                {g.level === "constant" ? "S&S" : `L${g.level}`}
+              </span>
+            </div>
+            <ul className="mt-2 space-y-1.5">
+              {g.skills.map((s, i) => (
+                <li key={i} className="text-[11px] leading-snug text-muted-foreground">
+                  <span className="mr-1 font-medium text-foreground">{i + 1}.</span>
+                  {s.criterion}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 

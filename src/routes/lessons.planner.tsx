@@ -71,6 +71,8 @@ const STATUS_META: Record<LessonStatus, { label: string; className: string; Icon
   returned: { label: "Returned", className: "bg-rose-100 text-rose-800 border-rose-200", Icon: RotateCcw },
 };
 
+type CohortLevel = "B" | "C" | "D";
+
 interface Draft {
   id?: string;
   title: string;
@@ -79,6 +81,7 @@ interface Draft {
   topic: string;
   duration: string;
   abilityRange: string;
+  level: CohortLevel;
   term: LessonTerm;
   week?: LessonWeek;
   vcCode?: string;
@@ -92,6 +95,7 @@ const NEW_DRAFT: Draft = {
   topic: "",
   duration: "45 min",
   abilityRange: "Towards Foundation A–D",
+  level: "C",
   term: "Term 1",
   week: "Week 1",
   vcCode: "",
@@ -146,6 +150,7 @@ function LessonPlannerPage() {
       topic: l.topic,
       duration: l.duration,
       abilityRange: l.abilityRange,
+      level: "C",
       term: l.term,
       week: l.week,
       vcCode: l.vcCode,
@@ -198,16 +203,31 @@ function LessonPlannerPage() {
   const generateFn = useServerFn(generateLessonPlan);
   const generate = useMutation({
     mutationFn: async () => {
-      return generateFn({
-        data: {
-          subject: draft.subject,
-          strand: draft.strand,
-          topic: draft.topic || draft.title || draft.strand,
-          duration: draft.duration,
-          abilityRange: draft.abilityRange,
-          notes: "",
-        },
+      // Prototype-first: build a full sample plan locally so the button
+      // always works. If a Lovable AI key is available, layer that on top,
+      // otherwise fall back to the mock.
+      const mock = mockGenerateLesson({
+        subject: draft.subject,
+        strand: draft.strand,
+        topic: draft.topic || draft.title || draft.strand,
+        level: draft.level,
+        duration: draft.duration,
       });
+      try {
+        const out = await generateFn({
+          data: {
+            subject: draft.subject,
+            strand: draft.strand,
+            topic: draft.topic || draft.title || draft.strand,
+            duration: draft.duration,
+            abilityRange: `Level ${draft.level} · ${draft.abilityRange}`,
+            notes: "",
+          },
+        });
+        return out;
+      } catch {
+        return mock;
+      }
     },
     onSuccess: (out) => {
       patchDraft({
@@ -222,7 +242,7 @@ function LessonPlannerPage() {
         weDo: out.weDo,
         youDo: out.youDo,
       });
-      toast.success("Mate drafted the 6-part plan — review and edit.");
+      toast.success("Mate drafted the 6-part plan — review, edit or regenerate.");
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Generation failed"),
   });
@@ -477,7 +497,7 @@ function LessonPlannerPage() {
               </div>
             </div>
 
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div className="mt-3 grid gap-3 md:grid-cols-4">
               <div>
                 <Label className="text-xs">Topic</Label>
                 <Input
@@ -486,6 +506,17 @@ function LessonPlannerPage() {
                   placeholder="e.g. Blend and read CVC words"
                   className="mt-1 h-9"
                 />
+              </div>
+              <div>
+                <Label className="text-xs">Cohort level</Label>
+                <Select value={draft.level} onValueChange={(v) => patchDraft({ level: v as CohortLevel })}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="B">Level B</SelectItem>
+                    <SelectItem value="C">Level C</SelectItem>
+                    <SelectItem value="D">Level D</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-xs">Duration</Label>
@@ -724,4 +755,63 @@ function PublishedTimetableBanner() {
       </div>
     </div>
   );
+}
+
+// -------- Local mock generator --------
+// Produces a full 6-part sample lesson so the "Generate with Mate" button
+// always works in the prototype, even without the AI gateway wired up.
+// For English strands we include Colourful Semantics colour-coding cues
+// (Who = orange, Has = yellow, What = green, Where = blue, When = purple).
+function mockGenerateLesson(input: {
+  subject: string; strand: string; topic: string;
+  level: CohortLevel; duration: string;
+}) {
+  const { subject, strand, topic, level, duration } = input;
+  const isEnglish = /english|literacy|reading|writing|speak/i.test(subject);
+  const isMaths = /math/i.test(subject);
+  const support = { B: "hand-over-hand + AAC symbols", C: "visual scaffolds + AAC choice board", D: "worded prompts + short model" }[level];
+  const criteriaByLevel: Record<CohortLevel, string[]> = {
+    B: ["I can attend to the activity with an adult.", "I can make a choice using symbols or eye gaze.", "I can join the routine with support."],
+    C: ["I can respond to a 1-step instruction.", "I can complete the task with a visual scaffold.", "I can show my answer to a partner."],
+    D: ["I can complete the task independently.", "I can explain my thinking with 1–2 sentences.", "I can check my work against the success criteria."],
+  };
+  const csNote = isEnglish
+    ? "\nColourful Semantics: colour-code sentences as WHO (orange) · HAS/IS DOING (yellow) · WHAT (green) · WHERE (blue) · WHEN (purple)."
+    : "";
+  const iDo = isEnglish
+    ? `Teacher models the target sentence using Colourful Semantics strips — orange WHO, yellow verb, green WHAT — while reading '${topic}' aloud (${support}).${csNote}`
+    : isMaths
+      ? `Teacher models '${topic}' using manipulatives (10-frames / MAB / counters) on the IWB, thinking aloud one step at a time (${support}).`
+      : `Teacher demonstrates '${topic}' step by step with visuals (${support}).`;
+  const weDo = isEnglish
+    ? `Small group co-constructs a sentence about '${topic}' by dragging colour-coded cards into WHO · HAS · WHAT order. Staff prompt with the colour cue only.`
+    : `Guided small-group practice on '${topic}'. Staff prompt Student A, Student B and Student C in turn, fading prompts as confidence grows.`;
+  const youDo = isEnglish
+    ? `Each learner builds their own Colourful Semantics sentence about '${topic}' using pre-cut cards, then reads it to a partner.`
+    : `Learners complete an applied task on '${topic}' at their level with a visual checklist. Extension: apply to a new example.`;
+  return {
+    title: `${strand} — ${topic}`,
+    vcCode: isMaths ? "VC2M" : isEnglish ? "VC2E" : "VC2",
+    learningIntention: `We are learning to engage with ${topic.toLowerCase()} in ${strand.toLowerCase()}.`,
+    successCriteria: criteriaByLevel[level],
+    hook: isEnglish
+      ? `Sensory hook: pass around a prop from '${topic}'. Model an orange-WHO / yellow-verb / green-WHAT sentence about it.`
+      : `Short warm-up linked to '${topic}' — 3 minutes, whole class, high-engagement (song, movement or mystery bag).`,
+    iDo,
+    weDo,
+    youDo,
+    narrative: `Level ${level} · ${duration}. ${iDo} ${weDo} ${youDo}`,
+    sessions: [],
+    differentiation: {
+      support: `Reduce steps, offer a 2-choice board, use ${support}.`,
+      extension: "Increase quantity, ask for reasoning, apply in a new context.",
+    },
+    aacSupports: ["Core-word board", "Symbol schedule", ...(isEnglish ? ["Colourful Semantics cards"] : [])],
+    sensorySupports: ["Movement break", "Fidget / weighted lap-pad"],
+    resources: [
+      { name: "Teacher-made visuals", source: "In-house" },
+      { name: isEnglish ? "Colourful Semantics card set" : "Twinkl AU", source: isEnglish ? "SLT resource pack" : "Twinkl" },
+    ],
+    assessment: "Observation checklist + one work sample per learner against the 3 success criteria.",
+  };
 }

@@ -3,7 +3,11 @@
 export type BehaviourStatus = "calm" | "settled" | "alert" | "incident";
 export type AttendanceStatus = "present" | "late" | "absent" | "partial";
 
-export type DipStatus = "Funded" | "Pending Review" | "Not Funded";
+export type DipStatus =
+  | "Not NDIS Funded"
+  | "Potentially Funded (DIP Meeting Scheduled)"
+  | "NDIS Funded";
+export type CohortLevel = "B" | "C" | "D";
 
 export interface Student {
   id: string;
@@ -25,6 +29,7 @@ export interface Student {
   ndisFunded: boolean;
   dipStatus: DipStatus;
   dipMeetingDate: string | null;
+  level: CohortLevel;
 }
 
 
@@ -40,14 +45,14 @@ const palette = [
 ];
 
 const studentSeed: Omit<Student, "avatarColor" | "initials">[] = [
-  { id: "s1", firstName: "Mia", lastName: "Nguyen", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "calm", iepGoalsActive: 6, iepGoalsAchieved: 2, latestEvidence: "Counting to 20 — work sample", medicalAlerts: ["Asthma"], dob: "12 Mar 2017", aacUser: false, funding: "NDIS Tier 2", ndisFunded: true, dipStatus: "Funded", dipMeetingDate: "18 Mar 2026" },
-  { id: "s2", firstName: "Jack", lastName: "O'Brien", yearLevel: "Year 3", className: "Rosella", attendance: "late", behaviour: "alert", iepGoalsActive: 5, iepGoalsAchieved: 1, latestEvidence: "Turn-taking video", medicalAlerts: ["Epilepsy", "PRN Midazolam"], dob: "04 Sep 2017", aacUser: true, funding: "NDIS Tier 3", ndisFunded: true, dipStatus: "Funded", dipMeetingDate: "02 Apr 2026" },
-  { id: "s3", firstName: "Aaliyah", lastName: "Tahir", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "settled", iepGoalsActive: 7, iepGoalsAchieved: 3, latestEvidence: "Tracing first name", medicalAlerts: [], dob: "21 Jan 2017", aacUser: false, funding: "DSE", ndisFunded: false, dipStatus: "Pending Review", dipMeetingDate: "12 Aug 2026" },
-  { id: "s4", firstName: "Noah", lastName: "Williams", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "incident", iepGoalsActive: 8, iepGoalsAchieved: 1, latestEvidence: "Sensory regulation chart", medicalAlerts: ["ADHD meds 11:00"], dob: "08 Jun 2017", aacUser: false, funding: "NDIS Tier 3", ndisFunded: true, dipStatus: "Funded", dipMeetingDate: "22 Feb 2026" },
-  { id: "s5", firstName: "Zara", lastName: "Patel", yearLevel: "Year 3", className: "Rosella", attendance: "partial", behaviour: "calm", iepGoalsActive: 5, iepGoalsAchieved: 4, latestEvidence: "Independent play 8 mins", medicalAlerts: [], dob: "14 Nov 2017", aacUser: true, funding: "NDIS Tier 2", ndisFunded: true, dipStatus: "Pending Review", dipMeetingDate: null },
-  { id: "s6", firstName: "Liam", lastName: "Schmidt", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "settled", iepGoalsActive: 6, iepGoalsAchieved: 2, latestEvidence: "Joint attention — photo", medicalAlerts: ["Coeliac"], dob: "30 Apr 2017", aacUser: false, funding: "DSE", ndisFunded: false, dipStatus: "Not Funded", dipMeetingDate: null },
-  { id: "s7", firstName: "Charlotte", lastName: "Reid", yearLevel: "Year 3", className: "Rosella", attendance: "absent", behaviour: "calm", iepGoalsActive: 4, iepGoalsAchieved: 3, latestEvidence: "Sorting by colour", medicalAlerts: [], dob: "17 Feb 2017", aacUser: false, funding: "NDIS Tier 2", ndisFunded: true, dipStatus: "Funded", dipMeetingDate: "05 May 2026" },
-  { id: "s8", firstName: "Hamish", lastName: "Carter", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "alert", iepGoalsActive: 6, iepGoalsAchieved: 2, latestEvidence: "Requesting break with AAC", medicalAlerts: [], dob: "02 Aug 2017", aacUser: true, funding: "NDIS Tier 3", ndisFunded: true, dipStatus: "Pending Review", dipMeetingDate: "28 Jul 2026" },
+  { id: "s1", firstName: "Mia", lastName: "Nguyen", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "calm", iepGoalsActive: 6, iepGoalsAchieved: 2, latestEvidence: "Counting to 20 — work sample", medicalAlerts: ["Asthma"], dob: "12 Mar 2017", aacUser: false, funding: "NDIS Tier 2", ndisFunded: true, dipStatus: "NDIS Funded", dipMeetingDate: "18 Mar 2026", level: "C" },
+  { id: "s2", firstName: "Jack", lastName: "O'Brien", yearLevel: "Year 3", className: "Rosella", attendance: "late", behaviour: "alert", iepGoalsActive: 5, iepGoalsAchieved: 1, latestEvidence: "Turn-taking video", medicalAlerts: ["Epilepsy", "PRN Midazolam"], dob: "04 Sep 2017", aacUser: true, funding: "NDIS Tier 3", ndisFunded: true, dipStatus: "NDIS Funded", dipMeetingDate: "02 Apr 2026", level: "D" },
+  { id: "s3", firstName: "Aaliyah", lastName: "Tahir", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "settled", iepGoalsActive: 7, iepGoalsAchieved: 3, latestEvidence: "Tracing first name", medicalAlerts: [], dob: "21 Jan 2017", aacUser: false, funding: "DSE", ndisFunded: false, dipStatus: "Potentially Funded (DIP Meeting Scheduled)", dipMeetingDate: "12 Aug 2026", level: "B" },
+  { id: "s4", firstName: "Noah", lastName: "Williams", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "incident", iepGoalsActive: 8, iepGoalsAchieved: 1, latestEvidence: "Sensory regulation chart", medicalAlerts: ["ADHD meds 11:00"], dob: "08 Jun 2017", aacUser: false, funding: "NDIS Tier 3", ndisFunded: true, dipStatus: "NDIS Funded", dipMeetingDate: "22 Feb 2026", level: "C" },
+  { id: "s5", firstName: "Zara", lastName: "Patel", yearLevel: "Year 3", className: "Rosella", attendance: "partial", behaviour: "calm", iepGoalsActive: 5, iepGoalsAchieved: 4, latestEvidence: "Independent play 8 mins", medicalAlerts: [], dob: "14 Nov 2017", aacUser: true, funding: "NDIS Tier 2", ndisFunded: true, dipStatus: "Potentially Funded (DIP Meeting Scheduled)", dipMeetingDate: null, level: "C" },
+  { id: "s6", firstName: "Liam", lastName: "Schmidt", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "settled", iepGoalsActive: 6, iepGoalsAchieved: 2, latestEvidence: "Joint attention — photo", medicalAlerts: ["Coeliac"], dob: "30 Apr 2017", aacUser: false, funding: "DSE", ndisFunded: false, dipStatus: "Not NDIS Funded", dipMeetingDate: null, level: "B" },
+  { id: "s7", firstName: "Charlotte", lastName: "Reid", yearLevel: "Year 3", className: "Rosella", attendance: "absent", behaviour: "calm", iepGoalsActive: 4, iepGoalsAchieved: 3, latestEvidence: "Sorting by colour", medicalAlerts: [], dob: "17 Feb 2017", aacUser: false, funding: "NDIS Tier 2", ndisFunded: true, dipStatus: "NDIS Funded", dipMeetingDate: "05 May 2026", level: "D" },
+  { id: "s8", firstName: "Hamish", lastName: "Carter", yearLevel: "Year 3", className: "Rosella", attendance: "present", behaviour: "alert", iepGoalsActive: 6, iepGoalsAchieved: 2, latestEvidence: "Requesting break with AAC", medicalAlerts: [], dob: "02 Aug 2017", aacUser: true, funding: "NDIS Tier 3", ndisFunded: true, dipStatus: "Potentially Funded (DIP Meeting Scheduled)", dipMeetingDate: "28 Jul 2026", level: "C" },
 ];
 
 
