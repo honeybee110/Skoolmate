@@ -29,6 +29,7 @@ import {
   CURRICULUM_SUBJECTS, LEVEL_TONE, visibleSubjects, strandsForSemester,
   type CurriculumRecord, type CurriculumSubject,
 } from "@/lib/curriculum-db";
+import { getEntrySkillsForGoal } from "@/lib/entry-skills";
 import {
   useCurriculumStore, updateCell as storeUpdateCell, pickGoal as storePickGoal,
   cellKey, findRecordIn, recordsForIn, deriveFromChecks, CROSS_CHECK_LABELS,
