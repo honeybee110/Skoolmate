@@ -597,22 +597,35 @@ function CellEditor({
               <Label>Entry Skills · Level {es.level}</Label>
               <Badge variant="outline" className="text-[10px]">{es.topic}</Badge>
             </div>
-            <ol className="mt-2 space-y-1.5">
+            <p className="mt-1 text-[10px] text-muted-foreground">Source: {es.source}</p>
+            <ol className="mt-2 space-y-2">
               {es.skills.map((sk, i) => (
                 <li key={i} className="flex gap-2 text-xs leading-snug">
                   <span className="mt-[1px] flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[9px] font-bold text-primary">{i + 1}</span>
-                  <span>{sk}</span>
+                  <div>
+                    <span>{sk.text}</span>
+                    <div className="mt-0.5 text-[10px] text-muted-foreground">
+                      <span className="font-medium">{sk.source}</span>
+                      <span className="mx-1">·</span>
+                      <span className="break-words">{sk.path}</span>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ol>
             <button
               type="button"
               className="mt-2 text-[10px] font-semibold text-primary underline underline-offset-2"
-              onClick={() => onUpdate(cellKey, { entrySkillsOverride: es.skills.map((sk, i) => `${i + 1}. ${sk}`).join("\n") })}
+              onClick={() => onUpdate(cellKey, {
+                entrySkillsOverride: es.skills
+                  .map((sk, i) => `${i + 1}. ${sk.text}\n   [${sk.source} — ${sk.path}]`)
+                  .join("\n"),
+              })}
             >
               Copy into Entry Skills notes
             </button>
           </div>
+
         );
       })()}
 
