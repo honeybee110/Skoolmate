@@ -586,6 +586,35 @@ function CellEditor({
         </div>
       </div>
 
+      {/* Entry skills for the selected goal at the chosen level (Entry Skills 2025) */}
+      {rec && (() => {
+        const es = getEntrySkillsForGoal(subject, strand, level, rec.goal);
+        if (!es) return null;
+        return (
+          <div className="rounded-lg border border-primary/25 bg-primary/5 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <Label>Entry Skills · Level {es.level}</Label>
+              <Badge variant="outline" className="text-[10px]">{es.topic}</Badge>
+            </div>
+            <ol className="mt-2 space-y-1.5">
+              {es.skills.map((sk, i) => (
+                <li key={i} className="flex gap-2 text-xs leading-snug">
+                  <span className="mt-[1px] flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[9px] font-bold text-primary">{i + 1}</span>
+                  <span>{sk}</span>
+                </li>
+              ))}
+            </ol>
+            <button
+              type="button"
+              className="mt-2 text-[10px] font-semibold text-primary underline underline-offset-2"
+              onClick={() => onUpdate(cellKey, { entrySkillsOverride: es.skills.map((sk, i) => `${i + 1}. ${sk}`).join("\n") })}
+            >
+              Copy into Entry Skills notes
+            </button>
+          </div>
+        );
+      })()}
+
       {/* Auto-filled entry skills */}
       <div>
         <div className="flex items-center justify-between">
@@ -600,6 +629,7 @@ function CellEditor({
           placeholder="Select a Goal to auto-fill Entry Skills from the curriculum."
         />
       </div>
+
 
       {rec && (
         <div className="grid gap-2 md:grid-cols-2">
