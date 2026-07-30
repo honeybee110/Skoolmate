@@ -248,3 +248,75 @@ export function getEntrySkillsForStudent(
   });
   return groups;
 }
+
+// -------- Goal-level Entry Skills (from the Entry Skills 2025 documents) --------
+
+import { entrySkillRecords, type EntryLevel, type EntrySkillRecord } from "./entry-skills-data";
+
+/** Maps an IEP planner subject + strand onto the Entry Skills document taxonomy. */
+function mapToEntryTaxonomy(subject: string, strand: string): { area: EntrySkillRecord["area"]; strand: string } | null {
+  const s = strand.toLowerCase();
+  if (subject === "English") {
+    if (s.startsWith("reading")) return { area: "English", strand: "Reading & Viewing" };
+    if (s.startsWith("speaking")) return { area: "English", strand: "Speaking & Listening" };
+    if (s.startsWith("writing")) return { area: "English", strand: "Writing" };
+    return null;
+  }
+  if (subject === "Mathematics") {
+    if (s.startsWith("number") || s.startsWith("algebra")) return { area: "Maths", strand: "Number" };
+    if (s.startsWith("measurement") || s.startsWith("space")) return { area: "Maths", strand: "Measurement" };
+    if (s.startsWith("statistic")) return { area: "Maths", strand: "Statistics" };
+    return null;
+  }
+  if (subject.startsWith("Personal")) {
+    if (s.startsWith("self")) return { area: "Personal & Social", strand: "Self-Awareness & Management" };
+    return { area: "Personal & Social", strand: "Social Awareness & Management" };
+  }
+  return null;
+}
+
+const STOP = new Set(["and","the","a","an","of","to","with","in","for","on","using","their","own","or"]);
+function overlap(a: string, b: string): number {
+  const wa = new Set(a.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2 && !STOP.has(w)));
+  const wb = b.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2 && !STOP.has(w));
+  return wb.reduce((n, w) => n + (wa.has(w) ? 1 : 0), 0);
+}
+
+export interface GoalEntrySkills {
+  topic: string;
+  level: EntryLevel;
+  skills: string[];
+}
+
+/**
+ * Three entry skills for a selected IEP goal, at the chosen level, drawn from
+ * the school's Entry Skills 2025 documents. Returns null when the subject or
+ * strand is outside the documented taxonomy.
+ */
+export function getEntrySkillsForGoal(
+  subject: string,
+  strand: string,
+  level: string | undefined,
+  goalText = "",
+): GoalEntrySkills | null {
+  if (!level) return null;
+  const map = mapToEntryTaxonomy(subject, strand);
+  if (!map) return null;
+  const atLevel = entrySkillRecords.filter(
+    (r) => r.area === map.area && r.strand === map.strand && r.level === (level as EntryLevel),
+  );
+  if (!atLevel.length) return null;
+
+  const ranked = [...atLevel].sort(
+    (a, b) => overlap(goalText, b.topic) - overlap(goalText, a.topic),
+  );
+  const best = ranked[0];
+  const skills = [...best.skills];
+  for (const r of ranked.slice(1)) {
+    for (const sk of r.skills) {
+      if (skills.length >= 3) break;
+      if (!skills.includes(sk)) skills.push(sk);
+    }
+  }
+  return { topic: best.topic, level: level as EntryLevel, skills: skills.slice(0, 3) };
+}
