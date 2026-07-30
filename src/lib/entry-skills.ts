@@ -251,7 +251,7 @@ export function getEntrySkillsForStudent(
 
 // -------- Goal-level Entry Skills (from the Entry Skills 2025 documents) --------
 
-import { entrySkillRecords, type EntryLevel, type EntrySkillRecord } from "./entry-skills-data";
+import { entrySkillRecords, ENTRY_SKILL_SOURCES, type EntryLevel, type EntrySkillRecord } from "./entry-skills-data";
 
 /** Maps an IEP planner subject + strand onto the Entry Skills document taxonomy. */
 function mapToEntryTaxonomy(subject: string, strand: string): { area: EntrySkillRecord["area"]; strand: string } | null {
