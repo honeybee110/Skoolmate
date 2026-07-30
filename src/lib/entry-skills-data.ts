@@ -261,3 +261,15 @@ export const entrySkillRecords: EntrySkillRecord[] = [
   { area: "English", strand: "Writing", topic: "Use of Software", level: "F", skills: ["Can type simple sentences using a keyboard.", "Can add pictures to a text using software.", "Can use different features of a word processing program."] },
   { area: "English", strand: "Writing", topic: "Use of Software", level: "1", skills: ["Can type simple sentences using a keyboard.", "Can add pictures to a text using software.", "Can use different features of a word processing program."] },
 ];
+
+/** Source document each strand was imported from (Entry Skills 2025 upload set). */
+export const ENTRY_SKILL_SOURCES: Record<string, string> = {
+  "Reading & Viewing": "Reading and Viewing - Entry Skills 2025.docx",
+  "Speaking & Listening": "Speaking and Listening - Entry Skills 2025.docx",
+  "Writing": "Writing - Entry Skills 2025.docx",
+  "Number": "Number and Algebra - Entry Skills 2025.docx",
+  "Measurement": "Measurement and Geometry - Entry Skills 2025.docx",
+  "Statistics": "Statistics and Probability - Entry Skills 2025.docx",
+  "Self-Awareness & Management": "Personal and Social Capabilities (Self) - Entry Skills 2025.docx",
+  "Social Awareness & Management": "Personal and Social Capabilities (Social) - Entry Skills 2025.docx",
+};
