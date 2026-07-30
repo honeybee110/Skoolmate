@@ -4,8 +4,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* skoolmate — Brand palette (sampled from Figma product tour):
-   Navy #0B1A2F · Indigo #5B6CFF · Cyan #22D3C5 · White #FFFFFF */
+/* skoolmate — Brand palette:
+   Orange #F26A21 · White #FFFFFF · Blue #1D5FD0 · Deep Blue ink #0E2A4D */
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
