@@ -251,7 +251,7 @@ export function getEntrySkillsForStudent(
 
 // -------- Goal-level Entry Skills (from the Entry Skills 2025 documents) --------
 
-import { entrySkillRecords, type EntryLevel, type EntrySkillRecord } from "./entry-skills-data";
+import { entrySkillRecords, ENTRY_SKILL_SOURCES, type EntryLevel, type EntrySkillRecord } from "./entry-skills-data";
 
 /** Maps an IEP planner subject + strand onto the Entry Skills document taxonomy. */
 function mapToEntryTaxonomy(subject: string, strand: string): { area: EntrySkillRecord["area"]; strand: string } | null {
@@ -282,10 +282,20 @@ function overlap(a: string, b: string): number {
   return wb.reduce((n, w) => n + (wa.has(w) ? 1 : 0), 0);
 }
 
+export interface GoalEntrySkillItem {
+  /** The success-criterion text. */
+  text: string;
+  /** File the criterion was imported from. */
+  source: string;
+  /** Hierarchy path within that document, e.g. "Maths › Measurement › Length › Level B › Skill 2". */
+  path: string;
+}
+
 export interface GoalEntrySkills {
   topic: string;
   level: EntryLevel;
-  skills: string[];
+  source: string;
+  skills: GoalEntrySkillItem[];
 }
 
 /**
@@ -310,13 +320,21 @@ export function getEntrySkillsForGoal(
   const ranked = [...atLevel].sort(
     (a, b) => overlap(goalText, b.topic) - overlap(goalText, a.topic),
   );
-  const best = ranked[0];
-  const skills = [...best.skills];
-  for (const r of ranked.slice(1)) {
-    for (const sk of r.skills) {
-      if (skills.length >= 3) break;
-      if (!skills.includes(sk)) skills.push(sk);
-    }
+  const source = ENTRY_SKILL_SOURCES[map.strand] ?? "Entry Skills 2025";
+  const items: GoalEntrySkillItem[] = [];
+  const seen = new Set<string>();
+  for (const r of ranked) {
+    r.skills.forEach((sk, i) => {
+      if (items.length >= 3 || seen.has(sk)) return;
+      seen.add(sk);
+      items.push({
+        text: sk,
+        source: ENTRY_SKILL_SOURCES[r.strand] ?? source,
+        path: `${r.area} › ${r.strand} › ${r.topic} › Level ${r.level} › Skill ${i + 1}`,
+      });
+    });
+    if (items.length >= 3) break;
   }
-  return { topic: best.topic, level: level as EntryLevel, skills: skills.slice(0, 3) };
+  return { topic: ranked[0].topic, level: level as EntryLevel, source, skills: items };
 }
+
