@@ -57,9 +57,9 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-display: "Fraunces", "Cormorant Garamond", Georgia, serif;
-  --font-sans: "Public Sans", system-ui, -apple-system, sans-serif;
-  --font-brand: "Fraunces", "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-display: "Jost", "Century Gothic", "Questrial", system-ui, sans-serif;
+  --font-sans: "Jost", "Century Gothic", "Questrial", system-ui, -apple-system, sans-serif;
+  --font-brand: "Questrial", "Jost", "Century Gothic", system-ui, sans-serif;
 
   --shadow-card: 0 1px 2px 0 oklch(0 0 0 / 0.03), 0 1px 3px 0 oklch(0 0 0 / 0.05);
   --shadow-card-hover: 0 4px 12px -2px oklch(0 0 0 / 0.08), 0 2px 4px 0 oklch(0 0 0 / 0.04);
