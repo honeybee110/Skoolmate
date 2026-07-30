@@ -83,64 +83,65 @@
 
   /* Background: White */
   --background: oklch(1 0 0);
-  /* Foreground: Navy #0B1A2F */
-  --foreground: oklch(0.22 0.045 258);
+  /* Foreground: Deep blue ink #0E2A4D */
+  --foreground: oklch(0.29 0.075 250);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.045 258);
+  --card-foreground: oklch(0.29 0.075 250);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.045 258);
+  --popover-foreground: oklch(0.29 0.075 250);
 
-  /* Primary: Indigo #5B6CFF */
-  --primary: oklch(0.62 0.19 275);
-  --primary-foreground: oklch(0.99 0 0);
-  /* Soft lavender surface */
-  --primary-soft: oklch(0.965 0.02 275);
+  /* Primary: Orange #F26A21 */
+  --primary: oklch(0.68 0.18 46);
+  --primary-foreground: oklch(1 0 0);
+  /* Soft warm surface */
+  --primary-soft: oklch(0.965 0.028 60);
 
-  --secondary: oklch(0.97 0.01 258);
-  --secondary-foreground: oklch(0.28 0.04 258);
+  --secondary: oklch(0.97 0.012 250);
+  --secondary-foreground: oklch(0.32 0.06 250);
 
-  --muted: oklch(0.965 0.008 258);
-  --muted-foreground: oklch(0.5 0.02 258);
+  --muted: oklch(0.965 0.01 250);
+  --muted-foreground: oklch(0.52 0.03 250);
 
-  /* Accent: Cyan #22D3C5 */
-  --accent: oklch(0.78 0.13 190);
-  --accent-foreground: oklch(0.2 0.04 200);
-  --accent-soft: oklch(0.955 0.035 190);
+  /* Accent: Blue #1D5FD0 */
+  --accent: oklch(0.53 0.17 260);
+  --accent-foreground: oklch(0.99 0 0);
+  --accent-soft: oklch(0.955 0.03 260);
 
-  --destructive: oklch(0.6 0.2 25);
+  --destructive: oklch(0.58 0.21 27);
   --destructive-foreground: oklch(0.99 0 0);
 
   --success: oklch(0.72 0.14 165);
   --success-foreground: oklch(0.2 0.05 165);
 
-  --warning: oklch(0.78 0.14 75);
-  --warning-foreground: oklch(0.22 0.05 60);
+  --warning: oklch(0.8 0.15 80);
+  --warning-foreground: oklch(0.24 0.06 60);
 
-  --border: oklch(0.92 0.008 258);
-  --input: oklch(0.94 0.008 258);
-  --ring: oklch(0.62 0.19 275);
+  --border: oklch(0.92 0.012 250);
+  --input: oklch(0.94 0.012 250);
+  --ring: oklch(0.68 0.18 46);
 
-  --chart-1: oklch(0.62 0.19 275);  /* indigo */
-  --chart-2: oklch(0.78 0.13 190);  /* cyan */
-  --chart-3: oklch(0.65 0.2 305);   /* violet */
-  --chart-4: oklch(0.22 0.045 258); /* navy */
-  --chart-5: oklch(0.75 0.15 60);   /* amber */
+  --chart-1: oklch(0.68 0.18 46);   /* orange */
+  --chart-2: oklch(0.53 0.17 260);  /* blue */
+  --chart-3: oklch(0.78 0.15 65);   /* amber */
+  --chart-4: oklch(0.29 0.075 250); /* deep blue */
+  --chart-5: oklch(0.66 0.12 225);  /* sky */
 
-  /* Deep navy — dark sections / sidebar */
-  --navy: oklch(0.22 0.045 258);
-  --navy-light: oklch(0.32 0.055 258);
-  --navy-soft: oklch(0.94 0.015 258);
+  /* Deep blue — dark sections / sidebar */
+  --navy: oklch(0.29 0.075 250);
+  --navy-light: oklch(0.38 0.09 252);
+  --navy-soft: oklch(0.94 0.02 250);
 
-  --sidebar: oklch(0.22 0.045 258);
-  --sidebar-foreground: oklch(0.97 0.005 258);
-  --sidebar-primary: oklch(0.62 0.19 275);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.3 0.05 258);
-  --sidebar-accent-foreground: oklch(0.97 0.005 258);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.62 0.19 275);
+  --sidebar: oklch(0.29 0.075 250);
+  --sidebar-foreground: oklch(0.97 0.006 250);
+  --sidebar-primary: oklch(0.68 0.18 46);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.36 0.085 252);
+  --sidebar-accent-foreground: oklch(0.97 0.006 250);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.68 0.18 46);
+
 
   /* SchoolMate subject palette — solid hues (pair with /10 or /15 opacity for soft surfaces) */
   --subj-startofday: oklch(0.85 0.14 92);   /* Soft Yellow */
