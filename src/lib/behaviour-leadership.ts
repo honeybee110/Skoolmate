@@ -296,20 +296,93 @@ export const defaultFilters: LeadershipFilters = {
   to: "",
 };
 
+/* ------------------------------------------------------------ Fast indexes */
+
+/**
+ * Large schools produce tens of thousands of incident rows. Every derivation
+ * below reads from prebuilt indexes (built once, in a single pass) plus small
+ * memo caches, so filtering and drill-down cost O(matching rows) rather than
+ * O(classes x incidents) on every render.
+ */
+const byClassGlobal = new Map<string, LeadershipIncident[]>();
+for (const inc of leadershipIncidents) {
+  const list = byClassGlobal.get(inc.classId);
+  if (list) list.push(inc);
+  else byClassGlobal.set(inc.classId, [inc]);
+}
+
+const filterCache = new Map<string, LeadershipIncident[]>();
+const classGroupCache = new WeakMap<LeadershipIncident[], Map<string, LeadershipIncident[]>>();
+
+/** Group incidents by class once and reuse the grouping for the same array. */
+export function groupIncidentsByClass(
+  incidents: LeadershipIncident[],
+): Map<string, LeadershipIncident[]> {
+  if (incidents === leadershipIncidents) return byClassGlobal;
+  const cached = classGroupCache.get(incidents);
+  if (cached) return cached;
+  const map = new Map<string, LeadershipIncident[]>();
+  for (const inc of incidents) {
+    const list = map.get(inc.classId);
+    if (list) list.push(inc);
+    else map.set(inc.classId, [inc]);
+  }
+  classGroupCache.set(incidents, map);
+  return map;
+}
+
 export function applyFilters(
   incidents: LeadershipIncident[],
   f: LeadershipFilters,
 ): LeadershipIncident[] {
-  return incidents.filter((i) => {
-    if (f.campus !== "all" && i.campus !== f.campus) return false;
-    if (f.yearLevel !== "all" && i.yearLevel !== f.yearLevel) return false;
-    if (f.classId !== "all" && i.classId !== f.classId) return false;
-    if (f.term !== "all" && i.term !== f.term) return false;
-    if (f.from && i.date < f.from) return false;
-    if (f.to && i.date > f.to) return false;
-    return true;
-  });
+  const cacheable = incidents === leadershipIncidents;
+  const key = `${f.campus}|${f.yearLevel}|${f.classId}|${f.term}|${f.from}|${f.to}`;
+  if (cacheable) {
+    const hit = filterCache.get(key);
+    if (hit) return hit;
+  }
+
+  const scoped = schoolClasses.filter(
+    (c) =>
+      (f.campus === "all" || c.campus === f.campus) &&
+      (f.yearLevel === "all" || c.yearLevel === f.yearLevel) &&
+      (f.classId === "all" || c.id === f.classId),
+  );
+
+  let base: LeadershipIncident[];
+  let classesApplied = false;
+  if (cacheable && scoped.length < schoolClasses.length) {
+    // Pull only the class buckets in scope instead of scanning every row.
+    base = [];
+    for (const c of scoped) {
+      const list = byClassGlobal.get(c.id);
+      if (list) for (const inc of list) base.push(inc);
+    }
+    base.sort((a, b) => a.date.localeCompare(b.date));
+    classesApplied = true;
+  } else {
+    base = incidents;
+  }
+
+  const scopedIds = classesApplied ? null : new Set(scoped.map((c) => c.id));
+  const needsScan = !classesApplied || f.term !== "all" || !!f.from || !!f.to;
+  const out = needsScan
+    ? base.filter((i) => {
+        if (scopedIds && !scopedIds.has(i.classId)) return false;
+        if (f.term !== "all" && i.term !== f.term) return false;
+        if (f.from && i.date < f.from) return false;
+        if (f.to && i.date > f.to) return false;
+        return true;
+      })
+    : base;
+
+  if (cacheable) {
+    if (filterCache.size > 64) filterCache.clear();
+    filterCache.set(key, out);
+  }
+  return out;
 }
+
 
 export const yearLevels = [...new Set(schoolClasses.map((c) => c.yearLevel))];
 
@@ -364,26 +437,52 @@ export function executiveKpis(incidents: LeadershipIncident[]): ExecutiveKpis {
   };
 }
 
+const studentGroupCache = new WeakMap<LeadershipIncident[], Map<string, LeadershipIncident[]>>();
+
 function groupByStudent(incidents: LeadershipIncident[]) {
+  const cached = studentGroupCache.get(incidents);
+  if (cached) return cached;
   const map = new Map<string, LeadershipIncident[]>();
-  for (const i of incidents) map.set(i.studentId, [...(map.get(i.studentId) ?? []), i]);
+  for (const i of incidents) {
+    const list = map.get(i.studentId);
+    if (list) list.push(i);
+    else map.set(i.studentId, [i]);
+  }
+  studentGroupCache.set(incidents, map);
   return map;
 }
 
-export function weeklyVolume(incidents: LeadershipIncident[]) {
+export interface WeeklyPoint {
+  label: string;
+  incidents: number;
+  minutesLost: number;
+  deEscalated: number;
+}
+
+const weeklyCache = new WeakMap<LeadershipIncident[], WeeklyPoint[]>();
+
+export function weeklyVolume(incidents: LeadershipIncident[]): WeeklyPoint[] {
+  const cached = weeklyCache.get(incidents);
+  if (cached) return cached;
   const map = new Map<string, { incidents: number; minutesLost: number; deEscalated: number }>();
   for (const i of incidents) {
     const key = `${i.term.replace("Term ", "T")} W${i.week.toString().padStart(2, "0")}`;
-    const row = map.get(key) ?? { incidents: 0, minutesLost: 0, deEscalated: 0 };
+    let row = map.get(key);
+    if (!row) {
+      row = { incidents: 0, minutesLost: 0, deEscalated: 0 };
+      map.set(key, row);
+    }
     row.incidents++;
     row.minutesLost += i.minutesLost;
     if (i.deEscalated) row.deEscalated++;
-    map.set(key, row);
   }
-  return [...map.entries()]
+  const out = [...map.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([label, r]) => ({ label, ...r }));
+  weeklyCache.set(incidents, out);
+  return out;
 }
+
 
 /* ----------------------------------------------------------- Class heat map */
 
@@ -422,14 +521,33 @@ export const defaultCapacityWeights: CapacityWeights = {
   interventionSuccess: 20,
 };
 
+const heatCache = new WeakMap<LeadershipIncident[], Map<string, ClassHeatCell[]>>();
+
 export function classHeatCells(
   incidents: LeadershipIncident[],
   weights: CapacityWeights = defaultCapacityWeights,
 ): ClassHeatCell[] {
+  const weightKey = `${weights.frequency}|${weights.severity}|${weights.trend}|${weights.interventionSuccess}`;
+  let perArray = heatCache.get(incidents);
+  if (perArray) {
+    const hit = perArray.get(weightKey);
+    if (hit) return hit;
+  } else {
+    perArray = new Map();
+    heatCache.set(incidents, perArray);
+  }
+
+  const grouped = groupIncidentsByClass(incidents);
   const cells = schoolClasses.map((cls) => {
-    const list = incidents.filter((i) => i.classId === cls.id);
-    const highIntensity = list.filter((i) => i.intensity === 3).length;
-    const deEsc = list.filter((i) => i.deEscalated).length;
+    const list = grouped.get(cls.id) ?? [];
+    let highIntensity = 0;
+    let deEsc = 0;
+    let minutesLost = 0;
+    for (const i of list) {
+      if (i.intensity === 3) highIntensity++;
+      if (i.deEscalated) deEsc++;
+      minutesLost += i.minutesLost;
+    }
     const trend = weeklyVolume(list);
     const last = trend[trend.length - 1]?.incidents ?? 0;
     const prev = trend[trend.length - 2]?.incidents ?? last;
@@ -444,7 +562,7 @@ export function classHeatCells(
       density: Number((list.length / cls.studentCount).toFixed(2)),
       highIntensity,
       deEscalationRate: Math.round((deEsc / (list.length || 1)) * 100),
-      minutesLost: list.reduce((s, i) => s + i.minutesLost, 0),
+      minutesLost,
       trendPct: prev === 0 ? 0 : Math.round(((last - prev) / prev) * 100),
       _severity: list.length ? highIntensity / list.length : 0,
     };
@@ -453,7 +571,7 @@ export function classHeatCells(
   const maxDensity = Math.max(1, ...cells.map((c) => c.density));
   const total = weights.frequency + weights.severity + weights.trend + weights.interventionSuccess || 1;
 
-  return cells.map((c) => {
+  const out = cells.map((c) => {
     const frequencyScore = (c.density / maxDensity) * weights.frequency;
     const severityScore = c._severity * weights.severity;
     const trendScore = (Math.max(-50, Math.min(50, c.trendPct)) + 50) / 100 * weights.trend;
@@ -468,7 +586,11 @@ export function classHeatCells(
       risk: (capacityIndex >= 65 ? "High" : capacityIndex >= 50 ? "Elevated" : capacityIndex >= 32 ? "Moderate" : "Low") as ClassHeatCell["risk"],
     };
   });
+
+  perArray.set(weightKey, out);
+  return out;
 }
+
 
 /* -------------------------------------------------- Class intelligence page */
 
