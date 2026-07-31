@@ -122,7 +122,16 @@ function AlertsAdminPage() {
   });
 
   const addSub = useMutation({
-    mutationFn: (v: Parameters<typeof upsertSubFn>[0]["data"]) => upsertSubFn({ data: v }),
+    mutationFn: (v: {
+      display_name?: string;
+      email?: string;
+      campus: string;
+      leadership_role: string;
+      min_severity: "critical" | "warning" | "info";
+      channels: ("in_app" | "email")[];
+      rules: AlertRuleKey[];
+      active: boolean;
+    }) => upsertSubFn({ data: v }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["alert-subs"] });
       toast.success("Subscription saved.");
