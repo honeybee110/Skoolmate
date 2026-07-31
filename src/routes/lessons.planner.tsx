@@ -151,12 +151,16 @@ function LessonPlannerPage() {
     setDraft({
       id: l.id,
       title: l.title,
+      learningArea: (LEARNING_AREAS as readonly string[]).includes(l.subject)
+        ? (l.subject as LearningArea)
+        : inferLearningArea(l.subject),
       subject: l.subject,
       strand: l.strand,
       topic: l.topic,
       duration: l.duration,
       abilityRange: l.abilityRange,
       level: "C",
+      levels: ["B", "C", "D"],
       term: l.term,
       week: l.week,
       vcCode: l.vcCode,
@@ -164,6 +168,7 @@ function LessonPlannerPage() {
     });
     setDirty(false);
   };
+
 
   const startNew = () => {
     setSelectedId(null);
