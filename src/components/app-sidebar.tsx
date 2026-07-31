@@ -11,7 +11,6 @@ import {
   FileText,
   Library,
   Calendar,
-  
   Settings,
   ShieldCheck,
   ClipboardCheck,
@@ -132,7 +131,6 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
   const activeClasses =
     "data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:border-l-2 data-[active=true]:border-[color:var(--accent)] data-[active=true]:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] text-white/75 hover:bg-white/5 hover:text-white";
 
-
   const primaryRole = roles[0];
   const initials = (profile?.display_name || user?.email || "SM")
     .split(/[\s@.]/)
@@ -143,9 +141,7 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
 
   const renderGroup = (label: string, items: NavItem[]) => (
     <SidebarGroup key={label}>
-      <SidebarGroupLabel
-        className="text-[10px] uppercase tracking-[0.14em] font-semibold text-white/45"
-      >
+      <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.14em] font-semibold text-white/45">
         {label}
       </SidebarGroupLabel>
 
@@ -153,11 +149,7 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.url}>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive(item.url)}
-                className={activeClasses}
-              >
+              <SidebarMenuButton asChild isActive={isActive(item.url)} className={activeClasses}>
                 <Link to={item.url} className="flex items-center gap-3">
                   <item.icon className="h-4 w-4" />
                   <span>{item.title}</span>
@@ -177,7 +169,11 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
     >
       <SidebarHeader className="border-b border-white/10 bg-gradient-to-br from-[color:var(--navy-light)] via-[color:var(--navy)] to-[color:var(--navy)] text-white">
         <Link to={homeUrl} className="flex items-center gap-2.5 px-2 py-2">
-          <BrandMark size="sm" tagline={isAdmin ? "Admin Portal" : "Teacher Portal"} textClassName="text-white" />
+          <BrandMark
+            size="sm"
+            tagline={isAdmin ? "Admin Portal" : "Teacher Portal"}
+            textClassName="text-white"
+          />
         </Link>
         {isAdmin && (
           <div className="mx-2 mb-2 flex items-center gap-1.5 rounded-md bg-gradient-to-r from-[color:var(--primary)]/30 to-[color:var(--accent)]/20 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-white ring-1 ring-white/10">
@@ -201,7 +197,10 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
           </SidebarMenuItem>
           {user && (
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => signOut()} className="flex items-center gap-3 text-white/75 hover:bg-white/5 hover:text-white">
+              <SidebarMenuButton
+                onClick={() => signOut()}
+                className="flex items-center gap-3 text-white/75 hover:bg-white/5 hover:text-white"
+              >
                 <LogOut className="h-4 w-4" />
                 <span>Sign out</span>
               </SidebarMenuButton>
@@ -230,4 +229,3 @@ export function AppSidebar({ variant = "teacher" }: { variant?: "teacher" | "adm
     </Sidebar>
   );
 }
-

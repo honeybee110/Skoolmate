@@ -16,7 +16,13 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/components/ai-elements/tool";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@/components/ai-elements/tool";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -175,12 +181,8 @@ export function AskChat({
             </Message>
           ))}
 
-          {status === "submitted" && (
-            <Shimmer className="text-sm">Reading your workspace…</Shimmer>
-          )}
-          {error && (
-            <p className="text-sm text-destructive">{error.message}</p>
-          )}
+          {status === "submitted" && <Shimmer className="text-sm">Reading your workspace…</Shimmer>}
+          {error && <p className="text-sm text-destructive">{error.message}</p>}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>

@@ -68,23 +68,28 @@ export const deleteAskThread = createServerFn({ method: "POST" })
 export const getAskThread = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
-  .handler(async ({ data, context }): Promise<{ thread: AskThread | null; messages: AskStoredMessage[] }> => {
-    const { data: thread } = await context.supabase
-      .from("ask_threads")
-      .select("id, title, created_at, updated_at")
-      .eq("id", data.id)
-      .maybeSingle();
-    if (!thread) return { thread: null, messages: [] };
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ thread: AskThread | null; messages: AskStoredMessage[] }> => {
+      const { data: thread } = await context.supabase
+        .from("ask_threads")
+        .select("id, title, created_at, updated_at")
+        .eq("id", data.id)
+        .maybeSingle();
+      if (!thread) return { thread: null, messages: [] };
 
-    const { data: rows, error } = await context.supabase
-      .from("ask_messages")
-      .select("id, role, parts, created_at")
-      .eq("thread_id", data.id)
-      .order("created_at", { ascending: true });
-    if (error) throw new Error(error.message);
+      const { data: rows, error } = await context.supabase
+        .from("ask_messages")
+        .select("id, role, parts, created_at")
+        .eq("thread_id", data.id)
+        .order("created_at", { ascending: true });
+      if (error) throw new Error(error.message);
 
-    return {
-      thread: thread as AskThread,
-      messages: (rows ?? []) as unknown as AskStoredMessage[],
-    };
-  });
+      return {
+        thread: thread as AskThread,
+        messages: (rows ?? []) as unknown as AskStoredMessage[],
+      };
+    },
+  );
