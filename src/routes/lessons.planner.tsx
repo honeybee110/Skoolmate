@@ -242,8 +242,6 @@ function LessonPlannerPage() {
         iDo: out.flow.iDo,
         weDo: out.flow.weDo,
         youDo: out.flow.youDo,
-        coolDown: out.flow.coolDown,
-        assessment: out.flow.assessment,
         reflection: out.flow.reflection,
         differentiation: out.differentiation.map((d) => `Level ${d.level}: ${d.activity}`).join("\n\n"),
       });
@@ -659,20 +657,6 @@ function LessonPlannerPage() {
                   rows={5}
                 />
                 <NotesField
-                  label="COOL DOWN / REVIEW"
-                  value={draft.notes.coolDown ?? ""}
-                  onChange={(v) => patchNotes({ coolDown: v })}
-                  placeholder="Revisit the learning intention, regulate and transition…"
-                  rows={4}
-                />
-                <NotesField
-                  label="ASSESSMENT"
-                  value={draft.notes.assessment ?? ""}
-                  onChange={(v) => patchNotes({ assessment: v })}
-                  placeholder="Evidence collected, prompt level recorded, where it is filed…"
-                  rows={4}
-                />
-                <NotesField
                   label="REFLECTION"
                   value={draft.notes.reflection ?? ""}
                   onChange={(v) => patchNotes({ reflection: v })}
@@ -826,8 +810,6 @@ function buildMarkdown(d: Draft): string {
     `### I DO`, d.notes.iDo, ``,
     `### WE DO`, d.notes.weDo, ``,
     `### YOU DO`, d.notes.youDo, ``,
-    `### COOL DOWN / REVIEW`, d.notes.coolDown ?? "", ``,
-    `### ASSESSMENT`, d.notes.assessment ?? "", ``,
     `### REFLECTION`, d.notes.reflection ?? "", ``,
     `## Differentiation`, d.notes.differentiation ?? "", ``,
   ].filter(Boolean).join("\n");
