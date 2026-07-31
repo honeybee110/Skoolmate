@@ -363,6 +363,129 @@ export type Database = {
         }
         Relationships: []
       }
+      leadership_alert_deliveries: {
+        Row: {
+          alert_key: string
+          campus: string
+          channel: string
+          created_at: string
+          dedupe_key: string | null
+          detail: string | null
+          error: string | null
+          id: string
+          recipient_email: string | null
+          recipient_user_id: string | null
+          severity: string
+          status: string
+          title: string
+        }
+        Insert: {
+          alert_key: string
+          campus?: string
+          channel: string
+          created_at?: string
+          dedupe_key?: string | null
+          detail?: string | null
+          error?: string | null
+          id?: string
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          severity: string
+          status?: string
+          title: string
+        }
+        Update: {
+          alert_key?: string
+          campus?: string
+          channel?: string
+          created_at?: string
+          dedupe_key?: string | null
+          detail?: string | null
+          error?: string | null
+          id?: string
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          severity?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      leadership_alert_settings: {
+        Row: {
+          active: boolean
+          created_at: string
+          enabled: Json
+          id: string
+          thresholds: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          enabled?: Json
+          id?: string
+          thresholds?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          enabled?: Json
+          id?: string
+          thresholds?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      leadership_alert_subscriptions: {
+        Row: {
+          active: boolean
+          campus: string
+          channels: string[]
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          leadership_role: string
+          min_severity: string
+          rules: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          campus?: string
+          channels?: string[]
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          leadership_role?: string
+          min_severity?: string
+          rules?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          campus?: string
+          channels?: string[]
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          leadership_role?: string
+          min_severity?: string
+          rules?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lesson_bank_uploads: {
         Row: {
           class_name: string | null
