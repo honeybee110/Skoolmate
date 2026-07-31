@@ -39,7 +39,6 @@ import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
 import { Route as LessonsPlannerRouteImport } from './routes/lessons.planner'
 import { Route as LessonsBankRouteImport } from './routes/lessons.bank'
-import { Route as DevcheckBehaviourRouteImport } from './routes/devcheck.behaviour'
 import { Route as AskThreadIdRouteImport } from './routes/ask.$threadId'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminYearSetupRouteImport } from './routes/admin.year-setup'
@@ -220,11 +219,6 @@ const LessonsBankRoute = LessonsBankRouteImport.update({
   id: '/bank',
   path: '/bank',
   getParentRoute: () => LessonsRoute,
-} as any)
-const DevcheckBehaviourRoute = DevcheckBehaviourRouteImport.update({
-  id: '/devcheck/behaviour',
-  path: '/devcheck/behaviour',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const AskThreadIdRoute = AskThreadIdRouteImport.update({
   id: '/$threadId',
@@ -429,7 +423,6 @@ export interface FileRoutesByFullPath {
   '/admin/year-setup': typeof AdminYearSetupRoute
   '/api/chat': typeof ApiChatRoute
   '/ask/$threadId': typeof AskThreadIdRoute
-  '/devcheck/behaviour': typeof DevcheckBehaviourRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -490,7 +483,6 @@ export interface FileRoutesByTo {
   '/admin/year-setup': typeof AdminYearSetupRoute
   '/api/chat': typeof ApiChatRoute
   '/ask/$threadId': typeof AskThreadIdRoute
-  '/devcheck/behaviour': typeof DevcheckBehaviourRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -554,7 +546,6 @@ export interface FileRoutesById {
   '/admin/year-setup': typeof AdminYearSetupRoute
   '/api/chat': typeof ApiChatRoute
   '/ask/$threadId': typeof AskThreadIdRoute
-  '/devcheck/behaviour': typeof DevcheckBehaviourRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -619,7 +610,6 @@ export interface FileRouteTypes {
     | '/admin/year-setup'
     | '/api/chat'
     | '/ask/$threadId'
-    | '/devcheck/behaviour'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -680,7 +670,6 @@ export interface FileRouteTypes {
     | '/admin/year-setup'
     | '/api/chat'
     | '/ask/$threadId'
-    | '/devcheck/behaviour'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -743,7 +732,6 @@ export interface FileRouteTypes {
     | '/admin/year-setup'
     | '/api/chat'
     | '/ask/$threadId'
-    | '/devcheck/behaviour'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -806,7 +794,6 @@ export interface RootRouteChildren {
   AdminWellbeingRoute: typeof AdminWellbeingRoute
   AdminYearSetupRoute: typeof AdminYearSetupRoute
   ApiChatRoute: typeof ApiChatRoute
-  DevcheckBehaviourRoute: typeof DevcheckBehaviourRoute
   TeacherLoginRoute: typeof TeacherLoginRoute
   TeacherSsgMinutesRoute: typeof TeacherSsgMinutesRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -1023,13 +1010,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/lessons/bank'
       preLoaderRoute: typeof LessonsBankRouteImport
       parentRoute: typeof LessonsRoute
-    }
-    '/devcheck/behaviour': {
-      id: '/devcheck/behaviour'
-      path: '/devcheck/behaviour'
-      fullPath: '/devcheck/behaviour'
-      preLoaderRoute: typeof DevcheckBehaviourRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/ask/$threadId': {
       id: '/ask/$threadId'
@@ -1344,7 +1324,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminWellbeingRoute: AdminWellbeingRoute,
   AdminYearSetupRoute: AdminYearSetupRoute,
   ApiChatRoute: ApiChatRoute,
-  DevcheckBehaviourRoute: DevcheckBehaviourRoute,
   TeacherLoginRoute: TeacherLoginRoute,
   TeacherSsgMinutesRoute: TeacherSsgMinutesRoute,
   AdminIndexRoute: AdminIndexRoute,
