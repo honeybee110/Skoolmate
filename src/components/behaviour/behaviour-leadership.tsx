@@ -106,7 +106,17 @@ export function BehaviourLeadership() {
   const kpis = useMemo(() => executiveKpis(incidents), [incidents]);
   const cells = useMemo(() => classHeatCells(incidents, weights), [incidents, weights]);
   const queue = useMemo(() => interventionQueue(incidents), [incidents]);
-  const alerts = useMemo(() => leadershipAlerts(incidents, weights), [incidents, weights]);
+  const settingsFn = useServerFn(getAlertSettings);
+  const settingsQ = useQuery({
+    queryKey: ["alert-settings"],
+    queryFn: () => settingsFn(),
+    staleTime: 60_000,
+  });
+  const alertConfig = useMemo(() => mergeConfig(settingsQ.data ?? null), [settingsQ.data]);
+  const alerts = useMemo(
+    () => leadershipAlerts(incidents, weights, { ...alertConfig, active: true }),
+    [incidents, weights, alertConfig],
+  );
   const trend = useMemo(() => weeklyVolume(incidents), [incidents]);
 
   const set = (patch: Partial<LeadershipFilters>) =>
