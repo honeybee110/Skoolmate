@@ -38,7 +38,7 @@ import {
 } from "@/lib/lesson-store";
 import { useCurriculumStore } from "@/lib/curriculum-store";
 import { CURRICULUM_SUBJECTS } from "@/lib/curriculum-db";
-import { generateLessonPlan } from "@/lib/lessons.functions";
+import { generateLessonPlan, LEARNING_AREAS, type LearningArea } from "@/lib/lessons.functions";
 import { registerWeeklyUpload } from "@/lib/lesson-uploads.functions";
 import { useAuth } from "@/lib/auth-context";
 import { useDirectory, getApprovedOrPublishedTimetable, statusLabel } from "@/lib/directory-store";
