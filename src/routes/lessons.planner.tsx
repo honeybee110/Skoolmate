@@ -691,6 +691,68 @@ function LessonPlannerPage() {
               />
             </div>
 
+            {lessonEntrySkills.length > 0 && (
+              <div className="mt-4 rounded-2xl border bg-muted/30 p-4">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Entry skills feeding this lesson
+                </div>
+                <ul className="space-y-1.5 text-xs text-muted-foreground">
+                  {lessonEntrySkills.map((s, i) => (
+                    <li key={`${s.level}-${i}`}>
+                      <span className="font-medium text-foreground">Level {s.level}</span> · {s.strand} › {s.topic} — {s.text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <NotesField
+                label="Entry skill → activity alignment"
+                value={draft.notes.entrySkillAlignment ?? ""}
+                onChange={(v) => patchNotes({ entrySkillAlignment: v })}
+                placeholder={"Level B — attends to shared book\n→ Sits with ES during HOOK…"}
+                rows={6}
+              />
+              <NotesField
+                label="Sensory supports"
+                value={draft.notes.sensorySupports ?? ""}
+                onChange={(v) => patchNotes({ sensorySupports: v })}
+                placeholder={"Wobble cushion at the table\nMovement break after I DO"}
+                rows={6}
+              />
+              <NotesField
+                label="Communication supports"
+                value={draft.notes.communicationSupports ?? ""}
+                onChange={(v) => patchNotes({ communicationSupports: v })}
+                placeholder={"Model core words: more, stop, my turn\nKey Word Sign for 'finished'"}
+                rows={5}
+              />
+              <NotesField
+                label="Visuals to prepare"
+                value={draft.notes.visuals ?? ""}
+                onChange={(v) => patchNotes({ visuals: v })}
+                placeholder={"Now/Next board\n3-step task strip with finished box"}
+                rows={5}
+              />
+              <NotesField
+                label="Assessment evidence"
+                value={draft.notes.assessmentEvidence ?? ""}
+                onChange={(v) => patchNotes({ assessmentEvidence: v })}
+                placeholder={"Prompt-level tick sheet against success criteria\nPhoto/video to Evidence hub"}
+                rows={5}
+              />
+              <NotesField
+                label="Extension activities"
+                value={draft.notes.extension ?? ""}
+                onChange={(v) => patchNotes({ extension: v })}
+                placeholder={"Generalise the skill in the kitchen\nPeer modelling with staff supervision"}
+                rows={5}
+              />
+            </div>
+
+
+
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t pt-4">
               <div className="flex flex-wrap items-center gap-2">
