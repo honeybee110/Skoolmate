@@ -530,7 +530,7 @@ export const CodeBlockLanguageSelectorTrigger = ({
       className
     )}
     {...props}
-    {...props}
+
   />
 );
 
