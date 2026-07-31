@@ -29,14 +29,18 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BehaviourRouteImport } from './routes/behaviour'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AttendanceRouteImport } from './routes/attendance'
+import { Route as AskRouteImport } from './routes/ask'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LessonsIndexRouteImport } from './routes/lessons.index'
+import { Route as AskIndexRouteImport } from './routes/ask.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TeacherSsgMinutesRouteImport } from './routes/teacher.ssg-minutes'
 import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
 import { Route as LessonsPlannerRouteImport } from './routes/lessons.planner'
 import { Route as LessonsBankRouteImport } from './routes/lessons.bank'
+import { Route as AskThreadIdRouteImport } from './routes/ask.$threadId'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminYearSetupRouteImport } from './routes/admin.year-setup'
 import { Route as AdminWellbeingRouteImport } from './routes/admin.wellbeing'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -166,6 +170,11 @@ const AttendanceRoute = AttendanceRouteImport.update({
   path: '/attendance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AskRoute = AskRouteImport.update({
+  id: '/ask',
+  path: '/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -175,6 +184,11 @@ const LessonsIndexRoute = LessonsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LessonsRoute,
+} as any)
+const AskIndexRoute = AskIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AskRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
@@ -205,6 +219,16 @@ const LessonsBankRoute = LessonsBankRouteImport.update({
   id: '/bank',
   path: '/bank',
   getParentRoute: () => LessonsRoute,
+} as any)
+const AskThreadIdRoute = AskThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => AskRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminYearSetupRoute = AdminYearSetupRouteImport.update({
   id: '/admin/year-setup',
@@ -349,6 +373,7 @@ const IepsGoalIdPrintRoute = IepsGoalIdPrintRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ask': typeof AskRouteWithChildren
   '/attendance': typeof AttendanceRoute
   '/auth': typeof AuthRoute
   '/behaviour': typeof BehaviourRoute
@@ -396,12 +421,15 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/admin/year-setup': typeof AdminYearSetupRoute
+  '/api/chat': typeof ApiChatRoute
+  '/ask/$threadId': typeof AskThreadIdRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin/': typeof AdminIndexRoute
+  '/ask/': typeof AskIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
@@ -453,18 +481,22 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/admin/year-setup': typeof AdminYearSetupRoute
+  '/api/chat': typeof ApiChatRoute
+  '/ask/$threadId': typeof AskThreadIdRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin': typeof AdminIndexRoute
+  '/ask': typeof AskIndexRoute
   '/lessons': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ask': typeof AskRouteWithChildren
   '/attendance': typeof AttendanceRoute
   '/auth': typeof AuthRoute
   '/behaviour': typeof BehaviourRoute
@@ -512,12 +544,15 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/admin/year-setup': typeof AdminYearSetupRoute
+  '/api/chat': typeof ApiChatRoute
+  '/ask/$threadId': typeof AskThreadIdRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/teacher/login': typeof TeacherLoginRoute
   '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin/': typeof AdminIndexRoute
+  '/ask/': typeof AskIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
@@ -525,6 +560,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ask'
     | '/attendance'
     | '/auth'
     | '/behaviour'
@@ -572,12 +608,15 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/wellbeing'
     | '/admin/year-setup'
+    | '/api/chat'
+    | '/ask/$threadId'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
     | '/teacher/ssg-minutes'
     | '/admin/'
+    | '/ask/'
     | '/lessons/'
     | '/ieps/$goalId/print'
   fileRoutesByTo: FileRoutesByTo
@@ -629,17 +668,21 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/wellbeing'
     | '/admin/year-setup'
+    | '/api/chat'
+    | '/ask/$threadId'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
     | '/teacher/ssg-minutes'
     | '/admin'
+    | '/ask'
     | '/lessons'
     | '/ieps/$goalId/print'
   id:
     | '__root__'
     | '/'
+    | '/ask'
     | '/attendance'
     | '/auth'
     | '/behaviour'
@@ -687,18 +730,22 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/wellbeing'
     | '/admin/year-setup'
+    | '/api/chat'
+    | '/ask/$threadId'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
     | '/teacher/login'
     | '/teacher/ssg-minutes'
     | '/admin/'
+    | '/ask/'
     | '/lessons/'
     | '/ieps/$goalId/print'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AskRoute: typeof AskRouteWithChildren
   AttendanceRoute: typeof AttendanceRoute
   AuthRoute: typeof AuthRoute
   BehaviourRoute: typeof BehaviourRoute
@@ -746,6 +793,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AdminWellbeingRoute: typeof AdminWellbeingRoute
   AdminYearSetupRoute: typeof AdminYearSetupRoute
+  ApiChatRoute: typeof ApiChatRoute
   TeacherLoginRoute: typeof TeacherLoginRoute
   TeacherSsgMinutesRoute: typeof TeacherSsgMinutesRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -893,6 +941,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AttendanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ask': {
+      id: '/ask'
+      path: '/ask'
+      fullPath: '/ask'
+      preLoaderRoute: typeof AskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -906,6 +961,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lessons/'
       preLoaderRoute: typeof LessonsIndexRouteImport
       parentRoute: typeof LessonsRoute
+    }
+    '/ask/': {
+      id: '/ask/'
+      path: '/'
+      fullPath: '/ask/'
+      preLoaderRoute: typeof AskIndexRouteImport
+      parentRoute: typeof AskRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -948,6 +1010,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/lessons/bank'
       preLoaderRoute: typeof LessonsBankRouteImport
       parentRoute: typeof LessonsRoute
+    }
+    '/ask/$threadId': {
+      id: '/ask/$threadId'
+      path: '/$threadId'
+      fullPath: '/ask/$threadId'
+      preLoaderRoute: typeof AskThreadIdRouteImport
+      parentRoute: typeof AskRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/year-setup': {
       id: '/admin/year-setup'
@@ -1148,6 +1224,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AskRouteChildren {
+  AskThreadIdRoute: typeof AskThreadIdRoute
+  AskIndexRoute: typeof AskIndexRoute
+}
+
+const AskRouteChildren: AskRouteChildren = {
+  AskThreadIdRoute: AskThreadIdRoute,
+  AskIndexRoute: AskIndexRoute,
+}
+
+const AskRouteWithChildren = AskRoute._addFileChildren(AskRouteChildren)
+
 interface IepsRouteChildren {
   IepsGoalIdPrintRoute: typeof IepsGoalIdPrintRoute
 }
@@ -1187,6 +1275,7 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AskRoute: AskRouteWithChildren,
   AttendanceRoute: AttendanceRoute,
   AuthRoute: AuthRoute,
   BehaviourRoute: BehaviourRoute,
@@ -1234,6 +1323,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AdminWellbeingRoute: AdminWellbeingRoute,
   AdminYearSetupRoute: AdminYearSetupRoute,
+  ApiChatRoute: ApiChatRoute,
   TeacherLoginRoute: TeacherLoginRoute,
   TeacherSsgMinutesRoute: TeacherSsgMinutesRoute,
   AdminIndexRoute: AdminIndexRoute,
