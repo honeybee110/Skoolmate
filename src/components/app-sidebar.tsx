@@ -28,6 +28,7 @@ import {
   UserCheck,
   Archive,
   History,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -60,6 +61,7 @@ const teacherNav = {
     { title: "Handover Documents", url: "/handover", icon: FolderKanban },
     { title: "Scope & Sequence", url: "/scope-sequence", icon: ClipboardCheck },
     { title: "Resource Bank", url: "/resources", icon: Library },
+    { title: "AI Document Search", url: "/search", icon: Sparkles },
   ] as NavItem[],
   Track: [
     { title: "Daily Attendance", url: "/attendance", icon: UserCheck },
@@ -79,6 +81,7 @@ const adminNav = {
     { title: "SSG Minutes", url: "/admin/ssg-minutes", icon: ClipboardCheck },
     { title: "Approval Centre", url: "/admin/approvals", icon: ClipboardCheck },
     { title: "Document Centre", url: "/admin/documents", icon: FolderKanban },
+    { title: "AI Document Search", url: "/search", icon: Sparkles },
     { title: "Notifications", url: "/admin/notifications", icon: Bell },
   ] as NavItem[],
   School: [
