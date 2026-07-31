@@ -889,6 +889,13 @@ function buildMarkdown(d: Draft): string {
     `### YOU DO`, d.notes.youDo, ``,
     `### REFLECTION`, d.notes.reflection ?? "", ``,
     `## Differentiation`, d.notes.differentiation ?? "", ``,
+    `## Entry skill → activity alignment`, d.notes.entrySkillAlignment ?? "", ``,
+    `## Sensory supports`, d.notes.sensorySupports ?? "", ``,
+    `## Communication supports`, d.notes.communicationSupports ?? "", ``,
+    `## Visuals to prepare`, d.notes.visuals ?? "", ``,
+    `## Assessment evidence`, d.notes.assessmentEvidence ?? "", ``,
+    `## Extension activities`, d.notes.extension ?? "", ``,
+
   ].filter(Boolean).join("\n");
 }
 
