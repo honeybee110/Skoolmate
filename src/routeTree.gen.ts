@@ -69,6 +69,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAlliedHealthRouteImport } from './routes/admin.allied-health'
 import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 import { Route as IepsGoalIdPrintRouteImport } from './routes/ieps.$goalId.print'
+import { Route as AdminBehaviourAlertsRouteImport } from './routes/admin.behaviour.alerts'
 
 const TimeclockRoute = TimeclockRouteImport.update({
   id: '/timeclock',
@@ -370,6 +371,11 @@ const IepsGoalIdPrintRoute = IepsGoalIdPrintRouteImport.update({
   path: '/$goalId/print',
   getParentRoute: () => IepsRoute,
 } as any)
+const AdminBehaviourAlertsRoute = AdminBehaviourAlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => AdminBehaviourRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -399,7 +405,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
-  '/admin/behaviour': typeof AdminBehaviourRoute
+  '/admin/behaviour': typeof AdminBehaviourRouteWithChildren
   '/admin/classes': typeof AdminClassesRoute
   '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
@@ -431,6 +437,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/ask/': typeof AskIndexRoute
   '/lessons/': typeof LessonsIndexRoute
+  '/admin/behaviour/alerts': typeof AdminBehaviourAlertsRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesByTo {
@@ -459,7 +466,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
-  '/admin/behaviour': typeof AdminBehaviourRoute
+  '/admin/behaviour': typeof AdminBehaviourRouteWithChildren
   '/admin/classes': typeof AdminClassesRoute
   '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
@@ -491,6 +498,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/ask': typeof AskIndexRoute
   '/lessons': typeof LessonsIndexRoute
+  '/admin/behaviour/alerts': typeof AdminBehaviourAlertsRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesById {
@@ -522,7 +530,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
-  '/admin/behaviour': typeof AdminBehaviourRoute
+  '/admin/behaviour': typeof AdminBehaviourRouteWithChildren
   '/admin/classes': typeof AdminClassesRoute
   '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
@@ -554,6 +562,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/ask/': typeof AskIndexRoute
   '/lessons/': typeof LessonsIndexRoute
+  '/admin/behaviour/alerts': typeof AdminBehaviourAlertsRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRouteTypes {
@@ -618,6 +627,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/ask/'
     | '/lessons/'
+    | '/admin/behaviour/alerts'
     | '/ieps/$goalId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -678,6 +688,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ask'
     | '/lessons'
+    | '/admin/behaviour/alerts'
     | '/ieps/$goalId/print'
   id:
     | '__root__'
@@ -740,6 +751,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/ask/'
     | '/lessons/'
+    | '/admin/behaviour/alerts'
     | '/ieps/$goalId/print'
   fileRoutesById: FileRoutesById
 }
@@ -771,7 +783,7 @@ export interface RootRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminAuditRoute: typeof AdminAuditRoute
-  AdminBehaviourRoute: typeof AdminBehaviourRoute
+  AdminBehaviourRoute: typeof AdminBehaviourRouteWithChildren
   AdminClassesRoute: typeof AdminClassesRoute
   AdminCrosscheckBuilderRoute: typeof AdminCrosscheckBuilderRoute
   AdminCurriculumRoute: typeof AdminCurriculumRoute
@@ -1221,6 +1233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IepsGoalIdPrintRouteImport
       parentRoute: typeof IepsRoute
     }
+    '/admin/behaviour/alerts': {
+      id: '/admin/behaviour/alerts'
+      path: '/alerts'
+      fullPath: '/admin/behaviour/alerts'
+      preLoaderRoute: typeof AdminBehaviourAlertsRouteImport
+      parentRoute: typeof AdminBehaviourRoute
+    }
   }
 }
 
@@ -1273,6 +1292,18 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
   StudentsRouteChildren,
 )
 
+interface AdminBehaviourRouteChildren {
+  AdminBehaviourAlertsRoute: typeof AdminBehaviourAlertsRoute
+}
+
+const AdminBehaviourRouteChildren: AdminBehaviourRouteChildren = {
+  AdminBehaviourAlertsRoute: AdminBehaviourAlertsRoute,
+}
+
+const AdminBehaviourRouteWithChildren = AdminBehaviourRoute._addFileChildren(
+  AdminBehaviourRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AskRoute: AskRouteWithChildren,
@@ -1301,7 +1332,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
   AdminAuditRoute: AdminAuditRoute,
-  AdminBehaviourRoute: AdminBehaviourRoute,
+  AdminBehaviourRoute: AdminBehaviourRouteWithChildren,
   AdminClassesRoute: AdminClassesRoute,
   AdminCrosscheckBuilderRoute: AdminCrosscheckBuilderRoute,
   AdminCurriculumRoute: AdminCurriculumRoute,

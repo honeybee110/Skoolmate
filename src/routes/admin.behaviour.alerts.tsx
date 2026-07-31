@@ -28,7 +28,7 @@ import {
   getAlertSettings, saveAlertSettings, listAlertSubscriptions, upsertAlertSubscription,
   deleteAlertSubscription, previewAlertRules, dispatchLeadershipAlerts, listAlertDeliveries,
 } from "@/lib/leadership-alerts.functions";
-import { campuses } from "@/lib/behaviour-leadership";
+import { CAMPUSES } from "@/lib/behaviour-leadership";
 
 export const Route = createFileRoute("/admin/behaviour/alerts")({
   head: () => ({
@@ -304,7 +304,7 @@ function AlertsAdminPage() {
                     <SelectTrigger className="h-9 w-[190px]"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All campuses</SelectItem>
-                      {campuses.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      {CAMPUSES.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -474,7 +474,7 @@ function SubscriptionForm({
             <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All campuses</SelectItem>
-              {campuses.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              {CAMPUSES.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
