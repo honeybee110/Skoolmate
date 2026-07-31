@@ -40,6 +40,8 @@ import { useCurriculumStore } from "@/lib/curriculum-store";
 import { CURRICULUM_SUBJECTS } from "@/lib/curriculum-db";
 import { generateLessonPlan, LEARNING_AREAS, type LearningArea } from "@/lib/lessons.functions";
 import { registerWeeklyUpload } from "@/lib/lesson-uploads.functions";
+import { getEntrySkillsForLesson } from "@/lib/entry-skills";
+
 import { useAuth } from "@/lib/auth-context";
 import { useDirectory, getApprovedOrPublishedTimetable, statusLabel } from "@/lib/directory-store";
 
@@ -212,6 +214,10 @@ function LessonPlannerPage() {
   };
 
   const generateFn = useServerFn(generateLessonPlan);
+  const lessonEntrySkills = useMemo(
+    () => getEntrySkillsForLesson(draft.learningArea, draft.strand, draft.topic || draft.title, draft.levels),
+    [draft.learningArea, draft.strand, draft.topic, draft.title, draft.levels],
+  );
   const generate = useMutation({
     mutationFn: async () => {
       if (!draft.levels.length) throw new Error("Select at least one ability level.");
@@ -222,7 +228,7 @@ function LessonPlannerPage() {
           topic: draft.topic || draft.title || draft.strand,
           duration: draft.duration,
           levels: draft.levels,
-          entrySkills: [],
+          entrySkills: lessonEntrySkills.map((s) => `Level ${s.level} · ${s.strand} › ${s.topic}: ${s.text}`),
           notes: "",
         },
       });
@@ -237,7 +243,15 @@ function LessonPlannerPage() {
         learningIntention: out.learningIntention,
         successCriteria: out.successCriteria.map((c) => (c.startsWith("I can") ? c : `I can ${c}`)).join("\n"),
         alignment: out.alignment,
+        entrySkillAlignment: (out.entrySkillAlignment ?? [])
+          .map((e) => `Level ${e.level} — ${e.entrySkill}\n→ ${e.activity}`)
+          .join("\n\n"),
         resources: out.resources.join("\n"),
+        sensorySupports: (out.sensorySupports ?? []).join("\n"),
+        communicationSupports: (out.communicationSupports ?? []).join("\n"),
+        visuals: (out.visuals ?? []).join("\n"),
+        assessmentEvidence: (out.assessmentEvidence ?? []).join("\n"),
+        extension: (out.extension ?? []).join("\n"),
         hook: out.flow.hook,
         iDo: out.flow.iDo,
         weDo: out.flow.weDo,
@@ -249,6 +263,7 @@ function LessonPlannerPage() {
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Generation failed"),
   });
+
 
 
   const registerFn = useServerFn(registerWeeklyUpload);
@@ -676,6 +691,68 @@ function LessonPlannerPage() {
               />
             </div>
 
+            {lessonEntrySkills.length > 0 && (
+              <div className="mt-4 rounded-2xl border bg-muted/30 p-4">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Entry skills feeding this lesson
+                </div>
+                <ul className="space-y-1.5 text-xs text-muted-foreground">
+                  {lessonEntrySkills.map((s, i) => (
+                    <li key={`${s.level}-${i}`}>
+                      <span className="font-medium text-foreground">Level {s.level}</span> · {s.strand} › {s.topic} — {s.text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <NotesField
+                label="Entry skill → activity alignment"
+                value={draft.notes.entrySkillAlignment ?? ""}
+                onChange={(v) => patchNotes({ entrySkillAlignment: v })}
+                placeholder={"Level B — attends to shared book\n→ Sits with ES during HOOK…"}
+                rows={6}
+              />
+              <NotesField
+                label="Sensory supports"
+                value={draft.notes.sensorySupports ?? ""}
+                onChange={(v) => patchNotes({ sensorySupports: v })}
+                placeholder={"Wobble cushion at the table\nMovement break after I DO"}
+                rows={6}
+              />
+              <NotesField
+                label="Communication supports"
+                value={draft.notes.communicationSupports ?? ""}
+                onChange={(v) => patchNotes({ communicationSupports: v })}
+                placeholder={"Model core words: more, stop, my turn\nKey Word Sign for 'finished'"}
+                rows={5}
+              />
+              <NotesField
+                label="Visuals to prepare"
+                value={draft.notes.visuals ?? ""}
+                onChange={(v) => patchNotes({ visuals: v })}
+                placeholder={"Now/Next board\n3-step task strip with finished box"}
+                rows={5}
+              />
+              <NotesField
+                label="Assessment evidence"
+                value={draft.notes.assessmentEvidence ?? ""}
+                onChange={(v) => patchNotes({ assessmentEvidence: v })}
+                placeholder={"Prompt-level tick sheet against success criteria\nPhoto/video to Evidence hub"}
+                rows={5}
+              />
+              <NotesField
+                label="Extension activities"
+                value={draft.notes.extension ?? ""}
+                onChange={(v) => patchNotes({ extension: v })}
+                placeholder={"Generalise the skill in the kitchen\nPeer modelling with staff supervision"}
+                rows={5}
+              />
+            </div>
+
+
+
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t pt-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -812,6 +889,13 @@ function buildMarkdown(d: Draft): string {
     `### YOU DO`, d.notes.youDo, ``,
     `### REFLECTION`, d.notes.reflection ?? "", ``,
     `## Differentiation`, d.notes.differentiation ?? "", ``,
+    `## Entry skill → activity alignment`, d.notes.entrySkillAlignment ?? "", ``,
+    `## Sensory supports`, d.notes.sensorySupports ?? "", ``,
+    `## Communication supports`, d.notes.communicationSupports ?? "", ``,
+    `## Visuals to prepare`, d.notes.visuals ?? "", ``,
+    `## Assessment evidence`, d.notes.assessmentEvidence ?? "", ``,
+    `## Extension activities`, d.notes.extension ?? "", ``,
+
   ].filter(Boolean).join("\n");
 }
 
