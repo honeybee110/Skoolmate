@@ -311,6 +311,16 @@ for (const inc of leadershipIncidents) {
   else byClassGlobal.set(inc.classId, [inc]);
 }
 
+export const classById = new Map(schoolClasses.map((c) => [c.id, c]));
+export const studentById = new Map(schoolStudents.map((s) => [s.id, s]));
+export const studentsByClass = new Map<string, SchoolStudent[]>();
+for (const s of schoolStudents) {
+  const list = studentsByClass.get(s.classId);
+  if (list) list.push(s);
+  else studentsByClass.set(s.classId, [s]);
+}
+
+
 const filterCache = new Map<string, LeadershipIncident[]>();
 const classGroupCache = new WeakMap<LeadershipIncident[], Map<string, LeadershipIncident[]>>();
 
