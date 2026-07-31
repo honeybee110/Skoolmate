@@ -129,6 +129,7 @@ export type Database = {
       }
       documents: {
         Row: {
+          access_level: string
           author_name: string | null
           category: string
           chunk_count: number
@@ -147,6 +148,7 @@ export type Database = {
           uploader_name: string | null
         }
         Insert: {
+          access_level?: string
           author_name?: string | null
           category?: string
           chunk_count?: number
@@ -165,6 +167,7 @@ export type Database = {
           uploader_name?: string | null
         }
         Update: {
+          access_level?: string
           author_name?: string | null
           category?: string
           chunk_count?: number
@@ -578,6 +581,8 @@ export type Database = {
         }
         Returns: Json
       }
+      can_read_document: { Args: { _doc_id: string }; Returns: boolean }
+      can_read_document_path: { Args: { _path: string }; Returns: boolean }
       claim_founder_admin: { Args: never; Returns: Json }
       has_role: {
         Args: {

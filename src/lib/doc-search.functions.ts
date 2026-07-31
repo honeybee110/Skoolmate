@@ -3,6 +3,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+export const ACCESS_LEVELS = [
+  { value: "all_staff", label: "All staff" },
+  { value: "leadership", label: "Leadership only" },
+  { value: "allied_health", label: "Allied health only" },
+  { value: "wellbeing", label: "Wellbeing team only" },
+  { value: "private", label: "Private (me + leadership)" },
+] as const;
+
+export type DocumentAccessLevel = (typeof ACCESS_LEVELS)[number]["value"];
+
 export interface IndexedDocument {
   id: string;
   title: string;
@@ -10,6 +20,7 @@ export interface IndexedDocument {
   mime_type: string | null;
   size_bytes: number | null;
   category: string;
+  access_level: DocumentAccessLevel;
   student_name: string | null;
   author_name: string | null;
   uploaded_by: string;
@@ -20,6 +31,7 @@ export interface IndexedDocument {
   text_preview: string | null;
   created_at: string;
 }
+
 
 export interface SearchHit {
   document: IndexedDocument;
@@ -48,6 +60,7 @@ const RegisterInput = z.object({
   mime_type: z.string().max(160).optional(),
   size_bytes: z.number().int().nonnegative().optional(),
   category: z.string().max(80).optional(),
+  access_level: z.enum(["all_staff","leadership","allied_health","wellbeing","private"]).optional(),
   student_name: z.string().max(120).optional(),
   author_name: z.string().max(120).optional(),
   uploader_name: z.string().max(120).optional(),
@@ -66,6 +79,7 @@ export const registerDocument = createServerFn({ method: "POST" })
         mime_type: data.mime_type ?? null,
         size_bytes: data.size_bytes ?? null,
         category: data.category ?? "General",
+        access_level: data.access_level ?? "all_staff",
         student_name: data.student_name || null,
         author_name: data.author_name || null,
         uploader_name: data.uploader_name || null,

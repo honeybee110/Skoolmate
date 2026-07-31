@@ -15,12 +15,13 @@ import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Search, Upload, FileText, FileImage, FileSpreadsheet, Presentation,
-  Loader2, ExternalLink, Trash2, RefreshCw, CheckCircle2, AlertTriangle, Highlighter,
+  Loader2, ExternalLink, Trash2, RefreshCw, CheckCircle2, AlertTriangle, Highlighter, Lock,
 } from "lucide-react";
 import {
   listDocuments, registerDocument, indexDocument, searchDocuments,
   getDocumentChunks, signDocument, deleteDocument,
-  type IndexedDocument, type SearchHit,
+  ACCESS_LEVELS,
+  type IndexedDocument, type SearchHit, type DocumentAccessLevel,
 } from "@/lib/doc-search.functions";
 
 export const Route = createFileRoute("/search")({
@@ -90,7 +91,7 @@ function DocumentSearch() {
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [meta, setMeta] = useState({ category: "General", student_name: "", author_name: "" });
+  const [meta, setMeta] = useState({ category: "General", access_level: "all_staff" as DocumentAccessLevel, student_name: "", author_name: "" });
   const [viewer, setViewer] = useState<{ hit: SearchHit } | null>(null);
 
   const docsQuery = useQuery({ queryKey: ["documents"], queryFn: () => list({}) });
@@ -135,6 +136,7 @@ function DocumentSearch() {
             mime_type: file.type || undefined,
             size_bytes: file.size,
             category: meta.category,
+            access_level: meta.access_level,
             student_name: meta.student_name || undefined,
             author_name: meta.author_name || undefined,
             uploader_name: profile?.display_name || user.email || undefined,
@@ -301,7 +303,7 @@ function DocumentSearch() {
             />
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label className="text-xs font-medium text-muted-foreground">
               Category
               <select
@@ -310,6 +312,16 @@ function DocumentSearch() {
                 className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm text-foreground"
               >
                 {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+              </select>
+            </label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Who can see this
+              <select
+                value={meta.access_level}
+                onChange={(e) => setMeta({ ...meta, access_level: e.target.value as DocumentAccessLevel })}
+                className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm text-foreground"
+              >
+                {ACCESS_LEVELS.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}
               </select>
             </label>
             <label className="text-xs font-medium text-muted-foreground">
@@ -345,6 +357,7 @@ function DocumentSearch() {
                   <Icon className="h-4 w-4 text-muted-foreground" />
                   <span className="min-w-0 flex-1 truncate text-sm">{doc.title}</span>
                   <Badge variant="outline" className="text-xs">{doc.category}</Badge>
+                  <AccessBadge level={doc.access_level} />
                   <StatusBadge status={doc.index_status} error={doc.index_error} />
                   <Button
                     size="sm"
@@ -404,6 +417,16 @@ function DocumentSearch() {
         </SheetContent>
       </Sheet>
     </>
+  );
+}
+
+function AccessBadge({ level }: { level: DocumentAccessLevel }) {
+  if (!level || level === "all_staff") return null;
+  const label = ACCESS_LEVELS.find((a) => a.value === level)?.label ?? level;
+  return (
+    <Badge variant="secondary" className="gap-1 text-xs">
+      <Lock className="h-3 w-3" /> {label}
+    </Badge>
   );
 }
 
