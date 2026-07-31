@@ -30,7 +30,7 @@ const LessonInput = z.object({
  * Specialist-school planner shape. Sections are produced in a fixed order:
  * Learning Area → Topic → Learning Intention → Success Criteria →
  * VC / Entry Skills alignment → Resources → Lesson Flow
- * (HOOK, I DO, WE DO, YOU DO, COOL DOWN / REVIEW, ASSESSMENT, REFLECTION).
+ * (HOOK, I DO, WE DO, YOU DO, REFLECTION).
  * Every flow step is written as detailed, teacher-ready prose — never a
  * bullet-point summary.
  */
@@ -55,8 +55,6 @@ const LessonSchema = z.object({
     iDo: FlowStep,
     weDo: FlowStep,
     youDo: FlowStep,
-    coolDown: FlowStep,
-    assessment: FlowStep,
     reflection: FlowStep,
   }),
   differentiation: z.array(
