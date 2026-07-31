@@ -20,7 +20,8 @@ import {
 import {
   listDocuments, registerDocument, indexDocument, searchDocuments,
   getDocumentChunks, signDocument, deleteDocument,
-  type IndexedDocument, type SearchHit,
+  ACCESS_LEVELS,
+  type IndexedDocument, type SearchHit, type DocumentAccessLevel,
 } from "@/lib/doc-search.functions";
 
 export const Route = createFileRoute("/search")({
@@ -416,6 +417,16 @@ function DocumentSearch() {
         </SheetContent>
       </Sheet>
     </>
+  );
+}
+
+function AccessBadge({ level }: { level: DocumentAccessLevel }) {
+  if (!level || level === "all_staff") return null;
+  const label = ACCESS_LEVELS.find((a) => a.value === level)?.label ?? level;
+  return (
+    <Badge variant="secondary" className="gap-1 text-xs">
+      <Lock className="h-3 w-3" /> {label}
+    </Badge>
   );
 }
 
