@@ -29,6 +29,7 @@ import {
   Archive,
   History,
   Sparkles,
+  MessagesSquare,
 } from "lucide-react";
 
 import {
@@ -62,6 +63,7 @@ const teacherNav = {
     { title: "Scope & Sequence", url: "/scope-sequence", icon: ClipboardCheck },
     { title: "Resource Bank", url: "/resources", icon: Library },
     { title: "AI Document Search", url: "/search", icon: Sparkles },
+    { title: "Ask SkoolMate", url: "/ask", icon: MessagesSquare },
   ] as NavItem[],
   Track: [
     { title: "Daily Attendance", url: "/attendance", icon: UserCheck },
@@ -82,6 +84,7 @@ const adminNav = {
     { title: "Approval Centre", url: "/admin/approvals", icon: ClipboardCheck },
     { title: "Document Centre", url: "/admin/documents", icon: FolderKanban },
     { title: "AI Document Search", url: "/search", icon: Sparkles },
+    { title: "Ask SkoolMate", url: "/ask", icon: MessagesSquare },
     { title: "Notifications", url: "/admin/notifications", icon: Bell },
   ] as NavItem[],
   School: [

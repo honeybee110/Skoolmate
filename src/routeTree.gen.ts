@@ -39,6 +39,7 @@ import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
 import { Route as StudentsStudentIdRouteImport } from './routes/students.$studentId'
 import { Route as LessonsPlannerRouteImport } from './routes/lessons.planner'
 import { Route as LessonsBankRouteImport } from './routes/lessons.bank'
+import { Route as AskThreadIdRouteImport } from './routes/ask.$threadId'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminYearSetupRouteImport } from './routes/admin.year-setup'
 import { Route as AdminWellbeingRouteImport } from './routes/admin.wellbeing'
@@ -218,6 +219,11 @@ const LessonsBankRoute = LessonsBankRouteImport.update({
   id: '/bank',
   path: '/bank',
   getParentRoute: () => LessonsRoute,
+} as any)
+const AskThreadIdRoute = AskThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => AskRoute,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
@@ -416,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/admin/year-setup': typeof AdminYearSetupRoute
   '/api/chat': typeof ApiChatRoute
+  '/ask/$threadId': typeof AskThreadIdRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -475,6 +482,7 @@ export interface FileRoutesByTo {
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/admin/year-setup': typeof AdminYearSetupRoute
   '/api/chat': typeof ApiChatRoute
+  '/ask/$threadId': typeof AskThreadIdRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -537,6 +545,7 @@ export interface FileRoutesById {
   '/admin/wellbeing': typeof AdminWellbeingRoute
   '/admin/year-setup': typeof AdminYearSetupRoute
   '/api/chat': typeof ApiChatRoute
+  '/ask/$threadId': typeof AskThreadIdRoute
   '/lessons/bank': typeof LessonsBankRoute
   '/lessons/planner': typeof LessonsPlannerRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
@@ -600,6 +609,7 @@ export interface FileRouteTypes {
     | '/admin/wellbeing'
     | '/admin/year-setup'
     | '/api/chat'
+    | '/ask/$threadId'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -659,6 +669,7 @@ export interface FileRouteTypes {
     | '/admin/wellbeing'
     | '/admin/year-setup'
     | '/api/chat'
+    | '/ask/$threadId'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -720,6 +731,7 @@ export interface FileRouteTypes {
     | '/admin/wellbeing'
     | '/admin/year-setup'
     | '/api/chat'
+    | '/ask/$threadId'
     | '/lessons/bank'
     | '/lessons/planner'
     | '/students/$studentId'
@@ -999,6 +1011,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LessonsBankRouteImport
       parentRoute: typeof LessonsRoute
     }
+    '/ask/$threadId': {
+      id: '/ask/$threadId'
+      path: '/$threadId'
+      fullPath: '/ask/$threadId'
+      preLoaderRoute: typeof AskThreadIdRouteImport
+      parentRoute: typeof AskRoute
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -1206,10 +1225,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AskRouteChildren {
+  AskThreadIdRoute: typeof AskThreadIdRoute
   AskIndexRoute: typeof AskIndexRoute
 }
 
 const AskRouteChildren: AskRouteChildren = {
+  AskThreadIdRoute: AskThreadIdRoute,
   AskIndexRoute: AskIndexRoute,
 }
 
