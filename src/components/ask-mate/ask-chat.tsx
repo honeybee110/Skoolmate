@@ -2,15 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { toast } from "sonner";
-import {
-  BookOpen,
-  Bell,
-  ClipboardCheck,
-  FileSearch,
-  FileText,
-  Sparkle,
-  Target,
-} from "lucide-react";
+import { Sparkle } from "lucide-react";
 import {
   Conversation,
   ConversationContent,
@@ -28,16 +20,6 @@ import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/componen
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-
-const TOOL_ICONS: Record<string, typeof FileSearch> = {
-  search_documents: FileSearch,
-  list_documents: FileText,
-  lookup_student: Target,
-  find_entry_skills: ClipboardCheck,
-  list_lesson_plans: BookOpen,
-  list_ssg_minutes: ClipboardCheck,
-  list_notifications: Bell,
-};
 
 const TOOL_LABELS: Record<string, string> = {
   search_documents: "Searching documents",
@@ -172,7 +154,6 @@ export function AskChat({
                       errorText?: string;
                     };
                     const name = anyPart.type.replace("tool-", "");
-                    const Icon = TOOL_ICONS[name] ?? FileSearch;
                     return (
                       <Tool defaultOpen={false} key={i} className="bg-muted/30">
                         <ToolHeader
