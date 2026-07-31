@@ -809,20 +809,30 @@ function buildMarkdown(d: Draft): string {
   return [
     `# ${d.title || "Untitled lesson"}`,
     ``,
-    `**Subject:** ${d.subject} · ${d.strand}`,
+    `**Learning Area:** ${d.learningArea}`,
+    `**Subject/Strand:** ${d.subject} · ${d.strand}`,
+    `**Topic:** ${d.topic}`,
     `**Term/Week:** ${d.term}${d.week ? ` · ${d.week}` : ""}`,
     `**Duration:** ${d.duration}`,
-    `**Ability range:** ${d.abilityRange}`,
+    `**Ability levels:** ${d.levels.join(", ")}`,
     d.vcCode ? `**VC 2.0 code:** ${d.vcCode}` : "",
     ``,
     `## Learning Intention`, d.notes.learningIntention, ``,
     `## Success Criteria`, d.notes.successCriteria, ``,
-    `## Hook`, d.notes.hook, ``,
-    `## I do`, d.notes.iDo, ``,
-    `## We do`, d.notes.weDo, ``,
-    `## You do`, d.notes.youDo, ``,
+    `## Victorian Curriculum / Entry Skills alignment`, d.notes.alignment ?? "", ``,
+    `## Resources`, d.notes.resources ?? "", ``,
+    `## Lesson Flow`, ``,
+    `### HOOK`, d.notes.hook, ``,
+    `### I DO`, d.notes.iDo, ``,
+    `### WE DO`, d.notes.weDo, ``,
+    `### YOU DO`, d.notes.youDo, ``,
+    `### COOL DOWN / REVIEW`, d.notes.coolDown ?? "", ``,
+    `### ASSESSMENT`, d.notes.assessment ?? "", ``,
+    `### REFLECTION`, d.notes.reflection ?? "", ``,
+    `## Differentiation`, d.notes.differentiation ?? "", ``,
   ].filter(Boolean).join("\n");
 }
+
 
 function PublishedTimetableBanner() {
   const { classes, timetables } = useDirectory();
