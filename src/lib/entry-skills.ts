@@ -338,3 +338,61 @@ export function getEntrySkillsForGoal(
   return { topic: ranked[0].topic, level: level as EntryLevel, source, skills: items };
 }
 
+
+// -------- Lesson-level Entry Skills (used by the Lesson Planner) --------
+
+/** Maps a planner Learning Area onto the Entry Skills document areas. */
+function areaForLearningArea(learningArea: string): EntrySkillRecord["area"] | null {
+  const s = learningArea.toLowerCase();
+  if (/literacy|english/.test(s)) return "English";
+  if (/numeracy|math/.test(s)) return "Maths";
+  if (/personal|social|care|sensory/.test(s)) return "Personal & Social";
+  return null;
+}
+
+export interface LessonEntrySkill {
+  level: string;
+  strand: string;
+  topic: string;
+  text: string;
+  source: string;
+}
+
+/**
+ * Entry skills to feed the lesson generator: up to two criteria per selected
+ * ability level, ranked by how closely the document topic matches the lesson
+ * topic/strand.
+ */
+export function getEntrySkillsForLesson(
+  learningArea: string,
+  strand: string,
+  topic: string,
+  levels: string[],
+  perLevel = 2,
+): LessonEntrySkill[] {
+  const area = areaForLearningArea(learningArea);
+  if (!area) return [];
+  const query = `${topic} ${strand}`;
+  const out: LessonEntrySkill[] = [];
+  for (const level of levels) {
+    const atLevel = entrySkillRecords.filter((r) => r.area === area && r.level === (level as EntryLevel));
+    if (!atLevel.length) continue;
+    const ranked = [...atLevel].sort((a, b) => overlap(query, `${b.strand} ${b.topic}`) - overlap(query, `${a.strand} ${a.topic}`));
+    let taken = 0;
+    for (const r of ranked) {
+      for (const sk of r.skills) {
+        if (taken >= perLevel) break;
+        out.push({
+          level,
+          strand: r.strand,
+          topic: r.topic,
+          text: sk,
+          source: ENTRY_SKILL_SOURCES[r.strand] ?? "Entry Skills 2025",
+        });
+        taken++;
+      }
+      if (taken >= perLevel) break;
+    }
+  }
+  return out;
+}
