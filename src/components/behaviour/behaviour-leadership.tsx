@@ -200,12 +200,14 @@ function FilterBar({
     <Card className="flex flex-wrap items-end gap-3 p-4">
       <FilterSelect
         label="Campus"
+        allLabel="All campuses"
         value={filters.campus}
         onChange={(v) => set({ campus: v, classId: "all" })}
         options={["all", ...CAMPUSES]}
       />
       <FilterSelect
         label="Year level"
+        allLabel="All year levels"
         value={filters.yearLevel}
         onChange={(v) => set({ yearLevel: v, classId: "all" })}
         options={["all", ...yearLevels]}
@@ -219,6 +221,7 @@ function FilterBar({
       />
       <FilterSelect
         label="Term"
+        allLabel="All terms"
         value={filters.term}
         onChange={(v) => set({ term: v })}
         options={["all", ...TERMS]}
@@ -254,12 +257,14 @@ function FilterSelect({
   onChange,
   options,
   labelFor,
+  allLabel,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: string[];
   labelFor?: (v: string) => string;
+  allLabel?: string;
 }) {
   return (
     <div className="space-y-1">
@@ -271,7 +276,7 @@ function FilterSelect({
         <SelectContent>
           {options.map((o) => (
             <SelectItem key={o} value={o}>
-              {labelFor ? labelFor(o) : o === "all" ? `All ${label.toLowerCase()}s` : o}
+              {labelFor ? labelFor(o) : o === "all" ? (allLabel ?? "All") : o}
             </SelectItem>
           ))}
         </SelectContent>
