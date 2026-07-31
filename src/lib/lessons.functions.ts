@@ -169,10 +169,21 @@ MANDATORY STRUCTURE — produce these sections, in this order:
 6. Resources (specific and nameable, including AAC, sensory and staffing)
 7. Lesson Flow: HOOK, I DO, WE DO, YOU DO, REFLECTION (the plan ends with REFLECTION — do NOT include a cool down, review or assessment section)
 
+ALSO produce, as separate fields:
+- entrySkillAlignment: one row for EVERY entry skill listed above. Quote the entry skill, give its level, and name the exact activity in THIS lesson that works on it (which part of the flow, what the learner physically does, what staff do). If no entry skills were supplied, write rows for typical Level A–D entry skills for this topic.
+- sensorySupports: named regulation supports and WHEN they are used (before the mat session, movement break after I DO, etc.) — wobble cushion, weighted lap pad, ear defenders, heavy work, chew tool, dimmed lights, proprioceptive input.
+- communicationSupports: the AAC systems in the room, the exact core words staff model, key word signs, choice-making formats, wait time, and scripts for non-speaking learners.
+- visuals: what to actually print or set up — now/next board, first–then card, 3-step task strip with a finished box, symbol choice board, visual timer, labelled work bins.
+- assessmentEvidence: what staff collect and how — prompt-level tick sheet against the success criteria, photo/video for the Evidence hub, work samples, anecdotal note format.
+- extension: what learners who nail it early do next — same skill in a new setting, generalisation to a second material, peer modelling, one more step of the task analysis.
+
 Style rules — non-negotiable:
 - Every Lesson Flow step is 5–8 sentences of running prose. NEVER bullet-point summaries, never generic filler.
+- Write like an experienced SDS classroom teacher writing for the ES team who will teach it tomorrow. Practical, concrete, staffroom language.
+- BANNED phrases: "engage students in meaningful learning", "foster a love of", "holistic development", "21st century skills", "leverage", "scaffold learning experiences", "diverse learners", "rich learning opportunities", "empower". If a sentence could appear in any lesson on any topic, rewrite it with the actual materials, room set-up and words staff say.
+- Name real classroom things: laminated symbols, Velcro, the sink, the mat, the trolley, Boardmaker, Proloquo2Go, the sand tray, the timer on the IWB.
 - Include exact teacher scripting in quotes, timing, staffing (teacher / ES), prompt hierarchy (physical → gestural → verbal → independent), AAC and sensory supports, and transitions.
-- Differentiate explicitly for each selected ability level; the differentiation array must contain one entry per level.
+- Differentiate explicitly for each selected ability level; the differentiation array must contain one entry per level, and each must say what the learner does, what support they get and what "done" looks like.
 - Use generic learner names ("Student A", "Student B") — never real names.
 - For Literacy, use Colourful Semantics colour coding where relevant (WHO orange · doing yellow · WHAT green · WHERE blue · WHEN purple).
 - For Personal Care and Sensory Learning, plan around routine, dignity, regulation, task analysis and backward chaining rather than academic outcomes.
@@ -180,11 +191,13 @@ Style rules — non-negotiable:
 
     try {
       const { output } = await generateText({
-        model: gateway("google/gemini-3-flash-preview"),
+        model: gateway("openai/gpt-5.6-sol"),
         prompt,
         output: Output.object({ schema: LessonSchema }),
+        providerOptions: { lovable: { reasoningEffort: "none" } },
       });
       return output;
+
     } catch (err) {
       const msg = err instanceof Error ? err.message : "AI request failed";
       if (msg.includes("No object generated") || msg.includes("did not match schema")) return fallbackPlan(data);
