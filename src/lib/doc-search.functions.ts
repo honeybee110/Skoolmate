@@ -3,6 +3,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+export const ACCESS_LEVELS = [
+  { value: "all_staff", label: "All staff" },
+  { value: "leadership", label: "Leadership only" },
+  { value: "allied_health", label: "Allied health only" },
+  { value: "wellbeing", label: "Wellbeing team only" },
+  { value: "private", label: "Private (me + leadership)" },
+] as const;
+
+export type DocumentAccessLevel = (typeof ACCESS_LEVELS)[number]["value"];
+
 export interface IndexedDocument {
   id: string;
   title: string;
@@ -10,6 +20,7 @@ export interface IndexedDocument {
   mime_type: string | null;
   size_bytes: number | null;
   category: string;
+  access_level: DocumentAccessLevel;
   student_name: string | null;
   author_name: string | null;
   uploaded_by: string;
@@ -20,6 +31,7 @@ export interface IndexedDocument {
   text_preview: string | null;
   created_at: string;
 }
+
 
 export interface SearchHit {
   document: IndexedDocument;
