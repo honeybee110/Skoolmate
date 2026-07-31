@@ -13,7 +13,7 @@ export interface AskThread {
 export interface AskStoredMessage {
   id: string;
   role: "user" | "assistant" | "system";
-  parts: unknown[];
+  parts: Record<string, unknown>[];
   created_at: string;
 }
 
