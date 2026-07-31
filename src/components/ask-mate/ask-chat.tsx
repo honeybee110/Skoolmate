@@ -24,6 +24,7 @@ import {
   ToolOutput,
 } from "@/components/ai-elements/tool";
 import { BrandMark } from "@/components/brand-mark";
+import { OutputTools } from "@/components/ask-mate/output-tools";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -132,7 +133,12 @@ export function AskChat({
             </div>
           )}
 
-          {messages.map((message) => (
+          {messages.map((message) => {
+            const plainText = message.parts
+              .map((p) => (p.type === "text" ? p.text : ""))
+              .join("\n")
+              .trim();
+            return (
             <Message from={message.role} key={message.id}>
               <MessageContent
                 className={
@@ -177,9 +183,15 @@ export function AskChat({
                   }
                   return null;
                 })}
+
+                {message.role === "assistant" && plainText.length > 0 && !busy && (
+                  <OutputTools text={plainText} disabled={busy} onAction={(p) => send(p)} />
+                )}
               </MessageContent>
             </Message>
-          ))}
+            );
+          })}
+
 
           {status === "submitted" && <Shimmer className="text-sm">Reading your workspace…</Shimmer>}
           {error && <p className="text-sm text-destructive">{error.message}</p>}
