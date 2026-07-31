@@ -178,13 +178,9 @@ export function AskChat({
                         <ToolHeader
                           type={anyPart.type as never}
                           state={anyPart.state as never}
-                          title={
-                            <span className="flex items-center gap-2">
-                              <Icon className="h-3.5 w-3.5 text-primary" />
-                              {TOOL_LABELS[name] ?? name}
-                            </span>
-                          as unknown as string}
+                          title={TOOL_LABELS[name] ?? name}
                         />
+
                         <ToolContent>
                           <ToolInput input={anyPart.input} />
                           <ToolOutput output={anyPart.output} errorText={anyPart.errorText} />
