@@ -572,43 +572,101 @@ function LessonPlannerPage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <NotesField
-                label="Learning Intention"
+                label="3. Learning Intention"
                 value={draft.notes.learningIntention}
                 onChange={(v) => patchNotes({ learningIntention: v })}
                 placeholder="We are learning to…"
               />
               <NotesField
-                label="Success Criteria"
+                label="4. Success Criteria"
                 value={draft.notes.successCriteria}
                 onChange={(v) => patchNotes({ successCriteria: v })}
                 placeholder={"I can …\nI can …\nI can …"}
                 rows={4}
               />
               <NotesField
-                label="Hook"
-                value={draft.notes.hook}
-                onChange={(v) => patchNotes({ hook: v })}
-                placeholder="Short warm-up / engagement routine…"
+                label="5. Victorian Curriculum / Entry Skills alignment"
+                value={draft.notes.alignment ?? ""}
+                onChange={(v) => patchNotes({ alignment: v })}
+                placeholder="VC 2.0 code, content description and how it maps to each level's entry skills…"
+                rows={4}
               />
               <NotesField
-                label="I do"
-                value={draft.notes.iDo}
-                onChange={(v) => patchNotes({ iDo: v })}
-                placeholder="Teacher models the target skill…"
-              />
-              <NotesField
-                label="We do"
-                value={draft.notes.weDo}
-                onChange={(v) => patchNotes({ weDo: v })}
-                placeholder="Guided small-group practice…"
-              />
-              <NotesField
-                label="You do"
-                value={draft.notes.youDo}
-                onChange={(v) => patchNotes({ youDo: v })}
-                placeholder="Independent applied task…"
+                label="6. Resources"
+                value={draft.notes.resources ?? ""}
+                onChange={(v) => patchNotes({ resources: v })}
+                placeholder={"Visual schedule\nCore-word AAC board\n1 teacher + 2 ES"}
+                rows={4}
               />
             </div>
+
+            <div className="mt-5 rounded-2xl border bg-muted/30 p-4">
+              <div className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                7. Lesson Flow
+              </div>
+              <div className="grid gap-4">
+                <NotesField
+                  label="HOOK"
+                  value={draft.notes.hook}
+                  onChange={(v) => patchNotes({ hook: v })}
+                  placeholder="Engagement routine, timing, teacher scripting, AAC supports…"
+                  rows={5}
+                />
+                <NotesField
+                  label="I DO"
+                  value={draft.notes.iDo}
+                  onChange={(v) => patchNotes({ iDo: v })}
+                  placeholder="Explicit teacher model, step by step, with exact wording…"
+                  rows={5}
+                />
+                <NotesField
+                  label="WE DO"
+                  value={draft.notes.weDo}
+                  onChange={(v) => patchNotes({ weDo: v })}
+                  placeholder="Guided practice, staffing, prompt hierarchy and fading…"
+                  rows={5}
+                />
+                <NotesField
+                  label="YOU DO"
+                  value={draft.notes.youDo}
+                  onChange={(v) => patchNotes({ youDo: v })}
+                  placeholder="Independent applied task with visual checklist…"
+                  rows={5}
+                />
+                <NotesField
+                  label="COOL DOWN / REVIEW"
+                  value={draft.notes.coolDown ?? ""}
+                  onChange={(v) => patchNotes({ coolDown: v })}
+                  placeholder="Revisit the learning intention, regulate and transition…"
+                  rows={4}
+                />
+                <NotesField
+                  label="ASSESSMENT"
+                  value={draft.notes.assessment ?? ""}
+                  onChange={(v) => patchNotes({ assessment: v })}
+                  placeholder="Evidence collected, prompt level recorded, where it is filed…"
+                  rows={4}
+                />
+                <NotesField
+                  label="REFLECTION"
+                  value={draft.notes.reflection ?? ""}
+                  onChange={(v) => patchNotes({ reflection: v })}
+                  placeholder="What worked, who met criteria, what changes next session…"
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <NotesField
+                label={`Differentiation by ability level (${draft.levels.join(", ") || "—"})`}
+                value={draft.notes.differentiation ?? ""}
+                onChange={(v) => patchNotes({ differentiation: v })}
+                placeholder={"Level B: …\n\nLevel C: …\n\nLevel D: …"}
+                rows={6}
+              />
+            </div>
+
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t pt-4">
               <div className="flex flex-wrap items-center gap-2">
