@@ -24,6 +24,7 @@ import {
   ToolOutput,
 } from "@/components/ai-elements/tool";
 import { BrandMark } from "@/components/brand-mark";
+import { OutputTools } from "@/components/ask-mate/output-tools";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
