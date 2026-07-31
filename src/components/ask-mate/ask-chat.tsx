@@ -102,6 +102,17 @@ export function AskChat({
     void sendMessage({ text: value });
   };
 
+  // A question typed on the dashboard is handed over here once the thread exists.
+  const pendingRef = useRef(false);
+  useEffect(() => {
+    if (pendingRef.current || initialMessages.length > 0) return;
+    const pending = sessionStorage.getItem("ask-mate:pending");
+    if (!pending) return;
+    pendingRef.current = true;
+    sessionStorage.removeItem("ask-mate:pending");
+    void sendMessage({ text: pending });
+  }, [initialMessages.length, sendMessage]);
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <Conversation className="min-h-0 flex-1">
