@@ -67,7 +67,7 @@ const teacherNav = {
   Track: [
     { title: "Daily Attendance", url: "/attendance", icon: UserCheck },
     { title: "Evidence Hub", url: "/evidence", icon: Camera },
-    { title: "Behaviour", url: "/behaviour", icon: Activity },
+    { title: "Behaviour Intelligence", url: "/behaviour", icon: Activity },
     { title: "SSG Minutes", url: "/teacher/ssg-minutes", icon: ClipboardCheck },
     { title: "Reports", url: "/reports", icon: FileText },
     { title: "Notifications", url: "/notifications", icon: Bell },
@@ -102,7 +102,7 @@ const adminNav = {
   Insights: [
     { title: "Reports", url: "/admin/reports", icon: FileText },
     { title: "Evidence Hub", url: "/admin/evidence", icon: Camera },
-    { title: "Behaviour Analytics", url: "/admin/behaviour", icon: BarChart3 },
+    { title: "Behaviour Intelligence", url: "/admin/behaviour", icon: BarChart3 },
   ] as NavItem[],
   Teams: [
     { title: "Wellbeing", url: "/admin/wellbeing", icon: HeartPulse },
