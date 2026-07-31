@@ -615,17 +615,25 @@ export function classIntelligence(
 ): ClassIntelligence | null {
   const cls = schoolClasses.find((c) => c.id === classId);
   if (!cls) return null;
-  const list = incidents.filter((i) => i.classId === classId);
-  const roster = schoolStudents.filter((s) => s.classId === classId);
+  const list = groupIncidentsByClass(incidents).get(classId) ?? [];
+  const roster = studentsByClass.get(classId) ?? [];
 
-  const interventions = [...new Set(list.map((i) => i.intervention))].map((intervention) => {
-    const subset = list.filter((i) => i.intervention === intervention);
-    return {
-      intervention,
-      used: subset.length,
-      successRate: Math.round((subset.filter((i) => i.deEscalated).length / subset.length) * 100),
-    };
-  }).sort((a, b) => b.successRate - a.successRate);
+  const ivStats = new Map<string, { used: number; success: number }>();
+  for (const i of list) {
+    let s = ivStats.get(i.intervention);
+    if (!s) {
+      s = { used: 0, success: 0 };
+      ivStats.set(i.intervention, s);
+    }
+    s.used++;
+    if (i.deEscalated) s.success++;
+  }
+  const interventions = [...ivStats.entries()].map(([intervention, s]) => ({
+    intervention,
+    used: s.used,
+    successRate: Math.round((s.success / s.used) * 100),
+  })).sort((a, b) => b.successRate - a.successRate);
+
 
   const bspMap = new Map<BspStatus, string[]>();
   for (const s of roster) bspMap.set(s.bsp, [...(bspMap.get(s.bsp) ?? []), s.name]);
