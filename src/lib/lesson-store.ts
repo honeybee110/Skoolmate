@@ -23,7 +23,20 @@ export interface LessonNotes {
   iDo: string;
   weDo: string;
   youDo: string;
+  /** Section 5 — Victorian Curriculum / Entry Skills alignment (optional for legacy plans). */
+  alignment?: string;
+  /** Section 6 — Resources. */
+  resources?: string;
+  /** Lesson Flow — Cool down / review. */
+  coolDown?: string;
+  /** Lesson Flow — Assessment. */
+  assessment?: string;
+  /** Lesson Flow — Teacher reflection. */
+  reflection?: string;
+  /** Differentiation by ability level (Level B / C / D). */
+  differentiation?: string;
 }
+
 
 export interface LessonSnapshot {
   at: string;

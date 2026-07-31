@@ -38,7 +38,7 @@ import {
 } from "@/lib/lesson-store";
 import { useCurriculumStore } from "@/lib/curriculum-store";
 import { CURRICULUM_SUBJECTS } from "@/lib/curriculum-db";
-import { generateLessonPlan } from "@/lib/lessons.functions";
+import { generateLessonPlan, LEARNING_AREAS, type LearningArea } from "@/lib/lessons.functions";
 import { registerWeeklyUpload } from "@/lib/lesson-uploads.functions";
 import { useAuth } from "@/lib/auth-context";
 import { useDirectory, getApprovedOrPublishedTimetable, statusLabel } from "@/lib/directory-store";
@@ -72,16 +72,19 @@ const STATUS_META: Record<LessonStatus, { label: string; className: string; Icon
 };
 
 type CohortLevel = "B" | "C" | "D";
+const COHORT_LEVELS: CohortLevel[] = ["B", "C", "D"];
 
 interface Draft {
   id?: string;
   title: string;
+  learningArea: LearningArea;
   subject: string;
   strand: string;
   topic: string;
   duration: string;
   abilityRange: string;
   level: CohortLevel;
+  levels: CohortLevel[];
   term: LessonTerm;
   week?: LessonWeek;
   vcCode?: string;
@@ -90,17 +93,20 @@ interface Draft {
 
 const NEW_DRAFT: Draft = {
   title: "",
+  learningArea: "Literacy",
   subject: CURRICULUM_SUBJECTS[0].label,
   strand: CURRICULUM_SUBJECTS[0].strands[0],
   topic: "",
   duration: "45 min",
   abilityRange: "Towards Foundation A–D",
   level: "C",
+  levels: ["B", "C", "D"],
   term: "Term 1",
   week: "Week 1",
   vcCode: "",
   notes: EMPTY_NOTES,
 };
+
 
 function LessonPlannerPage() {
   const { profile, user } = useAuth();
@@ -145,12 +151,16 @@ function LessonPlannerPage() {
     setDraft({
       id: l.id,
       title: l.title,
+      learningArea: (LEARNING_AREAS as readonly string[]).includes(l.subject)
+        ? (l.subject as LearningArea)
+        : inferLearningArea(l.subject),
       subject: l.subject,
       strand: l.strand,
       topic: l.topic,
       duration: l.duration,
       abilityRange: l.abilityRange,
       level: "C",
+      levels: ["B", "C", "D"],
       term: l.term,
       week: l.week,
       vcCode: l.vcCode,
@@ -158,6 +168,7 @@ function LessonPlannerPage() {
     });
     setDirty(false);
   };
+
 
   const startNew = () => {
     setSelectedId(null);
@@ -203,49 +214,44 @@ function LessonPlannerPage() {
   const generateFn = useServerFn(generateLessonPlan);
   const generate = useMutation({
     mutationFn: async () => {
-      // Prototype-first: build a full sample plan locally so the button
-      // always works. If a Lovable AI key is available, layer that on top,
-      // otherwise fall back to the mock.
-      const mock = mockGenerateLesson({
-        subject: draft.subject,
-        strand: draft.strand,
-        topic: draft.topic || draft.title || draft.strand,
-        level: draft.level,
-        duration: draft.duration,
+      if (!draft.levels.length) throw new Error("Select at least one ability level.");
+      return await generateFn({
+        data: {
+          learningArea: draft.learningArea,
+          strand: draft.strand,
+          topic: draft.topic || draft.title || draft.strand,
+          duration: draft.duration,
+          levels: draft.levels,
+          entrySkills: [],
+          notes: "",
+        },
       });
-      try {
-        const out = await generateFn({
-          data: {
-            subject: draft.subject,
-            strand: draft.strand,
-            topic: draft.topic || draft.title || draft.strand,
-            duration: draft.duration,
-            abilityRange: `Level ${draft.level} · ${draft.abilityRange}`,
-            notes: "",
-          },
-        });
-        return out;
-      } catch {
-        return mock;
-      }
     },
     onSuccess: (out) => {
       patchDraft({
         title: draft.title || out.title,
+        topic: draft.topic || out.topic,
         vcCode: draft.vcCode || out.vcCode,
       });
       patchNotes({
         learningIntention: out.learningIntention,
-        successCriteria: out.successCriteria.join("\n"),
-        hook: out.hook,
-        iDo: out.iDo,
-        weDo: out.weDo,
-        youDo: out.youDo,
+        successCriteria: out.successCriteria.map((c) => (c.startsWith("I can") ? c : `I can ${c}`)).join("\n"),
+        alignment: out.alignment,
+        resources: out.resources.join("\n"),
+        hook: out.flow.hook,
+        iDo: out.flow.iDo,
+        weDo: out.flow.weDo,
+        youDo: out.flow.youDo,
+        coolDown: out.flow.coolDown,
+        assessment: out.flow.assessment,
+        reflection: out.flow.reflection,
+        differentiation: out.differentiation.map((d) => `Level ${d.level}: ${d.activity}`).join("\n\n"),
       });
-      toast.success("Mate drafted the 6-part plan — review, edit or regenerate.");
+      toast.success("Mate drafted a full specialist-school planner — review, edit or regenerate.");
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Generation failed"),
   });
+
 
   const registerFn = useServerFn(registerWeeklyUpload);
   const submit = useMutation({
@@ -499,24 +505,27 @@ function LessonPlannerPage() {
 
             <div className="mt-3 grid gap-3 md:grid-cols-4">
               <div>
-                <Label className="text-xs">Topic</Label>
+                <Label className="text-xs">1. Learning Area</Label>
+                <Select
+                  value={draft.learningArea}
+                  onValueChange={(v) => patchDraft({ learningArea: v as LearningArea })}
+                >
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {LEARNING_AREAS.map((a) => (
+                      <SelectItem key={a} value={a}>{a}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">2. Topic</Label>
                 <Input
                   value={draft.topic}
                   onChange={(e) => patchDraft({ topic: e.target.value })}
                   placeholder="e.g. Blend and read CVC words"
                   className="mt-1 h-9"
                 />
-              </div>
-              <div>
-                <Label className="text-xs">Cohort level</Label>
-                <Select value={draft.level} onValueChange={(v) => patchDraft({ level: v as CohortLevel })}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="B">Level B</SelectItem>
-                    <SelectItem value="C">Level C</SelectItem>
-                    <SelectItem value="D">Level D</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <div>
                 <Label className="text-xs">Duration</Label>
@@ -527,14 +536,36 @@ function LessonPlannerPage() {
                 />
               </div>
               <div>
-                <Label className="text-xs">Ability range</Label>
-                <Input
-                  value={draft.abilityRange}
-                  onChange={(e) => patchDraft({ abilityRange: e.target.value })}
-                  className="mt-1 h-9"
-                />
+                <Label className="text-xs">Student ability levels</Label>
+                <div className="mt-1 flex h-9 items-center gap-1.5">
+                  {COHORT_LEVELS.map((lv) => {
+                    const on = draft.levels.includes(lv);
+                    return (
+                      <button
+                        key={lv}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() =>
+                          patchDraft({
+                            levels: on ? draft.levels.filter((x) => x !== lv) : [...draft.levels, lv].sort(),
+                            level: on ? draft.level : lv,
+                          })
+                        }
+                        className={cn(
+                          "flex-1 rounded-full border px-2 py-1.5 text-[11px] font-medium transition",
+                          on
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-background text-muted-foreground hover:border-primary/50",
+                        )}
+                      >
+                        Level {lv}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
+
 
             {alignmentSuggestions.length > 0 && (
               <div className="mt-3 rounded-md border bg-muted/40 p-3">
@@ -566,43 +597,101 @@ function LessonPlannerPage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <NotesField
-                label="Learning Intention"
+                label="3. Learning Intention"
                 value={draft.notes.learningIntention}
                 onChange={(v) => patchNotes({ learningIntention: v })}
                 placeholder="We are learning to…"
               />
               <NotesField
-                label="Success Criteria"
+                label="4. Success Criteria"
                 value={draft.notes.successCriteria}
                 onChange={(v) => patchNotes({ successCriteria: v })}
                 placeholder={"I can …\nI can …\nI can …"}
                 rows={4}
               />
               <NotesField
-                label="Hook"
-                value={draft.notes.hook}
-                onChange={(v) => patchNotes({ hook: v })}
-                placeholder="Short warm-up / engagement routine…"
+                label="5. Victorian Curriculum / Entry Skills alignment"
+                value={draft.notes.alignment ?? ""}
+                onChange={(v) => patchNotes({ alignment: v })}
+                placeholder="VC 2.0 code, content description and how it maps to each level's entry skills…"
+                rows={4}
               />
               <NotesField
-                label="I do"
-                value={draft.notes.iDo}
-                onChange={(v) => patchNotes({ iDo: v })}
-                placeholder="Teacher models the target skill…"
-              />
-              <NotesField
-                label="We do"
-                value={draft.notes.weDo}
-                onChange={(v) => patchNotes({ weDo: v })}
-                placeholder="Guided small-group practice…"
-              />
-              <NotesField
-                label="You do"
-                value={draft.notes.youDo}
-                onChange={(v) => patchNotes({ youDo: v })}
-                placeholder="Independent applied task…"
+                label="6. Resources"
+                value={draft.notes.resources ?? ""}
+                onChange={(v) => patchNotes({ resources: v })}
+                placeholder={"Visual schedule\nCore-word AAC board\n1 teacher + 2 ES"}
+                rows={4}
               />
             </div>
+
+            <div className="mt-5 rounded-2xl border bg-muted/30 p-4">
+              <div className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                7. Lesson Flow
+              </div>
+              <div className="grid gap-4">
+                <NotesField
+                  label="HOOK"
+                  value={draft.notes.hook}
+                  onChange={(v) => patchNotes({ hook: v })}
+                  placeholder="Engagement routine, timing, teacher scripting, AAC supports…"
+                  rows={5}
+                />
+                <NotesField
+                  label="I DO"
+                  value={draft.notes.iDo}
+                  onChange={(v) => patchNotes({ iDo: v })}
+                  placeholder="Explicit teacher model, step by step, with exact wording…"
+                  rows={5}
+                />
+                <NotesField
+                  label="WE DO"
+                  value={draft.notes.weDo}
+                  onChange={(v) => patchNotes({ weDo: v })}
+                  placeholder="Guided practice, staffing, prompt hierarchy and fading…"
+                  rows={5}
+                />
+                <NotesField
+                  label="YOU DO"
+                  value={draft.notes.youDo}
+                  onChange={(v) => patchNotes({ youDo: v })}
+                  placeholder="Independent applied task with visual checklist…"
+                  rows={5}
+                />
+                <NotesField
+                  label="COOL DOWN / REVIEW"
+                  value={draft.notes.coolDown ?? ""}
+                  onChange={(v) => patchNotes({ coolDown: v })}
+                  placeholder="Revisit the learning intention, regulate and transition…"
+                  rows={4}
+                />
+                <NotesField
+                  label="ASSESSMENT"
+                  value={draft.notes.assessment ?? ""}
+                  onChange={(v) => patchNotes({ assessment: v })}
+                  placeholder="Evidence collected, prompt level recorded, where it is filed…"
+                  rows={4}
+                />
+                <NotesField
+                  label="REFLECTION"
+                  value={draft.notes.reflection ?? ""}
+                  onChange={(v) => patchNotes({ reflection: v })}
+                  placeholder="What worked, who met criteria, what changes next session…"
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <NotesField
+                label={`Differentiation by ability level (${draft.levels.join(", ") || "—"})`}
+                value={draft.notes.differentiation ?? ""}
+                onChange={(v) => patchNotes({ differentiation: v })}
+                placeholder={"Level B: …\n\nLevel C: …\n\nLevel D: …"}
+                rows={6}
+              />
+            </div>
+
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t pt-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -720,20 +809,30 @@ function buildMarkdown(d: Draft): string {
   return [
     `# ${d.title || "Untitled lesson"}`,
     ``,
-    `**Subject:** ${d.subject} · ${d.strand}`,
+    `**Learning Area:** ${d.learningArea}`,
+    `**Subject/Strand:** ${d.subject} · ${d.strand}`,
+    `**Topic:** ${d.topic}`,
     `**Term/Week:** ${d.term}${d.week ? ` · ${d.week}` : ""}`,
     `**Duration:** ${d.duration}`,
-    `**Ability range:** ${d.abilityRange}`,
+    `**Ability levels:** ${d.levels.join(", ")}`,
     d.vcCode ? `**VC 2.0 code:** ${d.vcCode}` : "",
     ``,
     `## Learning Intention`, d.notes.learningIntention, ``,
     `## Success Criteria`, d.notes.successCriteria, ``,
-    `## Hook`, d.notes.hook, ``,
-    `## I do`, d.notes.iDo, ``,
-    `## We do`, d.notes.weDo, ``,
-    `## You do`, d.notes.youDo, ``,
+    `## Victorian Curriculum / Entry Skills alignment`, d.notes.alignment ?? "", ``,
+    `## Resources`, d.notes.resources ?? "", ``,
+    `## Lesson Flow`, ``,
+    `### HOOK`, d.notes.hook, ``,
+    `### I DO`, d.notes.iDo, ``,
+    `### WE DO`, d.notes.weDo, ``,
+    `### YOU DO`, d.notes.youDo, ``,
+    `### COOL DOWN / REVIEW`, d.notes.coolDown ?? "", ``,
+    `### ASSESSMENT`, d.notes.assessment ?? "", ``,
+    `### REFLECTION`, d.notes.reflection ?? "", ``,
+    `## Differentiation`, d.notes.differentiation ?? "", ``,
   ].filter(Boolean).join("\n");
 }
+
 
 function PublishedTimetableBanner() {
   const { classes, timetables } = useDirectory();
@@ -757,61 +856,16 @@ function PublishedTimetableBanner() {
   );
 }
 
-// -------- Local mock generator --------
-// Produces a full 6-part sample lesson so the "Generate with Mate" button
-// always works in the prototype, even without the AI gateway wired up.
-// For English strands we include Colourful Semantics colour-coding cues
-// (Who = orange, Has = yellow, What = green, Where = blue, When = purple).
-function mockGenerateLesson(input: {
-  subject: string; strand: string; topic: string;
-  level: CohortLevel; duration: string;
-}) {
-  const { subject, strand, topic, level, duration } = input;
-  const isEnglish = /english|literacy|reading|writing|speak/i.test(subject);
-  const isMaths = /math/i.test(subject);
-  const support = { B: "hand-over-hand + AAC symbols", C: "visual scaffolds + AAC choice board", D: "worded prompts + short model" }[level];
-  const criteriaByLevel: Record<CohortLevel, string[]> = {
-    B: ["I can attend to the activity with an adult.", "I can make a choice using symbols or eye gaze.", "I can join the routine with support."],
-    C: ["I can respond to a 1-step instruction.", "I can complete the task with a visual scaffold.", "I can show my answer to a partner."],
-    D: ["I can complete the task independently.", "I can explain my thinking with 1–2 sentences.", "I can check my work against the success criteria."],
-  };
-  const csNote = isEnglish
-    ? "\nColourful Semantics: colour-code sentences as WHO (orange) · HAS/IS DOING (yellow) · WHAT (green) · WHERE (blue) · WHEN (purple)."
-    : "";
-  const iDo = isEnglish
-    ? `Teacher models the target sentence using Colourful Semantics strips — orange WHO, yellow verb, green WHAT — while reading '${topic}' aloud (${support}).${csNote}`
-    : isMaths
-      ? `Teacher models '${topic}' using manipulatives (10-frames / MAB / counters) on the IWB, thinking aloud one step at a time (${support}).`
-      : `Teacher demonstrates '${topic}' step by step with visuals (${support}).`;
-  const weDo = isEnglish
-    ? `Small group co-constructs a sentence about '${topic}' by dragging colour-coded cards into WHO · HAS · WHAT order. Staff prompt with the colour cue only.`
-    : `Guided small-group practice on '${topic}'. Staff prompt Student A, Student B and Student C in turn, fading prompts as confidence grows.`;
-  const youDo = isEnglish
-    ? `Each learner builds their own Colourful Semantics sentence about '${topic}' using pre-cut cards, then reads it to a partner.`
-    : `Learners complete an applied task on '${topic}' at their level with a visual checklist. Extension: apply to a new example.`;
-  return {
-    title: `${strand} — ${topic}`,
-    vcCode: isMaths ? "VC2M" : isEnglish ? "VC2E" : "VC2",
-    learningIntention: `We are learning to engage with ${topic.toLowerCase()} in ${strand.toLowerCase()}.`,
-    successCriteria: criteriaByLevel[level],
-    hook: isEnglish
-      ? `Sensory hook: pass around a prop from '${topic}'. Model an orange-WHO / yellow-verb / green-WHAT sentence about it.`
-      : `Short warm-up linked to '${topic}' — 3 minutes, whole class, high-engagement (song, movement or mystery bag).`,
-    iDo,
-    weDo,
-    youDo,
-    narrative: `Level ${level} · ${duration}. ${iDo} ${weDo} ${youDo}`,
-    sessions: [],
-    differentiation: {
-      support: `Reduce steps, offer a 2-choice board, use ${support}.`,
-      extension: "Increase quantity, ask for reasoning, apply in a new context.",
-    },
-    aacSupports: ["Core-word board", "Symbol schedule", ...(isEnglish ? ["Colourful Semantics cards"] : [])],
-    sensorySupports: ["Movement break", "Fidget / weighted lap-pad"],
-    resources: [
-      { name: "Teacher-made visuals", source: "In-house" },
-      { name: isEnglish ? "Colourful Semantics card set" : "Twinkl AU", source: isEnglish ? "SLT resource pack" : "Twinkl" },
-    ],
-    assessment: "Observation checklist + one work sample per learner against the 3 success criteria.",
-  };
+/** Best-effort mapping of a legacy curriculum subject onto a Learning Area. */
+function inferLearningArea(subject: string): LearningArea {
+  const s = subject.toLowerCase();
+  if (/english|literacy|reading|writing|speak/.test(s)) return "Literacy";
+  if (/math|numeracy/.test(s)) return "Numeracy";
+  if (/geograph/.test(s)) return "Geography";
+  if (/histor/.test(s)) return "History";
+  if (/science/.test(s)) return "Science";
+  if (/sensory/.test(s)) return "Sensory Learning";
+  if (/personal|self|care|social/.test(s)) return "Personal Care";
+  return "Literacy";
 }
+
