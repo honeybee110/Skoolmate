@@ -103,6 +103,7 @@ export function BehaviourCentre({ scope = "teacher" }: { scope?: "teacher" | "ad
   const forecasts = useMemo(() => escalationForecasts(incidents), [incidents]);
   const rankings = useMemo(() => interventionRankings(incidents), [incidents]);
   const hypotheses = useMemo(() => functionHypotheses(incidents), [incidents]);
+  const series = useMemo(() => weeklySeries(incidents), [incidents]);
 
   const TrendIcon =
     summary.trend.direction === "up"
@@ -274,7 +275,7 @@ export function BehaviourCentre({ scope = "teacher" }: { scope?: "teacher" | "ad
               </div>
               <ChartCard title="Incident volume by week" subtitle="Incidents vs responses that de-escalated within 10 minutes">
                 <ResponsiveContainer width="100%" height={240}>
-                  <AreaChart data={useMemo(() => weeklySeries(incidents), [incidents])}>
+                  <AreaChart data={series}>
                     <defs>
                       <linearGradient id="gInc" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.5} />
@@ -308,11 +309,11 @@ export function BehaviourCentre({ scope = "teacher" }: { scope?: "teacher" | "ad
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-[11px] font-semibold">
                       {idx + 1}
                     </span>
-                    <ChainNode label="Antecedent" value={c.antecedent} tone="bg-chart1" />
+                    <ChainNode label="Antecedent" value={c.antecedent} tone="bg-primary/10 border-primary/25" />
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    <ChainNode label="Behaviour" value={c.behaviour} tone="bg-chart2" />
+                    <ChainNode label="Behaviour" value={c.behaviour} tone="bg-accent/10 border-accent/25" />
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    <ChainNode label="Response" value={c.consequence} tone="bg-chart3" />
+                    <ChainNode label="Response" value={c.consequence} tone="bg-muted" />
                     <div className="ml-auto flex items-center gap-3 text-xs">
                       <span className="tabular-nums text-muted-foreground">{c.count}× recorded</span>
                       <Badge className={cn("font-normal", c.deEscalationRate >= 60 ? "bg-success/20 text-success-foreground" : "bg-warning/20 text-warning-foreground")}>
