@@ -40,6 +40,8 @@ import { useCurriculumStore } from "@/lib/curriculum-store";
 import { CURRICULUM_SUBJECTS } from "@/lib/curriculum-db";
 import { generateLessonPlan, LEARNING_AREAS, type LearningArea } from "@/lib/lessons.functions";
 import { registerWeeklyUpload } from "@/lib/lesson-uploads.functions";
+import { getEntrySkillsForLesson } from "@/lib/entry-skills";
+
 import { useAuth } from "@/lib/auth-context";
 import { useDirectory, getApprovedOrPublishedTimetable, statusLabel } from "@/lib/directory-store";
 
