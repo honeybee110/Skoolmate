@@ -30,7 +30,7 @@ const LessonInput = z.object({
  * Specialist-school planner shape. Sections are produced in a fixed order:
  * Learning Area → Topic → Learning Intention → Success Criteria →
  * VC / Entry Skills alignment → Resources → Lesson Flow
- * (HOOK, I DO, WE DO, YOU DO, COOL DOWN / REVIEW, ASSESSMENT, REFLECTION).
+ * (HOOK, I DO, WE DO, YOU DO, REFLECTION).
  * Every flow step is written as detailed, teacher-ready prose — never a
  * bullet-point summary.
  */
@@ -55,8 +55,6 @@ const LessonSchema = z.object({
     iDo: FlowStep,
     weDo: FlowStep,
     youDo: FlowStep,
-    coolDown: FlowStep,
-    assessment: FlowStep,
     reflection: FlowStep,
   }),
   differentiation: z.array(
@@ -92,8 +90,6 @@ function fallbackPlan(data: z.infer<typeof LessonInput>): GeneratedLesson {
       iDo: `Teacher models the target skill explicitly while thinking aloud. Break the skill into no more than three steps, showing each one twice with the same wording. Use the IWB or a large model so all learners can see. ES staff sit beside Level B learners and support attending with hand-under-hand and AAC modelling. End the model by restating the success criteria.`,
       weDo: `Guided practice with the whole group, then in small groups. Staff prompt each learner in turn and fade from full physical to gestural to verbal prompts as confidence grows. Rotate through the three groups so every learner has at least two guided turns. Use the AAC board to model comments and choices throughout.`,
       youDo: `Each learner completes an applied task at their level with a visual checklist. Staff step back and record what learners do independently, offering the least prompt necessary. Learners who finish early apply the skill to a second example or teach a peer.`,
-      coolDown: `Bring the group back together for a 5-minute review. Revisit the learning intention card and ask each learner to show or say one thing they did, using AAC, photos or work samples. Preview the next lesson and use a calming sensory routine (breathing, dim lights, quiet music) before transitioning.`,
-      assessment: `Collect evidence against the three success criteria using the observation checklist and one work-sample photo per learner. Record the prompt level used (independent / gestural / verbal / physical). Upload evidence to the student's IEP goal in the Evidence Hub the same day.`,
       reflection: `Teacher notes: which learners met the criteria independently, which supports were most effective, and whether the pitch was right for each level. Record any regulation or behaviour patterns and adjust groupings, prompts or resources for the next session.`,
     },
     differentiation: levels.map((level) => ({
@@ -133,7 +129,7 @@ MANDATORY STRUCTURE — produce these sections, in this order:
 4. Success Criteria ("I can…", 3–5, pitched across the selected levels)
 5. Victorian Curriculum 2.0 / Entry Skills alignment (name the code and content description, and explain the entry-skill mapping per level)
 6. Resources (specific and nameable, including AAC, sensory and staffing)
-7. Lesson Flow: HOOK, I DO, WE DO, YOU DO, COOL DOWN / REVIEW, ASSESSMENT, REFLECTION
+7. Lesson Flow: HOOK, I DO, WE DO, YOU DO, REFLECTION (the plan ends with REFLECTION — do NOT include a cool down, review or assessment section)
 
 Style rules — non-negotiable:
 - Every Lesson Flow step is 5–8 sentences of running prose. NEVER bullet-point summaries, never generic filler.
