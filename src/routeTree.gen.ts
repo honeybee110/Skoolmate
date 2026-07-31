@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TimeclockRouteImport } from './routes/timeclock'
 import { Route as StudentsRouteImport } from './routes/students'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ScopeSequenceRouteImport } from './routes/scope-sequence'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -78,6 +79,11 @@ const StudentsRoute = StudentsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScopeSequenceRoute = ScopeSequenceRouteImport.update({
@@ -359,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/scope-sequence': typeof ScopeSequenceRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
@@ -415,6 +422,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/scope-sequence': typeof ScopeSequenceRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
@@ -473,6 +481,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/scope-sequence': typeof ScopeSequenceRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
@@ -532,6 +541,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/resources'
     | '/scope-sequence'
+    | '/search'
     | '/settings'
     | '/students'
     | '/timeclock'
@@ -588,6 +598,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/resources'
     | '/scope-sequence'
+    | '/search'
     | '/settings'
     | '/students'
     | '/timeclock'
@@ -645,6 +656,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/resources'
     | '/scope-sequence'
+    | '/search'
     | '/settings'
     | '/students'
     | '/timeclock'
@@ -703,6 +715,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   ResourcesRoute: typeof ResourcesRoute
   ScopeSequenceRoute: typeof ScopeSequenceRoute
+  SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
   TimeclockRoute: typeof TimeclockRoute
@@ -759,6 +772,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scope-sequence': {
@@ -1183,6 +1203,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   ResourcesRoute: ResourcesRoute,
   ScopeSequenceRoute: ScopeSequenceRoute,
+  SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   StudentsRoute: StudentsRouteWithChildren,
   TimeclockRoute: TimeclockRoute,
