@@ -505,24 +505,27 @@ function LessonPlannerPage() {
 
             <div className="mt-3 grid gap-3 md:grid-cols-4">
               <div>
-                <Label className="text-xs">Topic</Label>
+                <Label className="text-xs">1. Learning Area</Label>
+                <Select
+                  value={draft.learningArea}
+                  onValueChange={(v) => patchDraft({ learningArea: v as LearningArea })}
+                >
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {LEARNING_AREAS.map((a) => (
+                      <SelectItem key={a} value={a}>{a}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">2. Topic</Label>
                 <Input
                   value={draft.topic}
                   onChange={(e) => patchDraft({ topic: e.target.value })}
                   placeholder="e.g. Blend and read CVC words"
                   className="mt-1 h-9"
                 />
-              </div>
-              <div>
-                <Label className="text-xs">Cohort level</Label>
-                <Select value={draft.level} onValueChange={(v) => patchDraft({ level: v as CohortLevel })}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="B">Level B</SelectItem>
-                    <SelectItem value="C">Level C</SelectItem>
-                    <SelectItem value="D">Level D</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <div>
                 <Label className="text-xs">Duration</Label>
@@ -533,14 +536,36 @@ function LessonPlannerPage() {
                 />
               </div>
               <div>
-                <Label className="text-xs">Ability range</Label>
-                <Input
-                  value={draft.abilityRange}
-                  onChange={(e) => patchDraft({ abilityRange: e.target.value })}
-                  className="mt-1 h-9"
-                />
+                <Label className="text-xs">Student ability levels</Label>
+                <div className="mt-1 flex h-9 items-center gap-1.5">
+                  {COHORT_LEVELS.map((lv) => {
+                    const on = draft.levels.includes(lv);
+                    return (
+                      <button
+                        key={lv}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() =>
+                          patchDraft({
+                            levels: on ? draft.levels.filter((x) => x !== lv) : [...draft.levels, lv].sort(),
+                            level: on ? draft.level : lv,
+                          })
+                        }
+                        className={cn(
+                          "flex-1 rounded-full border px-2 py-1.5 text-[11px] font-medium transition",
+                          on
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-background text-muted-foreground hover:border-primary/50",
+                        )}
+                      >
+                        Level {lv}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
+
 
             {alignmentSuggestions.length > 0 && (
               <div className="mt-3 rounded-md border bg-muted/40 p-3">
