@@ -21,6 +21,13 @@ import type {
   TimeBlock,
 } from "@/lib/behaviour-intelligence";
 import { DAYS, TIME_BLOCKS } from "@/lib/behaviour-intelligence";
+import {
+  defaultAlertRuleConfig,
+  defaultAlertThresholds,
+  defaultEnabledRules,
+  type AlertRuleConfig,
+  type AlertRuleKey,
+} from "@/lib/leadership-alert-rules";
 
 export type Term = "Term 1" | "Term 2" | "Term 3" | "Term 4";
 export const TERMS: Term[] = ["Term 1", "Term 2", "Term 3", "Term 4"];
