@@ -32,6 +32,7 @@ import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as AskRouteImport } from './routes/ask'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LessonsIndexRouteImport } from './routes/lessons.index'
+import { Route as AskIndexRouteImport } from './routes/ask.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TeacherSsgMinutesRouteImport } from './routes/teacher.ssg-minutes'
 import { Route as TeacherLoginRouteImport } from './routes/teacher.login'
@@ -182,6 +183,11 @@ const LessonsIndexRoute = LessonsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LessonsRoute,
+} as any)
+const AskIndexRoute = AskIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AskRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
@@ -361,7 +367,7 @@ const IepsGoalIdPrintRoute = IepsGoalIdPrintRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/ask': typeof AskRoute
+  '/ask': typeof AskRouteWithChildren
   '/attendance': typeof AttendanceRoute
   '/auth': typeof AuthRoute
   '/behaviour': typeof BehaviourRoute
@@ -416,12 +422,12 @@ export interface FileRoutesByFullPath {
   '/teacher/login': typeof TeacherLoginRoute
   '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin/': typeof AdminIndexRoute
+  '/ask/': typeof AskIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/ask': typeof AskRoute
   '/attendance': typeof AttendanceRoute
   '/auth': typeof AuthRoute
   '/behaviour': typeof BehaviourRoute
@@ -475,13 +481,14 @@ export interface FileRoutesByTo {
   '/teacher/login': typeof TeacherLoginRoute
   '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin': typeof AdminIndexRoute
+  '/ask': typeof AskIndexRoute
   '/lessons': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/ask': typeof AskRoute
+  '/ask': typeof AskRouteWithChildren
   '/attendance': typeof AttendanceRoute
   '/auth': typeof AuthRoute
   '/behaviour': typeof BehaviourRoute
@@ -536,6 +543,7 @@ export interface FileRoutesById {
   '/teacher/login': typeof TeacherLoginRoute
   '/teacher/ssg-minutes': typeof TeacherSsgMinutesRoute
   '/admin/': typeof AdminIndexRoute
+  '/ask/': typeof AskIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/ieps/$goalId/print': typeof IepsGoalIdPrintRoute
 }
@@ -598,12 +606,12 @@ export interface FileRouteTypes {
     | '/teacher/login'
     | '/teacher/ssg-minutes'
     | '/admin/'
+    | '/ask/'
     | '/lessons/'
     | '/ieps/$goalId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/ask'
     | '/attendance'
     | '/auth'
     | '/behaviour'
@@ -657,6 +665,7 @@ export interface FileRouteTypes {
     | '/teacher/login'
     | '/teacher/ssg-minutes'
     | '/admin'
+    | '/ask'
     | '/lessons'
     | '/ieps/$goalId/print'
   id:
@@ -717,13 +726,14 @@ export interface FileRouteTypes {
     | '/teacher/login'
     | '/teacher/ssg-minutes'
     | '/admin/'
+    | '/ask/'
     | '/lessons/'
     | '/ieps/$goalId/print'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AskRoute: typeof AskRoute
+  AskRoute: typeof AskRouteWithChildren
   AttendanceRoute: typeof AttendanceRoute
   AuthRoute: typeof AuthRoute
   BehaviourRoute: typeof BehaviourRoute
@@ -939,6 +949,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lessons/'
       preLoaderRoute: typeof LessonsIndexRouteImport
       parentRoute: typeof LessonsRoute
+    }
+    '/ask/': {
+      id: '/ask/'
+      path: '/'
+      fullPath: '/ask/'
+      preLoaderRoute: typeof AskIndexRouteImport
+      parentRoute: typeof AskRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -1188,6 +1205,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AskRouteChildren {
+  AskIndexRoute: typeof AskIndexRoute
+}
+
+const AskRouteChildren: AskRouteChildren = {
+  AskIndexRoute: AskIndexRoute,
+}
+
+const AskRouteWithChildren = AskRoute._addFileChildren(AskRouteChildren)
+
 interface IepsRouteChildren {
   IepsGoalIdPrintRoute: typeof IepsGoalIdPrintRoute
 }
@@ -1227,7 +1254,7 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AskRoute: AskRoute,
+  AskRoute: AskRouteWithChildren,
   AttendanceRoute: AttendanceRoute,
   AuthRoute: AuthRoute,
   BehaviourRoute: BehaviourRoute,
