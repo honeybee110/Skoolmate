@@ -766,96 +766,150 @@ export function interventionQueue(incidents: LeadershipIncident[]): QueueEntry[]
 
 export interface LeadershipAlert {
   id: string;
+  /** Stable identifier for the rule that produced the alert. */
+  rule: AlertRuleKey;
   severity: "critical" | "warning" | "info";
   title: string;
   detail: string;
   scope: string;
+  /** Campus the alert belongs to, or "all" for whole-school alerts. */
+  campus: Campus | "all";
   classId?: string;
   evidence: string;
 }
 
+/**
+ * Evaluate every leadership alert rule. `config.enabled` decides which rules
+ * contribute — pass all rules enabled to preview ("test") the full rule set.
+ */
 export function leadershipAlerts(
   incidents: LeadershipIncident[],
   weights: CapacityWeights = defaultCapacityWeights,
+  config: AlertRuleConfig = defaultAlertRuleConfig,
 ): LeadershipAlert[] {
+  const t = { ...defaultAlertThresholds, ...config.thresholds };
+  const on = { ...defaultEnabledRules, ...config.enabled };
   const alerts: LeadershipAlert[] = [];
   const cells = classHeatCells(incidents, weights).filter((c) => c.incidents > 0);
+  const grouped = groupIncidentsByClass(incidents);
 
   for (const c of cells) {
-    if (c.trendPct >= 40) {
+    if (on.risk_trend && c.trendPct >= t.riskIncreasePct) {
       alerts.push({
         id: `alert-trend-${c.classId}`,
+        rule: "risk_trend",
         severity: "critical",
         title: `${c.className} incidents up ${c.trendPct}% week-on-week`,
-        detail: `Density is now ${c.density} incidents per student. Consider an additional ES allocation or a class-team debrief this week.`,
+        detail: `Density is now ${c.density} incidents per student, above the ${t.riskIncreasePct}% risk-change threshold. Consider an additional ES allocation or a class-team debrief this week.`,
         scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
         classId: c.classId,
         evidence: `${c.incidents} incident records in the selected period`,
       });
     }
-    if (c.risk === "High") {
+    if (on.capacity_index && c.capacityIndex >= t.capacityIndexHigh) {
       alerts.push({
         id: `alert-capacity-${c.classId}`,
+        rule: "capacity_index",
         severity: "critical",
         title: `${c.className} Behaviour Capacity Index at ${c.capacityIndex}`,
         detail: `High-intensity incidents: ${c.highIntensity}. De-escalation rate ${c.deEscalationRate}%. This is a resourcing signal for the class, not a measure of the teacher.`,
         scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
         classId: c.classId,
         evidence: `${c.minutesLost} teaching minutes lost in period`,
       });
-    } else if (c.deEscalationRate < 55 && c.incidents >= 8) {
+    }
+    if (
+      on.de_escalation &&
+      c.deEscalationRate < t.deEscalationFloorPct &&
+      c.incidents >= t.minIncidents
+    ) {
       alerts.push({
         id: `alert-deesc-${c.classId}`,
+        rule: "de_escalation",
         severity: "warning",
-        title: `${c.className} de-escalation rate below 55%`,
+        title: `${c.className} de-escalation rate below ${t.deEscalationFloorPct}%`,
         detail: `Current strategies resolved ${c.deEscalationRate}% of incidents within 10 minutes. A review of the class response scripts with allied health may help.`,
         scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
         classId: c.classId,
         evidence: `${c.incidents} incident records`,
       });
     }
-    if (c.trendPct <= -35 && c.incidents >= 6) {
+    if (on.teaching_time_lost && c.minutesLost >= t.teachingTimeLostMins) {
+      alerts.push({
+        id: `alert-timelost-${c.classId}`,
+        rule: "teaching_time_lost",
+        severity: "warning",
+        title: `${c.className} lost ${formatMinutes(c.minutesLost)} of teaching time`,
+        detail: `Above the ${formatMinutes(t.teachingTimeLostMins)} budget for this period across ${c.incidents} incidents (incident plus recovery time).`,
+        scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
+        classId: c.classId,
+        evidence: `${c.incidents} incident records, ${c.highIntensity} high intensity`,
+      });
+    }
+    if (on.emerging_pattern && c.incidents >= t.minIncidents) {
+      const list = grouped.get(c.classId) ?? [];
+      const candidates: { kind: string; top: { name: string; count: number } | undefined }[] = [
+        { kind: "antecedent", top: countBy(list.map((i) => i.antecedent))[0] },
+        { kind: "location", top: countBy(list.map((i) => i.location))[0] },
+        { kind: "time window", top: countBy(list.map((i) => `${i.day} ${i.time}`))[0] },
+      ];
+      for (const cand of candidates) {
+        if (!cand.top) continue;
+        const share = Math.round((cand.top.count / list.length) * 100);
+        if (share < t.emergingPatternSharePct) continue;
+        alerts.push({
+          id: `alert-pattern-${c.classId}-${cand.kind.replace(" ", "-")}`,
+          rule: "emerging_pattern",
+          severity: "warning",
+          title: `${c.className}: ${share}% of incidents share one ${cand.kind}`,
+          detail: `"${cand.top.name}" accounts for ${cand.top.count} of ${list.length} incidents — above the ${t.emergingPatternSharePct}% emerging-pattern threshold. A targeted environmental or routine change is likely to have the biggest effect.`,
+          scope: `${c.campus} · ${c.yearLevel}`,
+          campus: c.campus,
+          classId: c.classId,
+          evidence: `${list.length} incident records`,
+        });
+      }
+    }
+    if (on.improvement && c.trendPct <= -t.improvementDropPct && c.incidents >= 6) {
       alerts.push({
         id: `alert-improve-${c.classId}`,
+        rule: "improvement",
         severity: "info",
         title: `${c.className} incidents down ${Math.abs(c.trendPct)}%`,
         detail: "Worth capturing what changed — the approach may transfer to other classes.",
         scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
         classId: c.classId,
         evidence: `${c.incidents} incident records`,
       });
     }
   }
 
-  const overdue = schoolStudents.filter(
-    (s) => s.bsp === "Overdue" && incidents.some((i) => i.studentId === s.id),
-  );
-  if (overdue.length) {
-    alerts.push({
-      id: "alert-bsp-overdue",
-      severity: "critical",
-      title: `${overdue.length} behaviour support plan${overdue.length > 1 ? "s" : ""} overdue for review`,
-      detail: `Students: ${overdue.map((s) => s.name).join(", ")}. Schedule SSG reviews before the end of the term.`,
-      scope: "Whole school",
-      evidence: "Behaviour support plan register",
-    });
-  }
-
-  const peak = countBy(incidents.map((i) => `${i.day} ${i.time}`))[0];
-  if (peak && incidents.length) {
-    alerts.push({
-      id: "alert-peak-window",
-      severity: "warning",
-      title: `Peak incident window is ${peak.name}`,
-      detail: `${peak.count} of ${incidents.length} incidents occur in this window. A whole-school transition routine may reduce load across classes.`,
-      scope: "Whole school",
-      evidence: `${incidents.length} incident records`,
-    });
+  if (on.bsp_overdue) {
+    const involved = new Set(incidents.map((i) => i.studentId));
+    const overdue = schoolStudents.filter((s) => s.bsp === "Overdue" && involved.has(s.id));
+    if (overdue.length) {
+      alerts.push({
+        id: "alert-bsp-overdue",
+        rule: "bsp_overdue",
+        severity: "critical",
+        title: `${overdue.length} behaviour support plan${overdue.length > 1 ? "s" : ""} overdue for review`,
+        detail: `Students: ${overdue.map((s) => s.name).join(", ")}. Schedule SSG reviews before the end of the term.`,
+        scope: "Whole school",
+        campus: "all",
+        evidence: "Behaviour support plan register",
+      });
+    }
   }
 
   const order = { critical: 0, warning: 1, info: 2 } as const;
   return alerts.sort((a, b) => order[a.severity] - order[b.severity]);
 }
+
 
 export function formatMinutes(mins: number): string {
   const hours = Math.floor(mins / 60);
