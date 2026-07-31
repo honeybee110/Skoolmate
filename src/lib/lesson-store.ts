@@ -35,7 +35,20 @@ export interface LessonNotes {
   reflection?: string;
   /** Differentiation by ability level (Level B / C / D). */
   differentiation?: string;
+  /** How each selected entry skill is worked on in this lesson. */
+  entrySkillAlignment?: string;
+  /** Sensory / regulation supports. */
+  sensorySupports?: string;
+  /** AAC and communication supports. */
+  communicationSupports?: string;
+  /** Visuals to print or set up. */
+  visuals?: string;
+  /** Evidence staff collect for assessment. */
+  assessmentEvidence?: string;
+  /** Extension activities. */
+  extension?: string;
 }
+
 
 
 export interface LessonSnapshot {
