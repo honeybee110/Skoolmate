@@ -237,7 +237,7 @@ export function BehaviourCentre({ scope = "teacher" }: { scope?: "teacher" | "ad
                       <XAxis type="number" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
                       <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
                       <Tooltip content={<SoftTooltip />} />
-                      <Bar dataKey="count" radius={[0, 6, 6, 0]} fill="var(--chart-1)" />
+                      <Bar isAnimationActive={false} dataKey="count" radius={[0, 6, 6, 0]} fill="var(--chart-1)" />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartCard>
@@ -248,7 +248,7 @@ export function BehaviourCentre({ scope = "teacher" }: { scope?: "teacher" | "ad
                       <XAxis type="number" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
                       <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
                       <Tooltip content={<SoftTooltip />} />
-                      <Bar dataKey="count" radius={[0, 6, 6, 0]} fill="var(--chart-2)" />
+                      <Bar isAnimationActive={false} dataKey="count" radius={[0, 6, 6, 0]} fill="var(--chart-2)" />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartCard>
@@ -256,6 +256,7 @@ export function BehaviourCentre({ scope = "teacher" }: { scope?: "teacher" | "ad
                   <ResponsiveContainer width="100%" height={220}>
                     <PieChart>
                       <Pie
+                        isAnimationActive={false}
                         data={abc.consequences}
                         dataKey="count"
                         nameKey="name"
@@ -291,8 +292,8 @@ export function BehaviourCentre({ scope = "teacher" }: { scope?: "teacher" | "ad
                     <YAxis tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
                     <Tooltip content={<SoftTooltip />} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Area type="monotone" dataKey="incidents" stroke="var(--chart-1)" fill="url(#gInc)" strokeWidth={2} />
-                    <Area type="monotone" dataKey="deEscalated" stroke="var(--chart-2)" fill="url(#gDe)" strokeWidth={2} />
+                    <Area isAnimationActive={false} name="Incidents" type="monotone" dataKey="incidents" stroke="var(--chart-1)" fill="url(#gInc)" strokeWidth={2} />
+                    <Area isAnimationActive={false} name="De-escalated" type="monotone" dataKey="deEscalated" stroke="var(--chart-2)" fill="url(#gDe)" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -408,7 +409,7 @@ export function BehaviourCentre({ scope = "teacher" }: { scope?: "teacher" | "ad
                     <XAxis type="number" domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
                     <YAxis type="category" dataKey="intervention" width={170} tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
                     <Tooltip content={<SoftTooltip />} />
-                    <Bar dataKey="successRate" radius={[0, 6, 6, 0]}>
+                    <Bar isAnimationActive={false} dataKey="successRate" radius={[0, 6, 6, 0]}>
                       {rankings.map((_, i) => (
                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                       ))}
