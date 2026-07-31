@@ -33,7 +33,7 @@ export const listAskThreads = createServerFn({ method: "GET" })
 export const createAskThread = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AskThread> => {
-    const { data, error } = await (context.supabase as any)
+    const { data, error } = await context.supabase
       .from("ask_threads")
       .insert({ user_id: context.userId, title: "New conversation" })
       .select("id, title, created_at, updated_at")
