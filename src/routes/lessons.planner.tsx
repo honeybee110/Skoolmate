@@ -214,49 +214,44 @@ function LessonPlannerPage() {
   const generateFn = useServerFn(generateLessonPlan);
   const generate = useMutation({
     mutationFn: async () => {
-      // Prototype-first: build a full sample plan locally so the button
-      // always works. If a Lovable AI key is available, layer that on top,
-      // otherwise fall back to the mock.
-      const mock = mockGenerateLesson({
-        subject: draft.subject,
-        strand: draft.strand,
-        topic: draft.topic || draft.title || draft.strand,
-        level: draft.level,
-        duration: draft.duration,
+      if (!draft.levels.length) throw new Error("Select at least one ability level.");
+      return await generateFn({
+        data: {
+          learningArea: draft.learningArea,
+          strand: draft.strand,
+          topic: draft.topic || draft.title || draft.strand,
+          duration: draft.duration,
+          levels: draft.levels,
+          entrySkills: [],
+          notes: "",
+        },
       });
-      try {
-        const out = await generateFn({
-          data: {
-            subject: draft.subject,
-            strand: draft.strand,
-            topic: draft.topic || draft.title || draft.strand,
-            duration: draft.duration,
-            abilityRange: `Level ${draft.level} · ${draft.abilityRange}`,
-            notes: "",
-          },
-        });
-        return out;
-      } catch {
-        return mock;
-      }
     },
     onSuccess: (out) => {
       patchDraft({
         title: draft.title || out.title,
+        topic: draft.topic || out.topic,
         vcCode: draft.vcCode || out.vcCode,
       });
       patchNotes({
         learningIntention: out.learningIntention,
-        successCriteria: out.successCriteria.join("\n"),
-        hook: out.hook,
-        iDo: out.iDo,
-        weDo: out.weDo,
-        youDo: out.youDo,
+        successCriteria: out.successCriteria.map((c) => (c.startsWith("I can") ? c : `I can ${c}`)).join("\n"),
+        alignment: out.alignment,
+        resources: out.resources.join("\n"),
+        hook: out.flow.hook,
+        iDo: out.flow.iDo,
+        weDo: out.flow.weDo,
+        youDo: out.flow.youDo,
+        coolDown: out.flow.coolDown,
+        assessment: out.flow.assessment,
+        reflection: out.flow.reflection,
+        differentiation: out.differentiation.map((d) => `Level ${d.level}: ${d.activity}`).join("\n\n"),
       });
-      toast.success("Mate drafted the 6-part plan — review, edit or regenerate.");
+      toast.success("Mate drafted a full specialist-school planner — review, edit or regenerate.");
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Generation failed"),
   });
+
 
   const registerFn = useServerFn(registerWeeklyUpload);
   const submit = useMutation({
