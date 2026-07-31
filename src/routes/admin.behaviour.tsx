@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { RoleGate } from "@/components/role-gate";
-import { BehaviourCentre } from "@/components/behaviour/behaviour-centre";
+import { BehaviourLeadership } from "@/components/behaviour/behaviour-leadership";
 
 export const Route = createFileRoute("/admin/behaviour")({
   head: () => ({
@@ -11,13 +11,13 @@ export const Route = createFileRoute("/admin/behaviour")({
       {
         name: "description",
         content:
-          "Whole-school behaviour intelligence: risk levels, recurring behaviour chains, functional hypotheses and intervention rankings.",
+          "Executive behaviour analytics for school leaders: class heat maps, intervention queues, capacity index and leadership alerts.",
       },
       { property: "og:title", content: "Behaviour Intelligence Centre · SkoolMate Admin" },
       {
         property: "og:description",
         content:
-          "Leadership view of school-wide behaviour patterns, escalation forecasts and intervention effectiveness.",
+          "School-wide behaviour operational insight: risk, teaching time lost, intervention priorities and drill-down class intelligence.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -28,10 +28,11 @@ export const Route = createFileRoute("/admin/behaviour")({
       <AppShell variant="admin">
         <PageHeader
           title="Behaviour Intelligence Centre"
-          subtitle="Whole-school behaviour insight for leadership, wellbeing and allied health teams."
+          subtitle="School-wide behaviour operations for leadership — heat maps, intervention priorities and capacity planning."
         />
-        <BehaviourCentre scope="admin" />
+        <BehaviourLeadership />
       </AppShell>
     </RoleGate>
   ),
 });
+
