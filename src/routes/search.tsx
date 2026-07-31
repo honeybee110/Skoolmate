@@ -15,7 +15,7 @@ import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Search, Upload, FileText, FileImage, FileSpreadsheet, Presentation,
-  Loader2, ExternalLink, Trash2, RefreshCw, CheckCircle2, AlertTriangle, Highlighter,
+  Loader2, ExternalLink, Trash2, RefreshCw, CheckCircle2, AlertTriangle, Highlighter, Lock,
 } from "lucide-react";
 import {
   listDocuments, registerDocument, indexDocument, searchDocuments,
