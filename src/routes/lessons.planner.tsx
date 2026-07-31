@@ -72,16 +72,19 @@ const STATUS_META: Record<LessonStatus, { label: string; className: string; Icon
 };
 
 type CohortLevel = "B" | "C" | "D";
+const COHORT_LEVELS: CohortLevel[] = ["B", "C", "D"];
 
 interface Draft {
   id?: string;
   title: string;
+  learningArea: LearningArea;
   subject: string;
   strand: string;
   topic: string;
   duration: string;
   abilityRange: string;
   level: CohortLevel;
+  levels: CohortLevel[];
   term: LessonTerm;
   week?: LessonWeek;
   vcCode?: string;
@@ -90,17 +93,20 @@ interface Draft {
 
 const NEW_DRAFT: Draft = {
   title: "",
+  learningArea: "Literacy",
   subject: CURRICULUM_SUBJECTS[0].label,
   strand: CURRICULUM_SUBJECTS[0].strands[0],
   topic: "",
   duration: "45 min",
   abilityRange: "Towards Foundation A–D",
   level: "C",
+  levels: ["B", "C", "D"],
   term: "Term 1",
   week: "Week 1",
   vcCode: "",
   notes: EMPTY_NOTES,
 };
+
 
 function LessonPlannerPage() {
   const { profile, user } = useAuth();
