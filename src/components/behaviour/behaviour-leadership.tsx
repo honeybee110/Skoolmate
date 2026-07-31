@@ -919,11 +919,25 @@ function AlertsPanel({
   alerts: ReturnType<typeof leadershipAlerts>;
   onDrill: (id: string) => void;
 }) {
+  const configureCta = (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed p-3">
+      <p className="text-xs text-muted-foreground">
+        Thresholds, subscribers and rule testing are managed in alert settings.
+      </p>
+      <Button asChild size="sm" variant="outline">
+        <Link to="/admin/behaviour/alerts">Configure alerts</Link>
+      </Button>
+    </div>
+  );
+
   if (alerts.length === 0) {
     return (
-      <Card className="p-8 text-center text-sm text-muted-foreground">
-        No leadership alerts for the current filters.
-      </Card>
+      <>
+        {configureCta}
+        <Card className="p-8 text-center text-sm text-muted-foreground">
+          No leadership alerts for the current filters.
+        </Card>
+      </>
     );
   }
   const tone = {
@@ -939,6 +953,8 @@ function AlertsPanel({
 
   return (
     <>
+      {configureCta}
+
       {alerts.map((a) => (
         <Card key={a.id} className={cn("p-4", tone[a.severity])}>
           <div className="flex items-start gap-3">
