@@ -13,7 +13,8 @@ export interface AskThread {
 export interface AskStoredMessage {
   id: string;
   role: "user" | "assistant" | "system";
-  parts: Record<string, unknown>[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parts: any[];
   created_at: string;
 }
 
