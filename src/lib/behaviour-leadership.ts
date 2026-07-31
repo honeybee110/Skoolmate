@@ -21,6 +21,13 @@ import type {
   TimeBlock,
 } from "@/lib/behaviour-intelligence";
 import { DAYS, TIME_BLOCKS } from "@/lib/behaviour-intelligence";
+import {
+  defaultAlertRuleConfig,
+  defaultAlertThresholds,
+  defaultEnabledRules,
+  type AlertRuleConfig,
+  type AlertRuleKey,
+} from "@/lib/leadership-alert-rules";
 
 export type Term = "Term 1" | "Term 2" | "Term 3" | "Term 4";
 export const TERMS: Term[] = ["Term 1", "Term 2", "Term 3", "Term 4"];
@@ -296,20 +303,103 @@ export const defaultFilters: LeadershipFilters = {
   to: "",
 };
 
+/* ------------------------------------------------------------ Fast indexes */
+
+/**
+ * Large schools produce tens of thousands of incident rows. Every derivation
+ * below reads from prebuilt indexes (built once, in a single pass) plus small
+ * memo caches, so filtering and drill-down cost O(matching rows) rather than
+ * O(classes x incidents) on every render.
+ */
+const byClassGlobal = new Map<string, LeadershipIncident[]>();
+for (const inc of leadershipIncidents) {
+  const list = byClassGlobal.get(inc.classId);
+  if (list) list.push(inc);
+  else byClassGlobal.set(inc.classId, [inc]);
+}
+
+export const classById = new Map(schoolClasses.map((c) => [c.id, c]));
+export const studentById = new Map(schoolStudents.map((s) => [s.id, s]));
+export const studentsByClass = new Map<string, SchoolStudent[]>();
+for (const s of schoolStudents) {
+  const list = studentsByClass.get(s.classId);
+  if (list) list.push(s);
+  else studentsByClass.set(s.classId, [s]);
+}
+
+
+const filterCache = new Map<string, LeadershipIncident[]>();
+const classGroupCache = new WeakMap<LeadershipIncident[], Map<string, LeadershipIncident[]>>();
+
+/** Group incidents by class once and reuse the grouping for the same array. */
+export function groupIncidentsByClass(
+  incidents: LeadershipIncident[],
+): Map<string, LeadershipIncident[]> {
+  if (incidents === leadershipIncidents) return byClassGlobal;
+  const cached = classGroupCache.get(incidents);
+  if (cached) return cached;
+  const map = new Map<string, LeadershipIncident[]>();
+  for (const inc of incidents) {
+    const list = map.get(inc.classId);
+    if (list) list.push(inc);
+    else map.set(inc.classId, [inc]);
+  }
+  classGroupCache.set(incidents, map);
+  return map;
+}
+
 export function applyFilters(
   incidents: LeadershipIncident[],
   f: LeadershipFilters,
 ): LeadershipIncident[] {
-  return incidents.filter((i) => {
-    if (f.campus !== "all" && i.campus !== f.campus) return false;
-    if (f.yearLevel !== "all" && i.yearLevel !== f.yearLevel) return false;
-    if (f.classId !== "all" && i.classId !== f.classId) return false;
-    if (f.term !== "all" && i.term !== f.term) return false;
-    if (f.from && i.date < f.from) return false;
-    if (f.to && i.date > f.to) return false;
-    return true;
-  });
+  const cacheable = incidents === leadershipIncidents;
+  const key = `${f.campus}|${f.yearLevel}|${f.classId}|${f.term}|${f.from}|${f.to}`;
+  if (cacheable) {
+    const hit = filterCache.get(key);
+    if (hit) return hit;
+  }
+
+  const scoped = schoolClasses.filter(
+    (c) =>
+      (f.campus === "all" || c.campus === f.campus) &&
+      (f.yearLevel === "all" || c.yearLevel === f.yearLevel) &&
+      (f.classId === "all" || c.id === f.classId),
+  );
+
+  let base: LeadershipIncident[];
+  let classesApplied = false;
+  if (cacheable && scoped.length < schoolClasses.length) {
+    // Pull only the class buckets in scope instead of scanning every row.
+    base = [];
+    for (const c of scoped) {
+      const list = byClassGlobal.get(c.id);
+      if (list) for (const inc of list) base.push(inc);
+    }
+    base.sort((a, b) => a.date.localeCompare(b.date));
+    classesApplied = true;
+  } else {
+    base = incidents;
+  }
+
+  const scopedIds = classesApplied ? null : new Set(scoped.map((c) => c.id));
+  const needsScan = !classesApplied || f.term !== "all" || !!f.from || !!f.to;
+  const out = needsScan
+    ? base.filter((i) => {
+        if (scopedIds && !scopedIds.has(i.classId)) return false;
+        if (f.term !== "all" && i.term !== f.term) return false;
+        if (f.from && i.date < f.from) return false;
+        if (f.to && i.date > f.to) return false;
+        return true;
+      })
+    : base;
+
+  if (cacheable) {
+    if (filterCache.size > 64) filterCache.clear();
+    filterCache.set(key, out);
+  }
+  return out;
 }
+
 
 export const yearLevels = [...new Set(schoolClasses.map((c) => c.yearLevel))];
 
@@ -364,26 +454,52 @@ export function executiveKpis(incidents: LeadershipIncident[]): ExecutiveKpis {
   };
 }
 
+const studentGroupCache = new WeakMap<LeadershipIncident[], Map<string, LeadershipIncident[]>>();
+
 function groupByStudent(incidents: LeadershipIncident[]) {
+  const cached = studentGroupCache.get(incidents);
+  if (cached) return cached;
   const map = new Map<string, LeadershipIncident[]>();
-  for (const i of incidents) map.set(i.studentId, [...(map.get(i.studentId) ?? []), i]);
+  for (const i of incidents) {
+    const list = map.get(i.studentId);
+    if (list) list.push(i);
+    else map.set(i.studentId, [i]);
+  }
+  studentGroupCache.set(incidents, map);
   return map;
 }
 
-export function weeklyVolume(incidents: LeadershipIncident[]) {
+export interface WeeklyPoint {
+  label: string;
+  incidents: number;
+  minutesLost: number;
+  deEscalated: number;
+}
+
+const weeklyCache = new WeakMap<LeadershipIncident[], WeeklyPoint[]>();
+
+export function weeklyVolume(incidents: LeadershipIncident[]): WeeklyPoint[] {
+  const cached = weeklyCache.get(incidents);
+  if (cached) return cached;
   const map = new Map<string, { incidents: number; minutesLost: number; deEscalated: number }>();
   for (const i of incidents) {
     const key = `${i.term.replace("Term ", "T")} W${i.week.toString().padStart(2, "0")}`;
-    const row = map.get(key) ?? { incidents: 0, minutesLost: 0, deEscalated: 0 };
+    let row = map.get(key);
+    if (!row) {
+      row = { incidents: 0, minutesLost: 0, deEscalated: 0 };
+      map.set(key, row);
+    }
     row.incidents++;
     row.minutesLost += i.minutesLost;
     if (i.deEscalated) row.deEscalated++;
-    map.set(key, row);
   }
-  return [...map.entries()]
+  const out = [...map.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([label, r]) => ({ label, ...r }));
+  weeklyCache.set(incidents, out);
+  return out;
 }
+
 
 /* ----------------------------------------------------------- Class heat map */
 
@@ -422,14 +538,33 @@ export const defaultCapacityWeights: CapacityWeights = {
   interventionSuccess: 20,
 };
 
+const heatCache = new WeakMap<LeadershipIncident[], Map<string, ClassHeatCell[]>>();
+
 export function classHeatCells(
   incidents: LeadershipIncident[],
   weights: CapacityWeights = defaultCapacityWeights,
 ): ClassHeatCell[] {
+  const weightKey = `${weights.frequency}|${weights.severity}|${weights.trend}|${weights.interventionSuccess}`;
+  let perArray = heatCache.get(incidents);
+  if (perArray) {
+    const hit = perArray.get(weightKey);
+    if (hit) return hit;
+  } else {
+    perArray = new Map();
+    heatCache.set(incidents, perArray);
+  }
+
+  const grouped = groupIncidentsByClass(incidents);
   const cells = schoolClasses.map((cls) => {
-    const list = incidents.filter((i) => i.classId === cls.id);
-    const highIntensity = list.filter((i) => i.intensity === 3).length;
-    const deEsc = list.filter((i) => i.deEscalated).length;
+    const list = grouped.get(cls.id) ?? [];
+    let highIntensity = 0;
+    let deEsc = 0;
+    let minutesLost = 0;
+    for (const i of list) {
+      if (i.intensity === 3) highIntensity++;
+      if (i.deEscalated) deEsc++;
+      minutesLost += i.minutesLost;
+    }
     const trend = weeklyVolume(list);
     const last = trend[trend.length - 1]?.incidents ?? 0;
     const prev = trend[trend.length - 2]?.incidents ?? last;
@@ -444,7 +579,7 @@ export function classHeatCells(
       density: Number((list.length / cls.studentCount).toFixed(2)),
       highIntensity,
       deEscalationRate: Math.round((deEsc / (list.length || 1)) * 100),
-      minutesLost: list.reduce((s, i) => s + i.minutesLost, 0),
+      minutesLost,
       trendPct: prev === 0 ? 0 : Math.round(((last - prev) / prev) * 100),
       _severity: list.length ? highIntensity / list.length : 0,
     };
@@ -453,7 +588,7 @@ export function classHeatCells(
   const maxDensity = Math.max(1, ...cells.map((c) => c.density));
   const total = weights.frequency + weights.severity + weights.trend + weights.interventionSuccess || 1;
 
-  return cells.map((c) => {
+  const out = cells.map((c) => {
     const frequencyScore = (c.density / maxDensity) * weights.frequency;
     const severityScore = c._severity * weights.severity;
     const trendScore = (Math.max(-50, Math.min(50, c.trendPct)) + 50) / 100 * weights.trend;
@@ -468,7 +603,11 @@ export function classHeatCells(
       risk: (capacityIndex >= 65 ? "High" : capacityIndex >= 50 ? "Elevated" : capacityIndex >= 32 ? "Moderate" : "Low") as ClassHeatCell["risk"],
     };
   });
+
+  perArray.set(weightKey, out);
+  return out;
 }
+
 
 /* -------------------------------------------------- Class intelligence page */
 
@@ -493,17 +632,25 @@ export function classIntelligence(
 ): ClassIntelligence | null {
   const cls = schoolClasses.find((c) => c.id === classId);
   if (!cls) return null;
-  const list = incidents.filter((i) => i.classId === classId);
-  const roster = schoolStudents.filter((s) => s.classId === classId);
+  const list = groupIncidentsByClass(incidents).get(classId) ?? [];
+  const roster = studentsByClass.get(classId) ?? [];
 
-  const interventions = [...new Set(list.map((i) => i.intervention))].map((intervention) => {
-    const subset = list.filter((i) => i.intervention === intervention);
-    return {
-      intervention,
-      used: subset.length,
-      successRate: Math.round((subset.filter((i) => i.deEscalated).length / subset.length) * 100),
-    };
-  }).sort((a, b) => b.successRate - a.successRate);
+  const ivStats = new Map<string, { used: number; success: number }>();
+  for (const i of list) {
+    let s = ivStats.get(i.intervention);
+    if (!s) {
+      s = { used: 0, success: 0 };
+      ivStats.set(i.intervention, s);
+    }
+    s.used++;
+    if (i.deEscalated) s.success++;
+  }
+  const interventions = [...ivStats.entries()].map(([intervention, s]) => ({
+    intervention,
+    used: s.used,
+    successRate: Math.round((s.success / s.used) * 100),
+  })).sort((a, b) => b.successRate - a.successRate);
+
 
   const bspMap = new Map<BspStatus, string[]>();
   for (const s of roster) bspMap.set(s.bsp, [...(bspMap.get(s.bsp) ?? []), s.name]);
@@ -626,96 +773,150 @@ export function interventionQueue(incidents: LeadershipIncident[]): QueueEntry[]
 
 export interface LeadershipAlert {
   id: string;
+  /** Stable identifier for the rule that produced the alert. */
+  rule: AlertRuleKey;
   severity: "critical" | "warning" | "info";
   title: string;
   detail: string;
   scope: string;
+  /** Campus the alert belongs to, or "all" for whole-school alerts. */
+  campus: Campus | "all";
   classId?: string;
   evidence: string;
 }
 
+/**
+ * Evaluate every leadership alert rule. `config.enabled` decides which rules
+ * contribute — pass all rules enabled to preview ("test") the full rule set.
+ */
 export function leadershipAlerts(
   incidents: LeadershipIncident[],
   weights: CapacityWeights = defaultCapacityWeights,
+  config: AlertRuleConfig = defaultAlertRuleConfig,
 ): LeadershipAlert[] {
+  const t = { ...defaultAlertThresholds, ...config.thresholds };
+  const on = { ...defaultEnabledRules, ...config.enabled };
   const alerts: LeadershipAlert[] = [];
   const cells = classHeatCells(incidents, weights).filter((c) => c.incidents > 0);
+  const grouped = groupIncidentsByClass(incidents);
 
   for (const c of cells) {
-    if (c.trendPct >= 40) {
+    if (on.risk_trend && c.trendPct >= t.riskIncreasePct) {
       alerts.push({
         id: `alert-trend-${c.classId}`,
+        rule: "risk_trend",
         severity: "critical",
         title: `${c.className} incidents up ${c.trendPct}% week-on-week`,
-        detail: `Density is now ${c.density} incidents per student. Consider an additional ES allocation or a class-team debrief this week.`,
+        detail: `Density is now ${c.density} incidents per student, above the ${t.riskIncreasePct}% risk-change threshold. Consider an additional ES allocation or a class-team debrief this week.`,
         scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
         classId: c.classId,
         evidence: `${c.incidents} incident records in the selected period`,
       });
     }
-    if (c.risk === "High") {
+    if (on.capacity_index && c.capacityIndex >= t.capacityIndexHigh) {
       alerts.push({
         id: `alert-capacity-${c.classId}`,
+        rule: "capacity_index",
         severity: "critical",
         title: `${c.className} Behaviour Capacity Index at ${c.capacityIndex}`,
         detail: `High-intensity incidents: ${c.highIntensity}. De-escalation rate ${c.deEscalationRate}%. This is a resourcing signal for the class, not a measure of the teacher.`,
         scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
         classId: c.classId,
         evidence: `${c.minutesLost} teaching minutes lost in period`,
       });
-    } else if (c.deEscalationRate < 55 && c.incidents >= 8) {
+    }
+    if (
+      on.de_escalation &&
+      c.deEscalationRate < t.deEscalationFloorPct &&
+      c.incidents >= t.minIncidents
+    ) {
       alerts.push({
         id: `alert-deesc-${c.classId}`,
+        rule: "de_escalation",
         severity: "warning",
-        title: `${c.className} de-escalation rate below 55%`,
+        title: `${c.className} de-escalation rate below ${t.deEscalationFloorPct}%`,
         detail: `Current strategies resolved ${c.deEscalationRate}% of incidents within 10 minutes. A review of the class response scripts with allied health may help.`,
         scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
         classId: c.classId,
         evidence: `${c.incidents} incident records`,
       });
     }
-    if (c.trendPct <= -35 && c.incidents >= 6) {
+    if (on.teaching_time_lost && c.minutesLost >= t.teachingTimeLostMins) {
+      alerts.push({
+        id: `alert-timelost-${c.classId}`,
+        rule: "teaching_time_lost",
+        severity: "warning",
+        title: `${c.className} lost ${formatMinutes(c.minutesLost)} of teaching time`,
+        detail: `Above the ${formatMinutes(t.teachingTimeLostMins)} budget for this period across ${c.incidents} incidents (incident plus recovery time).`,
+        scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
+        classId: c.classId,
+        evidence: `${c.incidents} incident records, ${c.highIntensity} high intensity`,
+      });
+    }
+    if (on.emerging_pattern && c.incidents >= t.minIncidents) {
+      const list = grouped.get(c.classId) ?? [];
+      const candidates: { kind: string; top: { name: string; count: number } | undefined }[] = [
+        { kind: "antecedent", top: countBy(list.map((i) => i.antecedent))[0] },
+        { kind: "location", top: countBy(list.map((i) => i.location))[0] },
+        { kind: "time window", top: countBy(list.map((i) => `${i.day} ${i.time}`))[0] },
+      ];
+      for (const cand of candidates) {
+        if (!cand.top) continue;
+        const share = Math.round((cand.top.count / list.length) * 100);
+        if (share < t.emergingPatternSharePct) continue;
+        alerts.push({
+          id: `alert-pattern-${c.classId}-${cand.kind.replace(" ", "-")}`,
+          rule: "emerging_pattern",
+          severity: "warning",
+          title: `${c.className}: ${share}% of incidents share one ${cand.kind}`,
+          detail: `"${cand.top.name}" accounts for ${cand.top.count} of ${list.length} incidents — above the ${t.emergingPatternSharePct}% emerging-pattern threshold. A targeted environmental or routine change is likely to have the biggest effect.`,
+          scope: `${c.campus} · ${c.yearLevel}`,
+          campus: c.campus,
+          classId: c.classId,
+          evidence: `${list.length} incident records`,
+        });
+      }
+    }
+    if (on.improvement && c.trendPct <= -t.improvementDropPct && c.incidents >= 6) {
       alerts.push({
         id: `alert-improve-${c.classId}`,
+        rule: "improvement",
         severity: "info",
         title: `${c.className} incidents down ${Math.abs(c.trendPct)}%`,
         detail: "Worth capturing what changed — the approach may transfer to other classes.",
         scope: `${c.campus} · ${c.yearLevel}`,
+        campus: c.campus,
         classId: c.classId,
         evidence: `${c.incidents} incident records`,
       });
     }
   }
 
-  const overdue = schoolStudents.filter(
-    (s) => s.bsp === "Overdue" && incidents.some((i) => i.studentId === s.id),
-  );
-  if (overdue.length) {
-    alerts.push({
-      id: "alert-bsp-overdue",
-      severity: "critical",
-      title: `${overdue.length} behaviour support plan${overdue.length > 1 ? "s" : ""} overdue for review`,
-      detail: `Students: ${overdue.map((s) => s.name).join(", ")}. Schedule SSG reviews before the end of the term.`,
-      scope: "Whole school",
-      evidence: "Behaviour support plan register",
-    });
-  }
-
-  const peak = countBy(incidents.map((i) => `${i.day} ${i.time}`))[0];
-  if (peak && incidents.length) {
-    alerts.push({
-      id: "alert-peak-window",
-      severity: "warning",
-      title: `Peak incident window is ${peak.name}`,
-      detail: `${peak.count} of ${incidents.length} incidents occur in this window. A whole-school transition routine may reduce load across classes.`,
-      scope: "Whole school",
-      evidence: `${incidents.length} incident records`,
-    });
+  if (on.bsp_overdue) {
+    const involved = new Set(incidents.map((i) => i.studentId));
+    const overdue = schoolStudents.filter((s) => s.bsp === "Overdue" && involved.has(s.id));
+    if (overdue.length) {
+      alerts.push({
+        id: "alert-bsp-overdue",
+        rule: "bsp_overdue",
+        severity: "critical",
+        title: `${overdue.length} behaviour support plan${overdue.length > 1 ? "s" : ""} overdue for review`,
+        detail: `Students: ${overdue.map((s) => s.name).join(", ")}. Schedule SSG reviews before the end of the term.`,
+        scope: "Whole school",
+        campus: "all",
+        evidence: "Behaviour support plan register",
+      });
+    }
   }
 
   const order = { critical: 0, warning: 1, info: 2 } as const;
   return alerts.sort((a, b) => order[a.severity] - order[b.severity]);
 }
+
 
 export function formatMinutes(mins: number): string {
   const hours = Math.floor(mins / 60);
