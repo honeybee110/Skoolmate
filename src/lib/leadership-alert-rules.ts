@@ -132,7 +132,13 @@ export const SEVERITY_ORDER: Record<"critical" | "warning" | "info", number> = {
   info: 2,
 };
 
-export function mergeConfig(partial: Partial<AlertRuleConfig> | null | undefined): AlertRuleConfig {
+export interface PartialAlertRuleConfig {
+  thresholds?: Partial<AlertThresholds> | null;
+  enabled?: Partial<Record<AlertRuleKey, boolean>> | null;
+  active?: boolean | null;
+}
+
+export function mergeConfig(partial: PartialAlertRuleConfig | null | undefined): AlertRuleConfig {
   return {
     thresholds: { ...defaultAlertThresholds, ...(partial?.thresholds ?? {}) },
     enabled: { ...defaultEnabledRules, ...(partial?.enabled ?? {}) },
