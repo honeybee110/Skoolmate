@@ -212,6 +212,10 @@ function LessonPlannerPage() {
   };
 
   const generateFn = useServerFn(generateLessonPlan);
+  const lessonEntrySkills = useMemo(
+    () => getEntrySkillsForLesson(draft.learningArea, draft.strand, draft.topic || draft.title, draft.levels),
+    [draft.learningArea, draft.strand, draft.topic, draft.title, draft.levels],
+  );
   const generate = useMutation({
     mutationFn: async () => {
       if (!draft.levels.length) throw new Error("Select at least one ability level.");
@@ -222,7 +226,7 @@ function LessonPlannerPage() {
           topic: draft.topic || draft.title || draft.strand,
           duration: draft.duration,
           levels: draft.levels,
-          entrySkills: [],
+          entrySkills: lessonEntrySkills.map((s) => `Level ${s.level} · ${s.strand} › ${s.topic}: ${s.text}`),
           notes: "",
         },
       });
@@ -237,7 +241,15 @@ function LessonPlannerPage() {
         learningIntention: out.learningIntention,
         successCriteria: out.successCriteria.map((c) => (c.startsWith("I can") ? c : `I can ${c}`)).join("\n"),
         alignment: out.alignment,
+        entrySkillAlignment: (out.entrySkillAlignment ?? [])
+          .map((e) => `Level ${e.level} — ${e.entrySkill}\n→ ${e.activity}`)
+          .join("\n\n"),
         resources: out.resources.join("\n"),
+        sensorySupports: (out.sensorySupports ?? []).join("\n"),
+        communicationSupports: (out.communicationSupports ?? []).join("\n"),
+        visuals: (out.visuals ?? []).join("\n"),
+        assessmentEvidence: (out.assessmentEvidence ?? []).join("\n"),
+        extension: (out.extension ?? []).join("\n"),
         hook: out.flow.hook,
         iDo: out.flow.iDo,
         weDo: out.flow.weDo,
@@ -249,6 +261,7 @@ function LessonPlannerPage() {
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Generation failed"),
   });
+
 
 
   const registerFn = useServerFn(registerWeeklyUpload);
