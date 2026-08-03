@@ -263,6 +263,20 @@ function TeacherSSGMinutes() {
         }
       />
 
+      {restoredDraft && restoredDraft.id === null && form.id === null && (
+        <div className="mx-4 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm md:mx-8">
+          <span className="flex items-center gap-2 text-foreground">
+            <PencilLine className="h-4 w-4 text-primary" />
+            Unsaved minutes from{" "}
+            {draftSavedAt ? new Date(draftSavedAt).toLocaleString() : "an earlier session"} were kept on this device.
+          </span>
+          <span className="flex gap-2">
+            <Button size="sm" onClick={() => { setForm(restoredDraft); discardDraft(); }}>Restore</Button>
+            <Button size="sm" variant="ghost" onClick={discardDraft}>Discard</Button>
+          </span>
+        </div>
+      )}
+
       <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         {/* ─── List ───────────────────────────────────────────── */}
         <div className="space-y-3">
