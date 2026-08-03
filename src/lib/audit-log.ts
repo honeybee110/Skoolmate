@@ -50,8 +50,8 @@ export async function recordAuditEvent(input: RecordAuditInput): Promise<boolean
     const { error } = await supabase.rpc("record_audit_event", {
       p_action: input.action,
       p_entity_type: input.entityType,
-      p_entity_id: input.entityId ?? null,
-      p_summary: input.summary ?? null,
+      p_entity_id: input.entityId ?? undefined,
+      p_summary: input.summary ?? undefined,
       p_metadata: (input.metadata ?? {}) as never,
     });
     if (error) {
