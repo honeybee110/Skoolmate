@@ -249,8 +249,8 @@ function TeacherSSGMinutes() {
     void recordAuditEvent({
       action: nextStatus === "Submitted" ? "ssg_minutes.submitted" : "ssg_minutes.saved",
       entityType: "ssg_minutes",
-      entityId: String((saved as { id?: string } | null)?.id ?? ""),
-      summary: `SSG minutes ${nextStatus.toLowerCase()} for ${form.student_name}`,
+      entityId: String(res.data?.id ?? form.id ?? ""),
+      summary: `SSG minutes ${nextStatus.toLowerCase()} for ${clean.student_name}`,
       metadata: { status: nextStatus, meeting_date: form.meeting_date },
     });
     toast.success(nextStatus === "Submitted" ? "Minutes submitted" : "Draft saved");
