@@ -2,6 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { sanitizeText } from "@/lib/validation";
 
 const TERMS = ["Term 1", "Term 2", "Term 3", "Term 4"] as const;
 const WEEKS = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10","Week 11","Week 12"] as const;
@@ -42,12 +43,12 @@ export const listWeeklyUploads = createServerFn({ method: "GET" })
 const RegisterInput = z.object({
   term: z.enum(TERMS),
   week: z.enum(WEEKS),
-  title: z.string().min(1).max(200),
+  title: z.preprocess(sanitizeText, z.string().min(1).max(200)),
   storage_path: z.string().min(1),
   content_type: z.string().optional(),
   size_bytes: z.number().int().nonnegative().optional(),
-  uploader_name: z.string().optional(),
-  class_name: z.string().max(80).optional(),
+  uploader_name: z.preprocess(sanitizeText, z.string().max(120)).optional(),
+  class_name: z.preprocess(sanitizeText, z.string().max(80)).optional(),
 });
 
 export const registerWeeklyUpload = createServerFn({ method: "POST" })
