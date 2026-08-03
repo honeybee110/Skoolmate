@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { toast } from "sonner";
+import { withTimeout } from "@/lib/async-guard";
 import { Sparkle } from "lucide-react";
 import {
   Conversation,
@@ -70,7 +71,12 @@ export function AskChat({
           if (data.session?.access_token) {
             headers.set("Authorization", `Bearer ${data.session.access_token}`);
           }
-          return fetch(input, { ...init, headers });
+          // Bound the connection handshake only — the stream itself may run long.
+          return await withTimeout(
+            fetch(input, { ...init, headers }),
+            15_000,
+            "Ask SkoolMate is taking too long to respond. Please try again.",
+          );
         },
       }),
     [threadId],

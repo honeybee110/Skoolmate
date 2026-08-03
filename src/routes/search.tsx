@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { withRetry } from "@/lib/async-guard";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -98,12 +99,22 @@ function DocumentSearch() {
   const documents = (docsQuery.data ?? []) as IndexedDocument[];
 
   const search = useMutation({
-    mutationFn: (q: string) => runSearch({ data: { query: q } }),
+    mutationFn: (q: string) =>
+      withRetry(() => runSearch({ data: { query: q } }), {
+        retries: 1,
+        timeoutMs: 15_000,
+        timeoutMessage: "Search took too long. Please try again.",
+      }),
     onError: (e: Error) => toast.error(e.message),
   });
 
   const indexing = useMutation({
-    mutationFn: (id: string) => runIndex({ data: { id } }),
+    mutationFn: (id: string) =>
+      withRetry(() => runIndex({ data: { id } }), {
+        retries: 1,
+        timeoutMs: 15_000,
+        timeoutMessage: "Indexing took too long. It may still finish in the background.",
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["documents"] });
       toast.success("Document indexed and searchable");
