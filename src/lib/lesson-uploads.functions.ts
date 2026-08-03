@@ -1,5 +1,6 @@
 // Server functions for the Weekly Lesson Bank uploads (Cloud storage backed).
 import { createServerFn } from "@tanstack/react-start";
+import { auditServer } from "@/lib/audit-server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sanitizeText } from "@/lib/validation";
@@ -71,6 +72,13 @@ export const registerWeeklyUpload = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
+    await auditServer(context.supabase, {
+      action: "lesson_upload.created",
+      entityType: "lesson_bank_upload",
+      entityId: row.id,
+      summary: `Uploaded "${data.title}" to ${data.term} ${data.week}`,
+      metadata: { term: data.term, week: data.week, class_name: data.class_name ?? null },
+    });
     return row as WeeklyUpload;
   });
 
@@ -102,6 +110,13 @@ export const reviewWeeklyUpload = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
+    await auditServer(context.supabase, {
+      action: `lesson_upload.${data.status}`,
+      entityType: "lesson_bank_upload",
+      entityId: data.id,
+      summary: `Weekly lesson marked ${data.status}`,
+      metadata: { status: data.status, note: data.leadership_note ?? null },
+    });
     return row as WeeklyUpload;
   });
 
@@ -115,6 +130,13 @@ export const deleteWeeklyUpload = createServerFn({ method: "POST" })
     if (sErr && !sErr.message.includes("not found")) throw new Error(sErr.message);
     const { error } = await context.supabase.from("lesson_bank_uploads").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await auditServer(context.supabase, {
+      action: "lesson_upload.deleted",
+      entityType: "lesson_bank_upload",
+      entityId: data.id,
+      summary: "Weekly lesson upload deleted",
+      metadata: { storage_path: data.storage_path },
+    });
     return { ok: true };
   });
 
