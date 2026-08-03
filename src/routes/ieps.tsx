@@ -30,6 +30,7 @@ import {
   type CurriculumRecord, type CurriculumSubject,
 } from "@/lib/curriculum-db";
 import { getEntrySkillsForGoal } from "@/lib/entry-skills";
+import { useIepDraftAutosave } from "@/lib/use-iep-draft";
 import {
   useCurriculumStore, updateCell as storeUpdateCell, pickGoal as storePickGoal,
   cellKey, findRecordIn, recordsForIn, deriveFromChecks, CROSS_CHECK_LABELS,
@@ -68,6 +69,7 @@ const STATUS_META: Record<Status, { label: string; tone: string; pct: number }> 
 function IepBuilderPage() {
   const search = Route.useSearch();
   const { cells, records } = useCurriculumStore();
+  const draft = useIepDraftAutosave();
   const [semester, setSemester] = useState<Semester>(
     (search.semester && search.semester !== "all" ? (search.semester as Semester) : currentSemester),
   );
@@ -128,7 +130,18 @@ function IepBuilderPage() {
                   view === "detail" ? "bg-navy text-white" : "hover:bg-secondary")}
               ><User className="h-3.5 w-3.5" />Student Detail</button>
             </div>
-            <Button size="sm" variant="outline"><Save className="h-4 w-4" />Auto-saved</Button>
+            <Button size="sm" variant="outline" disabled className="gap-1.5">
+              <Save className={cn("h-4 w-4", draft.status === "saving" && "animate-pulse")} />
+              {draft.status === "loading"
+                ? "Loading draft…"
+                : draft.status === "saving"
+                  ? "Saving…"
+                  : draft.status === "error"
+                    ? "Autosave offline"
+                    : draft.savedAt
+                      ? `Saved ${new Date(draft.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                      : "Auto-saved"}
+            </Button>
           </>
         }
       />
