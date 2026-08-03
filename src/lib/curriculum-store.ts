@@ -141,6 +141,17 @@ export function resetIepCells() {
   emit();
 }
 
+/** Replace all IEP matrix cells (used when hydrating a server-side draft). */
+export function hydrateIepCells(cells: Record<string, IepCellState>) {
+  state = { ...state, cells };
+  emit();
+}
+
+/** Read the current cells without subscribing (used by autosave). */
+export function getIepCells(): Record<string, IepCellState> {
+  return state.cells;
+}
+
 
 function persist() {
   if (typeof window === "undefined") return;
