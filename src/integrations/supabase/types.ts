@@ -329,6 +329,7 @@ export type Database = {
           session_id: string
           updated_at: string
           user_id: string
+          version: number
         }
         Insert: {
           cells?: Json
@@ -337,6 +338,7 @@ export type Database = {
           session_id: string
           updated_at?: string
           user_id: string
+          version?: number
         }
         Update: {
           cells?: Json
@@ -345,6 +347,7 @@ export type Database = {
           session_id?: string
           updated_at?: string
           user_id?: string
+          version?: number
         }
         Relationships: []
       }
