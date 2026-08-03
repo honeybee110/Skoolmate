@@ -4,7 +4,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export type IepDraftCells = Record<string, unknown>;
+export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+export type IepDraftCells = Record<string, Json>;
 
 function sessionIdFrom(claims: Record<string, unknown>, userId: string): string {
   const sid = claims["session_id"];
