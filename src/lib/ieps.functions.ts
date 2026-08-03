@@ -1,6 +1,7 @@
 // Server functions that enforce IEP semester-scope rules authoritatively.
 // The client calls these; any mismatch is rejected before persistence.
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { iepGoals, specialistEntries, availableSemesters } from "./mock-data";
 import type { Semester, SpecialistSubject, SpecialistEntry, SuccessCriterion } from "./mock-data";
 import { validateSpecialistNote, validateCrossCheckSelection } from "./iep-rules";
