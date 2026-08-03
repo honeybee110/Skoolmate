@@ -41,6 +41,7 @@ import { useCurriculumStore } from "@/lib/curriculum-store";
 import { CURRICULUM_SUBJECTS } from "@/lib/curriculum-db";
 import { generateLessonPlan, LEARNING_AREAS, type LearningArea } from "@/lib/lessons.functions";
 import { registerWeeklyUpload } from "@/lib/lesson-uploads.functions";
+import { useFormDraft } from "@/lib/use-form-draft";
 import { getEntrySkillsForLesson } from "@/lib/entry-skills";
 
 import { useAuth } from "@/lib/auth-context";
@@ -121,6 +122,13 @@ function LessonPlannerPage() {
   const [draft, setDraft] = useState<Draft>(NEW_DRAFT);
   const [dirty, setDirty] = useState(false);
   const [filter, setFilter] = useState<"all" | LessonStatus>("all");
+
+  // Keep unsaved planner work on the device so a refresh never loses typing.
+  const { restoredDraft, draftSavedAt, clearDraft, discardDraft } = useFormDraft<Draft>(
+    "lesson-planner",
+    draft,
+    { scope: user?.id, isEmpty: (d) => !d.title.trim() && !d.topic.trim() && d.id === undefined },
+  );
 
   const authorName = profile?.display_name ?? user?.email?.split("@")[0] ?? "Teacher";
 
@@ -211,6 +219,7 @@ function LessonPlannerPage() {
     setSelectedId(saved.id);
     setDraft((d) => ({ ...d, id: saved.id }));
     setDirty(false);
+    clearDraft();
     return saved;
   };
 
