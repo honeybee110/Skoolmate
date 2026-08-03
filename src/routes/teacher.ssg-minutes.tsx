@@ -18,6 +18,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { recordAuditEvent } from "@/lib/audit-log";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -245,6 +246,13 @@ function TeacherSSGMinutes() {
       });
       return;
     }
+    void recordAuditEvent({
+      action: nextStatus === "Submitted" ? "ssg_minutes.submitted" : "ssg_minutes.saved",
+      entityType: "ssg_minutes",
+      entityId: String(res.data?.id ?? form.id ?? ""),
+      summary: `SSG minutes ${nextStatus.toLowerCase()} for ${clean.student_name}`,
+      metadata: { status: nextStatus, meeting_date: form.meeting_date },
+    });
     toast.success(nextStatus === "Submitted" ? "Minutes submitted" : "Draft saved");
     clearDraft();
     setForm(emptyForm());

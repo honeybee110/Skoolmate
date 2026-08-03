@@ -113,6 +113,7 @@ const adminNav = {
     { title: "User Management", url: "/admin/users", icon: UserCog },
     { title: "Activity Log", url: "/admin/activity", icon: History },
     { title: "Override Audit", url: "/admin/audit", icon: Archive },
+    { title: "Audit Trail", url: "/admin/audit-trail", icon: Archive },
   ] as NavItem[],
 };
 

@@ -41,6 +41,7 @@ import { useCurriculumStore } from "@/lib/curriculum-store";
 import { CURRICULUM_SUBJECTS } from "@/lib/curriculum-db";
 import { generateLessonPlan, LEARNING_AREAS, type LearningArea } from "@/lib/lessons.functions";
 import { registerWeeklyUpload } from "@/lib/lesson-uploads.functions";
+import { recordAuditEvent } from "@/lib/audit-log";
 import { useFormDraft } from "@/lib/use-form-draft";
 import { getEntrySkillsForLesson } from "@/lib/entry-skills";
 
@@ -304,6 +305,13 @@ function LessonPlannerPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["weekly-uploads"] });
+      void recordAuditEvent({
+        action: "lesson_plan.submitted_for_approval",
+        entityType: "lesson_plan",
+        entityId: draft.id ?? null,
+        summary: `Lesson "${draft.title}" sent to leadership for approval`,
+        metadata: { term: draft.term, week: draft.week, subject: draft.subject },
+      });
       toast.success("Sent to leadership for approval.");
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Submit failed"),
