@@ -63,6 +63,7 @@ import { Route as AdminCurriculumRouteImport } from './routes/admin.curriculum'
 import { Route as AdminCrosscheckBuilderRouteImport } from './routes/admin.crosscheck-builder'
 import { Route as AdminClassesRouteImport } from './routes/admin.classes'
 import { Route as AdminBehaviourRouteImport } from './routes/admin.behaviour'
+import { Route as AdminAuditTrailRouteImport } from './routes/admin.audit-trail'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -341,6 +342,11 @@ const AdminBehaviourRoute = AdminBehaviourRouteImport.update({
   path: '/admin/behaviour',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAuditTrailRoute = AdminAuditTrailRouteImport.update({
+  id: '/admin/audit-trail',
+  path: '/admin/audit-trail',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAuditRoute = AdminAuditRouteImport.update({
   id: '/admin/audit',
   path: '/admin/audit',
@@ -405,6 +411,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/audit-trail': typeof AdminAuditTrailRoute
   '/admin/behaviour': typeof AdminBehaviourRouteWithChildren
   '/admin/classes': typeof AdminClassesRoute
   '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
@@ -466,6 +473,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/audit-trail': typeof AdminAuditTrailRoute
   '/admin/behaviour': typeof AdminBehaviourRouteWithChildren
   '/admin/classes': typeof AdminClassesRoute
   '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
@@ -530,6 +538,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/audit-trail': typeof AdminAuditTrailRoute
   '/admin/behaviour': typeof AdminBehaviourRouteWithChildren
   '/admin/classes': typeof AdminClassesRoute
   '/admin/crosscheck-builder': typeof AdminCrosscheckBuilderRoute
@@ -595,6 +604,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/audit-trail'
     | '/admin/behaviour'
     | '/admin/classes'
     | '/admin/crosscheck-builder'
@@ -656,6 +666,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/audit-trail'
     | '/admin/behaviour'
     | '/admin/classes'
     | '/admin/crosscheck-builder'
@@ -719,6 +730,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/approvals'
     | '/admin/audit'
+    | '/admin/audit-trail'
     | '/admin/behaviour'
     | '/admin/classes'
     | '/admin/crosscheck-builder'
@@ -783,6 +795,7 @@ export interface RootRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminAuditTrailRoute: typeof AdminAuditTrailRoute
   AdminBehaviourRoute: typeof AdminBehaviourRouteWithChildren
   AdminClassesRoute: typeof AdminClassesRoute
   AdminCrosscheckBuilderRoute: typeof AdminCrosscheckBuilderRoute
@@ -1191,6 +1204,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBehaviourRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/audit-trail': {
+      id: '/admin/audit-trail'
+      path: '/admin/audit-trail'
+      fullPath: '/admin/audit-trail'
+      preLoaderRoute: typeof AdminAuditTrailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/audit': {
       id: '/admin/audit'
       path: '/admin/audit'
@@ -1332,6 +1352,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
   AdminAuditRoute: AdminAuditRoute,
+  AdminAuditTrailRoute: AdminAuditTrailRoute,
   AdminBehaviourRoute: AdminBehaviourRouteWithChildren,
   AdminClassesRoute: AdminClassesRoute,
   AdminCrosscheckBuilderRoute: AdminCrosscheckBuilderRoute,
