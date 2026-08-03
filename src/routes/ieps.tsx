@@ -272,11 +272,12 @@ function ClassMatrix({
         <span className="text-[10px] text-white/80">{students.length} students · {columns.length} strands · click any cell to edit</span>
       </div>
 
-      <div className="overflow-x-auto max-h-[70vh]">
+      <div className="relative isolate z-0 overflow-x-auto max-h-[70vh]">
         <table className="w-full min-w-[1400px] border-collapse text-sm">
-          <thead className="sticky top-0 z-20">
+          <thead className="sticky top-0 z-[2]">
             <tr className="border-b bg-muted/60 text-left text-[10px] uppercase tracking-wide text-muted-foreground backdrop-blur">
-              <th className="sticky left-0 z-30 bg-muted/80 px-3 py-2 font-semibold min-w-[180px]">Student</th>
+              <th className="sticky left-0 z-[3] bg-muted px-3 py-2 font-semibold min-w-[180px]">Student</th>
+
               {subjectStrands.map(({ sub, strands }) => (
                 <th key={sub.label} colSpan={strands.length}
                   className={cn("px-3 py-1.5 text-center font-semibold border-l border-border/60", sub.color)}>
@@ -285,7 +286,7 @@ function ClassMatrix({
               ))}
             </tr>
             <tr className="border-b bg-muted/40 text-left text-[10px] uppercase tracking-wide text-muted-foreground/80">
-              <th className="sticky left-0 z-30 bg-muted/60 px-3 py-1.5"></th>
+              <th className="sticky left-0 z-[3] bg-muted px-3 py-1.5"></th>
               {columns.map((c, i) => (
                 <th key={i} className="px-2 py-1.5 min-w-[200px] font-medium border-l border-border/40">
                   {c.strand}
@@ -296,7 +297,7 @@ function ClassMatrix({
           <tbody>
             {students.map((s) => (
               <tr key={s.id} className="border-b align-top last:border-b-0 hover:bg-secondary/20">
-                <td className="sticky left-0 z-10 bg-card px-3 py-2.5 border-r border-border/60">
+                <td className="sticky left-0 z-[1] bg-card px-3 py-2.5 border-r border-border/60">
                   <div className="flex items-center gap-2">
                     <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold text-foreground/80", s.avatarColor)}>
                       {s.initials}

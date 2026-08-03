@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
+import { resetIepCells } from "@/lib/curriculum-store";
 import { enterGuestMode } from "@/lib/guest-mode";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,11 @@ function TeacherLogin() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) toast.error(error.message);
-    else toast.success("Signed in");
+    else {
+      resetIepCells();
+      toast.success("Signed in");
+    }
+
   };
 
   const signUp = async (e: React.FormEvent) => {
