@@ -297,7 +297,7 @@ function ClassMatrix({
           <tbody>
             {students.map((s) => (
               <tr key={s.id} className="border-b align-top last:border-b-0 hover:bg-secondary/20">
-                <td className="sticky left-0 z-10 bg-card px-3 py-2.5 border-r border-border/60">
+                <td className="sticky left-0 z-[1] bg-card px-3 py-2.5 border-r border-border/60">
                   <div className="flex items-center gap-2">
                     <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold text-foreground/80", s.avatarColor)}>
                       {s.initials}
