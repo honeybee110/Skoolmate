@@ -1,6 +1,7 @@
 // Server functions that enforce IEP semester-scope rules authoritatively.
 // The client calls these; any mismatch is rejected before persistence.
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { iepGoals, specialistEntries, availableSemesters } from "./mock-data";
 import type { Semester, SpecialistSubject, SpecialistEntry, SuccessCriterion } from "./mock-data";
 import { validateSpecialistNote, validateCrossCheckSelection } from "./iep-rules";
@@ -81,6 +82,7 @@ export async function saveSpecialistNoteHandler(
 }
 
 export const saveSpecialistNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(validateSpecialistNoteInput)
   .handler(async ({ data }) => saveSpecialistNoteHandler(data));
 
@@ -138,5 +140,6 @@ export async function updateCrossCheckStatusHandler(
 }
 
 export const updateCrossCheckStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(validateCrossCheckInput)
   .handler(async ({ data }) => updateCrossCheckStatusHandler(data));

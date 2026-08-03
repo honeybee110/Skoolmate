@@ -2,6 +2,7 @@
 // language. Draft = AI generated; leadership/teachers can override before
 // the parent downloads a PDF.
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { generateText } from "ai";
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
@@ -29,6 +30,7 @@ const TranslationSchema = z.object({
 });
 
 export const translateIepDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => TranslateInput.parse(input))
   .handler(async ({ data }) => {
     const languageLabel = IEP_LANGUAGES.find((l) => l.code === data.language)?.label ?? data.language;
