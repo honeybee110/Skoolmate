@@ -145,6 +145,7 @@ function fallbackPlan(data: z.infer<typeof LessonInput>): GeneratedLesson {
 
 
 export const generateLessonPlan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => LessonInput.parse(input))
   .handler(async ({ data }) => {
     const key = process.env.LOVABLE_API_KEY;
