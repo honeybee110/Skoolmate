@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { withRetry } from "@/lib/async-guard";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -221,7 +222,9 @@ function LessonPlannerPage() {
   const generate = useMutation({
     mutationFn: async () => {
       if (!draft.levels.length) throw new Error("Select at least one ability level.");
-      return await generateFn({
+      return await withRetry(
+        () =>
+          generateFn({
         data: {
           learningArea: draft.learningArea,
           strand: draft.strand,
@@ -231,7 +234,9 @@ function LessonPlannerPage() {
           entrySkills: lessonEntrySkills.map((s) => `Level ${s.level} · ${s.strand} › ${s.topic}: ${s.text}`),
           notes: "",
         },
-      });
+          }),
+        { retries: 1, timeoutMs: 15_000, timeoutMessage: "Mate took too long to draft this planner. Please try again." },
+      );
     },
     onSuccess: (out) => {
       patchDraft({
