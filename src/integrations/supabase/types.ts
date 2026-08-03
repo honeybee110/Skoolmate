@@ -151,6 +151,54 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_name: string | null
+          actor_role: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          hash: string
+          id: string
+          metadata: Json
+          prev_hash: string | null
+          seq: number
+          summary: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          hash: string
+          id?: string
+          metadata?: Json
+          prev_hash?: string | null
+          seq?: never
+          summary?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          hash?: string
+          id?: string
+          metadata?: Json
+          prev_hash?: string | null
+          seq?: never
+          summary?: string | null
+        }
+        Relationships: []
+      }
       document_chunks: {
         Row: {
           chunk_index: number
@@ -824,6 +872,16 @@ export type Database = {
           similarity: number
         }[]
       }
+      record_audit_event: {
+        Args: {
+          p_action: string
+          p_entity_id?: string
+          p_entity_type: string
+          p_metadata?: Json
+          p_summary?: string
+        }
+        Returns: Json
+      }
       update_cross_check_status: {
         Args: {
           p_active_semester: string
@@ -833,6 +891,7 @@ export type Database = {
         }
         Returns: Json
       }
+      verify_audit_chain: { Args: never; Returns: Json }
     }
     Enums: {
       app_role:
