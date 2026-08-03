@@ -84,34 +84,9 @@ const MAX_AUDIT = 100;
 const cellKey = (studentId: string, subject: string, strand: string) =>
   `${studentId}::${subject}::${strand}`;
 
+// Every new sign-in starts with a blank IEP matrix — no pre-filled cells.
 function seedCells(): Record<string, IepCellState> {
-  const mk = (checks: CrossChecks, patch: Partial<IepCellState> = {}): Partial<IepCellState> => {
-    const { status, progress } = deriveFromChecks(checks);
-    return { crossChecks: checks, status, progress, ...patch };
-  };
-  const base: IepCellState = {
-    progress: 0, status: "developing", comment: "", evidenceCount: 0,
-    crossChecks: [false, false, false],
-  };
-  const seeds: Array<[string, string, string, Partial<IepCellState>]> = [
-    ["s1", "Mathematics", "Number", mk([true, false, false], { curriculumId: "ma-n-f", evidenceCount: 8, comment: "Mia counting 0–15 confidently." })],
-    ["s1", "English", "Reading and Viewing", mk([true, false, false], { curriculumId: "en-rv-b1", evidenceCount: 3 })],
-    ["s2", "English", "Speaking and Listening", mk([true, false, false], { curriculumId: "en-sl-c", evidenceCount: 12 })],
-    ["s2", "English", "Reading and Viewing", mk([true, true, false], { curriculumId: "en-rv-d", evidenceCount: 3 })],
-    ["s3", "English", "Writing", mk([true, true, true], { curriculumId: "en-w-f", evidenceCount: 14 })],
-    ["s3", "Science", "Science Understanding", mk([true, false, false], { curriculumId: "sc-f", evidenceCount: 3 })],
-    ["s4", "Physical Education", "Movement and Physical Activity", mk([true, true, false], { curriculumId: "pe-d", evidenceCount: 4 })],
-    ["s5", "Music", "Making and Responding", mk([true, false, false], { curriculumId: "mu-c", evidenceCount: 2 })],
-    ["s5", "English", "Speaking and Listening", mk([true, true, true], { curriculumId: "en-sl-c", evidenceCount: 9 })],
-    ["s7", "Learn to Play", "Play Skills", mk([true, false, false], { curriculumId: "l2p-d", evidenceCount: 2 })],
-    ["s8", "Drama", "Making and Responding", mk([true, false, false], { curriculumId: "dr-c", evidenceCount: 1 })],
-    ["s8", "English", "Speaking and Listening", mk([true, false, false], { curriculumId: "en-sl-c", evidenceCount: 7 })],
-  ];
-  const out: Record<string, IepCellState> = {};
-  for (const [sid, subj, strand, patch] of seeds) {
-    out[cellKey(sid, subj, strand)] = { ...base, ...patch, updatedAt: new Date().toISOString() };
-  }
-  return out;
+  return {};
 }
 
 // ---------- Store ----------
@@ -124,11 +99,27 @@ function initialState(): StoreState {
   };
 }
 
+const SESSION_KEY = `${STORAGE_KEY}::session`;
+
+// True the first time the store loads in a fresh browser session (i.e. a new
+// sign-in). Within the same session, edits persist across navigation/reloads.
+function isFreshSession(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    if (window.sessionStorage.getItem(SESSION_KEY)) return false;
+    window.sessionStorage.setItem(SESSION_KEY, "1");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 let state: StoreState = load() ?? initialState();
 const listeners = new Set<() => void>();
 
 function load(): StoreState | null {
   if (typeof window === "undefined") return null;
+  const fresh = isFreshSession();
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
@@ -136,13 +127,20 @@ function load(): StoreState | null {
     if (!parsed.records || !parsed.cells) return null;
     return {
       records: parsed.records,
-      cells: parsed.cells,
+      cells: fresh ? {} : parsed.cells,
       audit: parsed.audit ?? [],
     };
   } catch {
     return null;
   }
 }
+
+/** Clear all IEP matrix cells (used on sign-in / manual reset). */
+export function resetIepCells() {
+  state = { ...state, cells: {} };
+  emit();
+}
+
 
 function persist() {
   if (typeof window === "undefined") return;
