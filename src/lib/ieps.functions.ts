@@ -140,5 +140,6 @@ export async function updateCrossCheckStatusHandler(
 }
 
 export const updateCrossCheckStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(validateCrossCheckInput)
   .handler(async ({ data }) => updateCrossCheckStatusHandler(data));
