@@ -41,6 +41,7 @@ import { useCurriculumStore } from "@/lib/curriculum-store";
 import { CURRICULUM_SUBJECTS } from "@/lib/curriculum-db";
 import { generateLessonPlan, LEARNING_AREAS, type LearningArea } from "@/lib/lessons.functions";
 import { registerWeeklyUpload } from "@/lib/lesson-uploads.functions";
+import { useFormDraft } from "@/lib/use-form-draft";
 import { getEntrySkillsForLesson } from "@/lib/entry-skills";
 
 import { useAuth } from "@/lib/auth-context";
@@ -121,6 +122,13 @@ function LessonPlannerPage() {
   const [draft, setDraft] = useState<Draft>(NEW_DRAFT);
   const [dirty, setDirty] = useState(false);
   const [filter, setFilter] = useState<"all" | LessonStatus>("all");
+
+  // Keep unsaved planner work on the device so a refresh never loses typing.
+  const { restoredDraft, draftSavedAt, clearDraft, discardDraft } = useFormDraft<Draft>(
+    "lesson-planner",
+    draft,
+    { scope: user?.id, isEmpty: (d) => !d.title.trim() && !d.topic.trim() && d.id === undefined },
+  );
 
   const authorName = profile?.display_name ?? user?.email?.split("@")[0] ?? "Teacher";
 
@@ -211,6 +219,7 @@ function LessonPlannerPage() {
     setSelectedId(saved.id);
     setDraft((d) => ({ ...d, id: saved.id }));
     setDirty(false);
+    clearDraft();
     return saved;
   };
 
@@ -353,6 +362,19 @@ function LessonPlannerPage() {
       />
 
       <PublishedTimetableBanner />
+
+      {restoredDraft && !restoredDraft.id && !draft.id && !dirty && (
+        <div className="mx-4 mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm md:mx-6">
+          <span>
+            Unsaved lesson draft from{" "}
+            {draftSavedAt ? new Date(draftSavedAt).toLocaleString() : "an earlier session"} was kept on this device.
+          </span>
+          <span className="flex gap-2">
+            <Button size="sm" onClick={() => { setDraft(restoredDraft); setDirty(true); discardDraft(); }}>Restore</Button>
+            <Button size="sm" variant="ghost" onClick={discardDraft}>Discard</Button>
+          </span>
+        </div>
+      )}
 
 
 

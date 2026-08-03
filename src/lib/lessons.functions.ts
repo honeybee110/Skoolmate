@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { sanitizeText, sanitizeMultiline } from "@/lib/validation";
 
 /** The seven learning areas the planner supports. */
 export const LEARNING_AREAS = [
@@ -16,14 +17,14 @@ export const LEARNING_AREAS = [
 export type LearningArea = (typeof LEARNING_AREAS)[number];
 
 const LessonInput = z.object({
-  learningArea: z.string().min(1),
-  strand: z.string().optional().default(""),
-  topic: z.string().min(1),
-  duration: z.string().min(1),
+  learningArea: z.preprocess(sanitizeText, z.string().min(1).max(80)),
+  strand: z.preprocess(sanitizeText, z.string().max(120)).optional().default(""),
+  topic: z.preprocess(sanitizeText, z.string().min(1).max(200)),
+  duration: z.preprocess(sanitizeText, z.string().min(1).max(40)),
   /** Ability levels present in the group, e.g. ["B","C","D"]. */
   levels: z.array(z.string()).min(1),
-  entrySkills: z.array(z.string()).optional().default([]),
-  notes: z.string().optional().default(""),
+  entrySkills: z.array(z.preprocess(sanitizeText, z.string().max(300))).max(30).optional().default([]),
+  notes: z.preprocess(sanitizeMultiline, z.string().max(2000)).optional().default(""),
 });
 
 /**
