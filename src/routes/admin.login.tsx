@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { BrandMark } from "@/components/brand-mark";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resetIepCells } from "@/lib/curriculum-store";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
 import { Card } from "@/components/ui/card";
