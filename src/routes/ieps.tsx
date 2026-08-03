@@ -136,12 +136,20 @@ function IepBuilderPage() {
                 ? "Loading draft…"
                 : draft.status === "saving"
                   ? "Saving…"
-                  : draft.status === "error"
-                    ? "Autosave offline"
-                    : draft.savedAt
-                      ? `Saved ${new Date(draft.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                      : "Auto-saved"}
+                  : draft.status === "offline"
+                    ? "Offline — saved on this device"
+                    : draft.status === "error"
+                      ? "Retrying autosave…"
+                      : draft.savedAt
+                        ? `Saved ${new Date(draft.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                        : "Auto-saved"}
             </Button>
+            {draft.conflictsResolved > 0 && (
+              <span className="hidden rounded-md bg-secondary px-2 py-1 text-[11px] text-muted-foreground md:inline">
+                Merged edits from another tab
+              </span>
+            )}
+
           </>
         }
       />
