@@ -321,6 +321,33 @@ export type Database = {
         }
         Relationships: []
       }
+      iep_matrix_drafts: {
+        Row: {
+          cells: Json
+          created_at: string
+          id: string
+          session_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cells?: Json
+          created_at?: string
+          id?: string
+          session_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cells?: Json
+          created_at?: string
+          id?: string
+          session_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       iep_override_audit: {
         Row: {
           action: string
