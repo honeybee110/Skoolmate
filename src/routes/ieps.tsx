@@ -286,7 +286,7 @@ function ClassMatrix({
               ))}
             </tr>
             <tr className="border-b bg-muted/40 text-left text-[10px] uppercase tracking-wide text-muted-foreground/80">
-              <th className="sticky left-0 z-30 bg-muted/60 px-3 py-1.5"></th>
+              <th className="sticky left-0 z-[3] bg-muted px-3 py-1.5"></th>
               {columns.map((c, i) => (
                 <th key={i} className="px-2 py-1.5 min-w-[200px] font-medium border-l border-border/40">
                   {c.strand}
