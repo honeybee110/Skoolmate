@@ -42,6 +42,9 @@ import {
   type ActionItem,
   type MinuteStatus,
 } from "@/lib/ssg-minutes";
+import { z } from "zod";
+import { requiredText, shortText, longText, isoDate, safeValidate } from "@/lib/validation";
+import { useFormDraft } from "@/lib/use-form-draft";
 
 export const Route = createFileRoute("/teacher/ssg-minutes")({
   head: () => ({ meta: [{ title: "SSG Minutes · skoolmate" }] }),
@@ -84,6 +87,41 @@ const emptyForm = (): FormState => ({
   status: "Draft",
 });
 
+const AttendeeSchema = z.object({
+  name: shortText(120, "Attendee name"),
+  role: shortText(60, "Attendee role"),
+});
+
+const ActionItemSchema = z.object({
+  action: shortText(500, "Action"),
+  owner: shortText(120, "Owner"),
+  due_date: isoDate("Due date"),
+});
+
+const minutesSchema = (submitting: boolean) =>
+  z.object({
+    student_name: requiredText(120, "Student name"),
+    class_level: requiredText(10, "Class level"),
+    semester: requiredText(20, "Semester"),
+    meeting_date: z.preprocess(
+      (v) => (typeof v === "string" ? v.trim() : ""),
+      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Meeting date is required." }),
+    ),
+    meeting_type: requiredText(40, "Meeting type"),
+    attendees: z.array(AttendeeSchema).max(30, { message: "Too many attendees." }),
+    apologies: longText(1000, "Apologies"),
+    discussion_summary: submitting
+      ? z.preprocess(
+          (v) => (typeof v === "string" ? v : ""),
+          longText(8000, "Discussion summary").pipe(
+            z.string().min(1, { message: "Add a discussion summary before submitting." }),
+          ),
+        )
+      : longText(8000, "Discussion summary"),
+    action_items: z.array(ActionItemSchema).max(30, { message: "Too many action items." }),
+    next_meeting_date: isoDate("Next meeting date"),
+  });
+
 function TeacherSSGMinutes() {
   const { user } = useAuth();
   const [minutes, setMinutes] = useState<SSGMinute[]>([]);
@@ -91,6 +129,15 @@ function TeacherSSGMinutes() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm());
+  const { restoredDraft, draftSavedAt, clearDraft, discardDraft } = useFormDraft<FormState>(
+    "ssg-minutes",
+    form,
+    {
+      scope: user?.id,
+      isEmpty: (f) =>
+        !f.student_name.trim() && !f.discussion_summary.trim() && !f.apologies.trim() && f.id === null,
+    },
+  );
   const [filterSem, setFilterSem] = useState<string>("All");
   const [filterType, setFilterType] = useState<string>("All");
 
@@ -149,36 +196,37 @@ function TeacherSSGMinutes() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const validate = (submitting: boolean): string | null => {
-    if (!form.student_name.trim()) return "Student name is required.";
-    if (!form.class_level) return "Class level is required.";
-    if (!form.semester) return "Semester is required.";
-    if (!form.meeting_date) return "Meeting date is required.";
-    if (!form.meeting_type) return "Meeting type is required.";
-    if (submitting && !form.discussion_summary.trim())
-      return "Add a discussion summary before submitting.";
-    return null;
-  };
-
   const persist = async (nextStatus: MinuteStatus) => {
     if (!user) return;
-    const err = validate(nextStatus === "Submitted");
-    if (err) {
-      toast.error(err);
-      return;
-    }
-    setSaving(true);
-    const payload: Record<string, unknown> = {
-      student_name: form.student_name.trim(),
+    const parsed = safeValidate(minutesSchema(nextStatus === "Submitted"), {
+      student_name: form.student_name,
       class_level: form.class_level,
       semester: form.semester,
       meeting_date: form.meeting_date,
       meeting_type: form.meeting_type,
-      attendees: form.attendees.filter((a) => a.name.trim() || a.role),
-      apologies: form.apologies.trim() || null,
-      discussion_summary: form.discussion_summary.trim() || null,
-      action_items: form.action_items.filter((a) => a.action.trim()),
-      next_meeting_date: form.next_meeting_date || null,
+      attendees: form.attendees,
+      apologies: form.apologies,
+      discussion_summary: form.discussion_summary,
+      action_items: form.action_items,
+      next_meeting_date: form.next_meeting_date,
+    });
+    if (!parsed.ok) {
+      toast.error(parsed.message);
+      return;
+    }
+    const clean = parsed.data;
+    setSaving(true);
+    const payload: Record<string, unknown> = {
+      student_name: clean.student_name,
+      class_level: clean.class_level,
+      semester: clean.semester,
+      meeting_date: clean.meeting_date,
+      meeting_type: clean.meeting_type,
+      attendees: clean.attendees.filter((a) => a.name || a.role),
+      apologies: clean.apologies || null,
+      discussion_summary: clean.discussion_summary || null,
+      action_items: clean.action_items.filter((a) => a.action),
+      next_meeting_date: clean.next_meeting_date || null,
       status: nextStatus,
       submitted_by: user.id,
       submitted_at: nextStatus === "Submitted" ? new Date().toISOString() : null,
@@ -198,6 +246,7 @@ function TeacherSSGMinutes() {
       return;
     }
     toast.success(nextStatus === "Submitted" ? "Minutes submitted" : "Draft saved");
+    clearDraft();
     setForm(emptyForm());
     await load();
   };
