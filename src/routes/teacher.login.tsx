@@ -36,7 +36,11 @@ function TeacherLogin() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) toast.error(error.message);
-    else toast.success("Signed in");
+    else {
+      resetIepCells();
+      toast.success("Signed in");
+    }
+
   };
 
   const signUp = async (e: React.FormEvent) => {
