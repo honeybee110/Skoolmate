@@ -363,6 +363,19 @@ function LessonPlannerPage() {
 
       <PublishedTimetableBanner />
 
+      {restoredDraft && !restoredDraft.id && !draft.id && !dirty && (
+        <div className="mx-4 mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm md:mx-6">
+          <span>
+            Unsaved lesson draft from{" "}
+            {draftSavedAt ? new Date(draftSavedAt).toLocaleString() : "an earlier session"} was kept on this device.
+          </span>
+          <span className="flex gap-2">
+            <Button size="sm" onClick={() => { setDraft(restoredDraft); setDirty(true); discardDraft(); }}>Restore</Button>
+            <Button size="sm" variant="ghost" onClick={discardDraft}>Discard</Button>
+          </span>
+        </div>
+      )}
+
 
 
       <div className="grid gap-4 p-4 md:grid-cols-[320px_1fr] md:p-6">
