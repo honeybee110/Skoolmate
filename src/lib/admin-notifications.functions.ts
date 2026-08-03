@@ -2,6 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireLeadership } from "@/lib/require-role";
 
 export interface AdminNotification {
   id: string;
@@ -41,6 +42,7 @@ export const createAdminNotification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => CreateInput.parse(input))
   .handler(async ({ data, context }): Promise<AdminNotification> => {
+    await requireLeadership(context.supabase, context.userId, "publish notifications");
     const { data: row, error } = await (context.supabase as any)
       .from("admin_notifications")
       .insert({
@@ -98,6 +100,7 @@ export const deleteAdminNotification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
+    await requireLeadership(context.supabase, context.userId, "delete notifications");
     const { error } = await (context.supabase as any)
       .from("admin_notifications")
       .delete()

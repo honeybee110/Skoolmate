@@ -2,6 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireLeadership } from "@/lib/require-role";
 import {
   applyFilters,
   defaultCapacityWeights,
@@ -89,6 +90,7 @@ export const saveAlertSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ConfigSchema.parse(input))
   .handler(async ({ data, context }) => {
+    await requireLeadership(context.supabase, context.userId, "change alert settings");
     const { error } = await (context.supabase as any)
       .from("leadership_alert_settings")
       .upsert(
@@ -248,6 +250,7 @@ export const dispatchLeadershipAlerts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ scope: ScopeInput }).parse(input))
   .handler(async ({ data, context }): Promise<DispatchResult> => {
+    await requireLeadership(context.supabase, context.userId, "dispatch leadership alerts");
     const { data: settingsRow } = await (context.supabase as any)
       .from("leadership_alert_settings")
       .select("*")
