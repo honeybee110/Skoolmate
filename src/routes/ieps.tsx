@@ -272,11 +272,12 @@ function ClassMatrix({
         <span className="text-[10px] text-white/80">{students.length} students · {columns.length} strands · click any cell to edit</span>
       </div>
 
-      <div className="overflow-x-auto max-h-[70vh]">
+      <div className="relative isolate z-0 overflow-x-auto max-h-[70vh]">
         <table className="w-full min-w-[1400px] border-collapse text-sm">
-          <thead className="sticky top-0 z-20">
+          <thead className="sticky top-0 z-[2]">
             <tr className="border-b bg-muted/60 text-left text-[10px] uppercase tracking-wide text-muted-foreground backdrop-blur">
-              <th className="sticky left-0 z-30 bg-muted/80 px-3 py-2 font-semibold min-w-[180px]">Student</th>
+              <th className="sticky left-0 z-[3] bg-muted px-3 py-2 font-semibold min-w-[180px]">Student</th>
+
               {subjectStrands.map(({ sub, strands }) => (
                 <th key={sub.label} colSpan={strands.length}
                   className={cn("px-3 py-1.5 text-center font-semibold border-l border-border/60", sub.color)}>
