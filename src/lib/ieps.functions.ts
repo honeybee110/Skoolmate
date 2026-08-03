@@ -82,6 +82,7 @@ export async function saveSpecialistNoteHandler(
 }
 
 export const saveSpecialistNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(validateSpecialistNoteInput)
   .handler(async ({ data }) => saveSpecialistNoteHandler(data));
 

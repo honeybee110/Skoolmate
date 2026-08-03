@@ -30,6 +30,7 @@ const TranslationSchema = z.object({
 });
 
 export const translateIepDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => TranslateInput.parse(input))
   .handler(async ({ data }) => {
     const languageLabel = IEP_LANGUAGES.find((l) => l.code === data.language)?.label ?? data.language;
