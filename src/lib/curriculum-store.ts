@@ -99,27 +99,11 @@ function initialState(): StoreState {
   };
 }
 
-const SESSION_KEY = `${STORAGE_KEY}::session`;
-
-// True the first time the store loads in a fresh browser session (i.e. a new
-// sign-in). Within the same session, edits persist across navigation/reloads.
-function isFreshSession(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    if (window.sessionStorage.getItem(SESSION_KEY)) return false;
-    window.sessionStorage.setItem(SESSION_KEY, "1");
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 let state: StoreState = load() ?? initialState();
 const listeners = new Set<() => void>();
 
 function load(): StoreState | null {
   if (typeof window === "undefined") return null;
-  const fresh = isFreshSession();
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
@@ -127,13 +111,14 @@ function load(): StoreState | null {
     if (!parsed.records || !parsed.cells) return null;
     return {
       records: parsed.records,
-      cells: fresh ? {} : parsed.cells,
+      cells: parsed.cells,
       audit: parsed.audit ?? [],
     };
   } catch {
     return null;
   }
 }
+
 
 /** Clear all IEP matrix cells (used on sign-in / manual reset). */
 export function resetIepCells() {
