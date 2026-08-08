@@ -7,17 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { iepReports, students, type IepReportStatus, type Semester } from "@/lib/mock-data";
 import { useActiveSemester } from "@/lib/semester-context";
-import { scopedSearch } from "@/lib/scope";
+import { scopedSearch, type ScopedSearch } from "@/lib/scope";
 import { FileText, FileDown, CheckCircle2, Clock, Eye, PenLine, CalendarRange, Target, Camera, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "IEP Reports · skoolmate" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): ScopedSearch => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
   }),
+
   component: ReportsPage,
 });
 
