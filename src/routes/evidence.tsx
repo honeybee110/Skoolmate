@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Upload, Sparkles, Image as ImageIcon, Video, FileText, Mic, FileEdit, Search, Link2, Check, X, Filter } from "lucide-react";
 import { evidenceItems, iepGoals, students, type EvidenceItem, type EvidenceMedium, type Semester } from "@/lib/mock-data";
 import { useActiveSemester, type SemesterScope } from "@/lib/semester-context";
-import { scopedSearch } from "@/lib/scope";
+import { scopedSearch, type ScopedSearch } from "@/lib/scope";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
