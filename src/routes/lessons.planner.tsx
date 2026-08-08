@@ -245,7 +245,7 @@ function LessonPlannerPage() {
           notes: "",
         },
           }),
-        { retries: 1, timeoutMs: 15_000, timeoutMessage: "Mate took too long to draft this planner. Please try again." },
+        { retries: 1, timeoutMs: 90_000, timeoutMessage: "Mate took too long to draft this planner. Please try again." },
       );
     },
     onSuccess: (out) => {
@@ -256,24 +256,18 @@ function LessonPlannerPage() {
       });
       patchNotes({
         learningIntention: out.learningIntention,
-        successCriteria: out.successCriteria.map((c) => (c.startsWith("I can") ? c : `I can ${c}`)).join("\n"),
+        successCriteria: out.successCriteria
+          .map((c: string) => (c.startsWith("I can") ? c : `I can ${c}`))
+          .join("\n"),
         alignment: out.alignment,
-        entrySkillAlignment: (out.entrySkillAlignment ?? [])
-          .map((e) => `Level ${e.level} — ${e.entrySkill}\n→ ${e.activity}`)
-          .join("\n\n"),
         resources: out.resources.join("\n"),
-        sensorySupports: (out.sensorySupports ?? []).join("\n"),
-        communicationSupports: (out.communicationSupports ?? []).join("\n"),
-        visuals: (out.visuals ?? []).join("\n"),
-        assessmentEvidence: (out.assessmentEvidence ?? []).join("\n"),
-        extension: (out.extension ?? []).join("\n"),
         hook: out.flow.hook,
         iDo: out.flow.iDo,
         weDo: out.flow.weDo,
         youDo: out.flow.youDo,
         reflection: out.flow.reflection,
-        differentiation: out.differentiation.map((d) => `Level ${d.level}: ${d.activity}`).join("\n\n"),
       });
+
       toast.success("Mate drafted a full specialist-school planner — review, edit or regenerate.");
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Generation failed"),
