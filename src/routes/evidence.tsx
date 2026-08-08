@@ -15,11 +15,12 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/evidence")({
   head: () => ({ meta: [{ title: "Evidence Hub · skoolmate" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): ScopedSearch => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
     goal: typeof s.goal === "string" ? s.goal : undefined,
   }),
+
   component: EvidencePage,
 });
 
