@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
-import { resetIepCells } from "@/lib/curriculum-store";
 import { enterGuestMode } from "@/lib/guest-mode";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,6 @@ function TeacherLogin() {
     setLoading(false);
     if (error) toast.error(error.message);
     else {
-      resetIepCells();
       toast.success("Signed in");
     }
 
