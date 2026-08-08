@@ -1,6 +1,6 @@
 // Server-side IEP matrix draft autosave with optimistic concurrency.
-// Drafts are scoped to the user's *current auth session*, so a new sign-in
-// always starts from an empty matrix — consistently across tabs and devices.
+// Drafts are persistent per user, so work survives refresh, navigation and
+// signing out and back in — consistently across tabs and devices.
 // Saves carry the version the client last saw; a stale version returns the
 // server copy so the client can merge per cell instead of overwriting.
 import { createServerFn } from "@tanstack/react-start";
@@ -16,13 +16,6 @@ export const loadIepDraft = createServerFn({ method: "POST" })
     const { supabase, userId, claims } = context;
     const sessionId = sessionIdFrom(claims as Record<string, unknown>, userId);
 
-    // Any draft from an older sign-in is discarded.
-    await supabase
-      .from("iep_matrix_drafts")
-      .delete()
-      .eq("user_id", userId)
-      .neq("session_id", sessionId);
-
     const { data, error } = await supabase
       .from("iep_matrix_drafts")
       .select("cells, updated_at, version")
@@ -32,6 +25,31 @@ export const loadIepDraft = createServerFn({ method: "POST" })
 
     if (error) throw new Error(error.message);
 
+    // Migrate a legacy per-sign-in draft into the persistent row once.
+    if (!data) {
+      const { data: legacy } = await supabase
+        .from("iep_matrix_drafts")
+        .select("id, cells, updated_at")
+        .eq("user_id", userId)
+        .neq("session_id", sessionId)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (legacy) {
+        await supabase
+          .from("iep_matrix_drafts")
+          .update({ session_id: sessionId })
+          .eq("id", legacy.id);
+        return {
+          sessionId,
+          cells: (legacy.cells ?? {}) as IepDraftCells,
+          updatedAt: legacy.updated_at ?? null,
+          version: 0,
+        };
+      }
+    }
+
     return {
       sessionId,
       cells: (data?.cells ?? {}) as IepDraftCells,
@@ -39,6 +57,7 @@ export const loadIepDraft = createServerFn({ method: "POST" })
       version: data?.version ?? 0,
     };
   });
+
 
 export const saveIepDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
