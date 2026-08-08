@@ -110,15 +110,19 @@ export function useIepDraftAutosave() {
         if (cancelled) return;
         const server = (res.cells ?? {}) as DraftCells;
         const queued = readPending();
-        const next = queued ? mergeDraftCells(server, queued) : server;
+        const localNow = getIepCells() as unknown as DraftCells;
+        // Keep whichever copy of each cell was edited most recently.
+        let next = mergeDraftCells(server, localNow);
+        if (queued) next = mergeDraftCells(next, queued);
         version.current = res.version ?? 0;
         lastSaved.current = JSON.stringify(server);
         hydrated.current = true;
         hydrateIepCells(next as unknown as Record<string, IepCellState>);
         setSavedAt(res.updatedAt);
         setStatus("idle");
-        if (queued) void flush();
+        if (JSON.stringify(next) !== lastSaved.current) void flush();
       })
+
       .catch(() => {
         if (cancelled) return;
         // Offline at sign-in: keep working from whatever is cached locally.

@@ -9,17 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Upload, Sparkles, Image as ImageIcon, Video, FileText, Mic, FileEdit, Search, Link2, Check, X, Filter } from "lucide-react";
 import { evidenceItems, iepGoals, students, type EvidenceItem, type EvidenceMedium, type Semester } from "@/lib/mock-data";
 import { useActiveSemester, type SemesterScope } from "@/lib/semester-context";
-import { scopedSearch } from "@/lib/scope";
+import { scopedSearch, type ScopedSearch } from "@/lib/scope";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/evidence")({
   head: () => ({ meta: [{ title: "Evidence Hub · skoolmate" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): ScopedSearch => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
     goal: typeof s.goal === "string" ? s.goal : undefined,
   }),
+
   component: EvidencePage,
 });
 

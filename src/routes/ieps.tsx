@@ -46,10 +46,11 @@ import { Laptop, Cloud, HardDrive, Trash2, Paperclip } from "lucide-react";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEP Builder · skoolmate" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): import("@/lib/scope").ScopedSearch => ({
     student: typeof s.student === "string" ? s.student : undefined,
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
   }),
+
   component: IepBuilderPage,
 });
 

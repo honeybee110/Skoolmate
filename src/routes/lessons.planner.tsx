@@ -245,7 +245,7 @@ function LessonPlannerPage() {
           notes: "",
         },
           }),
-        { retries: 1, timeoutMs: 15_000, timeoutMessage: "Mate took too long to draft this planner. Please try again." },
+        { retries: 1, timeoutMs: 90_000, timeoutMessage: "Mate took too long to draft this planner. Please try again." },
       );
     },
     onSuccess: (out) => {
@@ -256,24 +256,18 @@ function LessonPlannerPage() {
       });
       patchNotes({
         learningIntention: out.learningIntention,
-        successCriteria: out.successCriteria.map((c) => (c.startsWith("I can") ? c : `I can ${c}`)).join("\n"),
+        successCriteria: out.successCriteria
+          .map((c: string) => (c.startsWith("I can") ? c : `I can ${c}`))
+          .join("\n"),
         alignment: out.alignment,
-        entrySkillAlignment: (out.entrySkillAlignment ?? [])
-          .map((e) => `Level ${e.level} — ${e.entrySkill}\n→ ${e.activity}`)
-          .join("\n\n"),
         resources: out.resources.join("\n"),
-        sensorySupports: (out.sensorySupports ?? []).join("\n"),
-        communicationSupports: (out.communicationSupports ?? []).join("\n"),
-        visuals: (out.visuals ?? []).join("\n"),
-        assessmentEvidence: (out.assessmentEvidence ?? []).join("\n"),
-        extension: (out.extension ?? []).join("\n"),
         hook: out.flow.hook,
         iDo: out.flow.iDo,
         weDo: out.flow.weDo,
         youDo: out.flow.youDo,
         reflection: out.flow.reflection,
-        differentiation: out.differentiation.map((d) => `Level ${d.level}: ${d.activity}`).join("\n\n"),
       });
+
       toast.success("Mate drafted a full specialist-school planner — review, edit or regenerate.");
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Generation failed"),
@@ -716,16 +710,6 @@ function LessonPlannerPage() {
               </div>
             </div>
 
-            <div className="mt-4">
-              <NotesField
-                label={`Differentiation by ability level (${draft.levels.join(", ") || "—"})`}
-                value={draft.notes.differentiation ?? ""}
-                onChange={(v) => patchNotes({ differentiation: v })}
-                placeholder={"Level B: …\n\nLevel C: …\n\nLevel D: …"}
-                rows={6}
-              />
-            </div>
-
             {lessonEntrySkills.length > 0 && (
               <div className="mt-4 rounded-2xl border bg-muted/30 p-4">
                 <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -741,50 +725,6 @@ function LessonPlannerPage() {
               </div>
             )}
 
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <NotesField
-                label="Entry skill → activity alignment"
-                value={draft.notes.entrySkillAlignment ?? ""}
-                onChange={(v) => patchNotes({ entrySkillAlignment: v })}
-                placeholder={"Level B — attends to shared book\n→ Sits with ES during HOOK…"}
-                rows={6}
-              />
-              <NotesField
-                label="Sensory supports"
-                value={draft.notes.sensorySupports ?? ""}
-                onChange={(v) => patchNotes({ sensorySupports: v })}
-                placeholder={"Wobble cushion at the table\nMovement break after I DO"}
-                rows={6}
-              />
-              <NotesField
-                label="Communication supports"
-                value={draft.notes.communicationSupports ?? ""}
-                onChange={(v) => patchNotes({ communicationSupports: v })}
-                placeholder={"Model core words: more, stop, my turn\nKey Word Sign for 'finished'"}
-                rows={5}
-              />
-              <NotesField
-                label="Visuals to prepare"
-                value={draft.notes.visuals ?? ""}
-                onChange={(v) => patchNotes({ visuals: v })}
-                placeholder={"Now/Next board\n3-step task strip with finished box"}
-                rows={5}
-              />
-              <NotesField
-                label="Assessment evidence"
-                value={draft.notes.assessmentEvidence ?? ""}
-                onChange={(v) => patchNotes({ assessmentEvidence: v })}
-                placeholder={"Prompt-level tick sheet against success criteria\nPhoto/video to Evidence hub"}
-                rows={5}
-              />
-              <NotesField
-                label="Extension activities"
-                value={draft.notes.extension ?? ""}
-                onChange={(v) => patchNotes({ extension: v })}
-                placeholder={"Generalise the skill in the kitchen\nPeer modelling with staff supervision"}
-                rows={5}
-              />
-            </div>
 
 
 
@@ -923,13 +863,8 @@ function buildMarkdown(d: Draft): string {
     `### WE DO`, d.notes.weDo, ``,
     `### YOU DO`, d.notes.youDo, ``,
     `### REFLECTION`, d.notes.reflection ?? "", ``,
-    `## Differentiation`, d.notes.differentiation ?? "", ``,
-    `## Entry skill → activity alignment`, d.notes.entrySkillAlignment ?? "", ``,
-    `## Sensory supports`, d.notes.sensorySupports ?? "", ``,
-    `## Communication supports`, d.notes.communicationSupports ?? "", ``,
-    `## Visuals to prepare`, d.notes.visuals ?? "", ``,
-    `## Assessment evidence`, d.notes.assessmentEvidence ?? "", ``,
-    `## Extension activities`, d.notes.extension ?? "", ``,
+
+
 
   ].filter(Boolean).join("\n");
 }

@@ -1,7 +1,11 @@
 // Server-only helpers for IEP matrix draft autosave.
-export function sessionIdFrom(claims: Record<string, unknown>, userId: string): string {
-  const sid = claims["session_id"];
-  return typeof sid === "string" && sid ? sid : `nosession:${userId}`;
+//
+// Drafts are persistent per user (not per sign-in session), so work survives
+// refreshes, navigation and signing out and back in.
+export const PERSISTENT_SESSION_ID = "persistent";
+
+export function sessionIdFrom(_claims: Record<string, unknown>, _userId: string): string {
+  return PERSISTENT_SESSION_ID;
 }
 
 export function validateDraftInput(input: { cells: unknown; baseVersion?: unknown }) {
