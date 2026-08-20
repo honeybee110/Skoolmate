@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TimeclockRouteImport } from './routes/timeclock'
 import { Route as StudentsRouteImport } from './routes/students'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ScopeSequenceRouteImport } from './routes/scope-sequence'
@@ -80,6 +81,11 @@ const TimeclockRoute = TimeclockRouteImport.update({
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
   path: '/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/scope-sequence': typeof ScopeSequenceRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
   '/admin/activity': typeof AdminActivityRoute
@@ -466,6 +473,7 @@ export interface FileRoutesByTo {
   '/scope-sequence': typeof ScopeSequenceRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
   '/admin/activity': typeof AdminActivityRoute
@@ -531,6 +539,7 @@ export interface FileRoutesById {
   '/scope-sequence': typeof ScopeSequenceRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRouteWithChildren
   '/timeclock': typeof TimeclockRoute
   '/admin/activity': typeof AdminActivityRoute
@@ -597,6 +606,7 @@ export interface FileRouteTypes {
     | '/scope-sequence'
     | '/search'
     | '/settings'
+    | '/sitemap.xml'
     | '/students'
     | '/timeclock'
     | '/admin/activity'
@@ -659,6 +669,7 @@ export interface FileRouteTypes {
     | '/scope-sequence'
     | '/search'
     | '/settings'
+    | '/sitemap.xml'
     | '/students'
     | '/timeclock'
     | '/admin/activity'
@@ -723,6 +734,7 @@ export interface FileRouteTypes {
     | '/scope-sequence'
     | '/search'
     | '/settings'
+    | '/sitemap.xml'
     | '/students'
     | '/timeclock'
     | '/admin/activity'
@@ -788,6 +800,7 @@ export interface RootRouteChildren {
   ScopeSequenceRoute: typeof ScopeSequenceRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StudentsRoute: typeof StudentsRouteWithChildren
   TimeclockRoute: typeof TimeclockRoute
   AdminActivityRoute: typeof AdminActivityRoute
@@ -838,6 +851,13 @@ declare module '@tanstack/react-router' {
       path: '/students'
       fullPath: '/students'
       preLoaderRoute: typeof StudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -1345,6 +1365,7 @@ const rootRouteChildren: RootRouteChildren = {
   ScopeSequenceRoute: ScopeSequenceRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   StudentsRoute: StudentsRouteWithChildren,
   TimeclockRoute: TimeclockRoute,
   AdminActivityRoute: AdminActivityRoute,
