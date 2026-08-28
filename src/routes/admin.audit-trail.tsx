@@ -30,7 +30,11 @@ export const Route = createFileRoute("/admin/audit-trail")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: AuditTrailPage,
+  component: () => (
+    <RoleGate groups={["leadership", "it"]}>
+      <AuditTrailPage />
+    </RoleGate>
+  ),
 });
 
 function fmt(iso: string) {

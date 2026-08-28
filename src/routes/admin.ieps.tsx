@@ -19,7 +19,11 @@ import { availableSemesters, currentSemester, type Semester } from "@/lib/mock-d
 
 export const Route = createFileRoute("/admin/ieps")({
   head: () => ({ meta: [{ title: "IEP Management · skoolmate" }] }),
-  component: AdminIepManagement,
+  component: () => (
+    <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
+      <AdminIepManagement />
+    </RoleGate>
+  ),
 });
 
 // ---------- Class registry ----------
