@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
+import { RoleGate } from "@/components/role-gate";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,11 @@ import { availableSemesters, currentSemester, type Semester } from "@/lib/mock-d
 
 export const Route = createFileRoute("/admin/ieps")({
   head: () => ({ meta: [{ title: "IEP Management · skoolmate" }] }),
-  component: AdminIepManagement,
+  component: () => (
+    <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
+      <AdminIepManagement />
+    </RoleGate>
+  ),
 });
 
 // ---------- Class registry ----------
