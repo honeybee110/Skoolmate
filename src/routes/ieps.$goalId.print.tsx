@@ -15,10 +15,15 @@ import { Printer, ArrowLeft, Languages, Loader2, Sparkles, PenLine, Download } f
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { translateIepDraft, IEP_LANGUAGES, type IepLanguageCode } from "@/lib/iep-translate.functions";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/ieps/$goalId/print")({
   head: () => ({ meta: [{ title: "IEP · Printable" }] }),
-  component: IepPrintPage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <IepPrintPage />
+    </PortalGuard>
+  ),
   notFoundComponent: () => <div className="p-10 text-center text-sm text-muted-foreground">Goal not found</div>,
   errorComponent: ({ error }) => <div className="p-10 text-center text-sm text-destructive">{error.message}</div>,
   loader: ({ params }) => {

@@ -13,6 +13,7 @@ import {
   Camera, Activity, Target, BookOpen, GraduationCap, Heart, ShieldCheck, ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PortalGuard } from "@/components/portal-guard";
 
 
 export const Route = createFileRoute("/students/$studentId")({
@@ -40,7 +41,11 @@ export const Route = createFileRoute("/students/$studentId")({
       </div>
     </AppShell>
   ),
-  component: StudentProfile,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <StudentProfile />
+    </PortalGuard>
+  ),
 });
 
 function StudentProfile() {

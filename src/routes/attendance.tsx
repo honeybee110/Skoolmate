@@ -15,6 +15,7 @@ import {
   useAttendanceStore, markAttendance, bulkMark, clearDay, attendanceKey, todayISO, isSessionOverdue,
   ATTENDANCE_MARKS, SESSION_META, type AttendanceMark, type RollSession,
 } from "@/lib/attendance-store";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/attendance")({
   head: () => ({
@@ -23,7 +24,11 @@ export const Route = createFileRoute("/attendance")({
       { name: "description", content: "Mark the class roll twice a day — Morning (before 9:30 AM) and Afternoon (12:30 PM)." },
     ],
   }),
-  component: AttendancePage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <AttendancePage />
+    </PortalGuard>
+  ),
 });
 
 function AttendancePage() {

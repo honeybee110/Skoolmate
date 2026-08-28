@@ -9,10 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Library, Search, Star, Upload, Sparkles, ExternalLink, FileText, Video, Image as ImgIcon, Music2, BookOpen, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/resources")({
   head: () => ({ meta: [{ title: "Resource Bank · skoolmate" }] }),
-  component: ResourceBank,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <ResourceBank />
+    </PortalGuard>
+  ),
 });
 
 type Kind = "worksheet" | "video" | "visual" | "song" | "lesson" | "aac";

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { students, availableSemesters, type Semester } from "@/lib/mock-data";
 import { getIsAdmin, listOverrideAudit } from "@/lib/ieps-admin.functions";
+import { RoleGate } from "@/components/role-gate";
 import {
   ShieldAlert,
   ShieldCheck,
@@ -43,7 +44,11 @@ type AuditRow = {
 
 export const Route = createFileRoute("/admin/audit")({
   head: () => ({ meta: [{ title: "Override audit log · skoolmate" }] }),
-  component: AdminAuditPage,
+  component: () => (
+    <RoleGate groups={["leadership", "it"]}>
+      <AdminAuditPage />
+    </RoleGate>
+  ),
 });
 
 type MismatchFilter = "any" | "mismatch" | "clean";

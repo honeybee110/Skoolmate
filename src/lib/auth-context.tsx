@@ -76,8 +76,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("user_roles").select("role").eq("user_id", uid),
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
     ]);
+    if (rolesRes.error) {
+      // Surface this instead of silently pretending the user is a plain
+      // teacher — a transient failure here should never quietly downgrade
+      // (or upgrade) what portal/role UI someone sees.
+      console.error("[auth] Failed to load user roles:", rolesRes.error.message);
+    }
     const rs = (rolesRes.data ?? []).map((r: { role: AppRole }) => r.role);
-    setRoles(rs.length ? rs : ["teacher"]);
+    // Only fall back to "teacher" when the query actually succeeded and
+    // simply returned no rows (a genuinely new/roleless account). On error,
+    // leave roles empty rather than guessing — group checks (isAdminPortalUser
+    // etc.) will correctly treat that as "unknown", not "confirmed teacher".
+    setRoles(rs.length ? rs : rolesRes.error ? [] : ["teacher"]);
+    if (profileRes.error) {
+      console.error("[auth] Failed to load profile:", profileRes.error.message);
+    }
     setProfile((profileRes.data as Profile | null) ?? null);
   };
 

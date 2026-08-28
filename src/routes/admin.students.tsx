@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { RoleGate } from "@/components/role-gate";
+import { PortalGuard } from "@/components/portal-guard";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -14,11 +15,13 @@ import { students as seedStudents, iepGoals, behaviourReports, currentSemester, 
 export const Route = createFileRoute("/admin/students")({
   head: () => ({ meta: [{ title: "Student Directory · skoolmate" }] }),
   component: () => (
-    <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
-      <AppShell variant="admin">
-        <StudentsDirectory />
-      </AppShell>
-    </RoleGate>
+    <PortalGuard portal="admin">
+      <RoleGate groups={["leadership", "allied_health", "wellbeing", "it"]}>
+        <AppShell variant="admin">
+          <StudentsDirectory />
+        </AppShell>
+      </RoleGate>
+    </PortalGuard>
   ),
 });
 

@@ -10,6 +10,7 @@ import { useActiveSemester } from "@/lib/semester-context";
 import { scopedSearch, type ScopedSearch } from "@/lib/scope";
 import { FileText, FileDown, CheckCircle2, Clock, Eye, PenLine, CalendarRange, Target, Camera, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PortalGuard } from "@/components/portal-guard";
 
 
 export const Route = createFileRoute("/reports")({
@@ -19,7 +20,11 @@ export const Route = createFileRoute("/reports")({
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
   }),
 
-  component: ReportsPage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <ReportsPage />
+    </PortalGuard>
+  ),
 });
 
 const statusMeta: Record<IepReportStatus, { label: string; tone: string; Icon: typeof Clock }> = {

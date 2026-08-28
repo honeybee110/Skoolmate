@@ -11,10 +11,15 @@ import { scopeSequence, type ScopeItem } from "@/lib/scope-sequence";
 import { availableSemesters, students, type IepDomain, type Semester } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/scope-sequence")({
   head: () => ({ meta: [{ title: "Scope & Sequence · skoolmate" }] }),
-  component: ScopeSequencePage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <ScopeSequencePage />
+    </PortalGuard>
+  ),
 });
 
 const DOMAINS: (IepDomain | "all")[] = [

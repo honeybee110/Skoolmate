@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { BehaviourCentre } from "@/components/behaviour/behaviour-centre";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/behaviour")({
   head: () => ({
@@ -22,7 +23,11 @@ export const Route = createFileRoute("/behaviour")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: BehaviourPage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <BehaviourPage />
+    </PortalGuard>
+  ),
 });
 
 function BehaviourPage() {

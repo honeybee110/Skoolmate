@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { RoleGate } from "@/components/role-gate";
+import { PortalGuard } from "@/components/portal-guard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,9 +33,11 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/admin/users")({
   head: () => ({ meta: [{ title: "User & Photo Management · skoolmate" }] }),
   component: () => (
-    <RoleGate groups={["it", "leadership"]}>
-      <UserPhotoManagement />
-    </RoleGate>
+    <PortalGuard portal="admin">
+      <RoleGate groups={["it", "leadership"]}>
+        <UserPhotoManagement />
+      </RoleGate>
+    </PortalGuard>
   ),
 });
 

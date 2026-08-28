@@ -45,7 +45,7 @@ function TeacherLogin() {
   const signUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -54,8 +54,17 @@ function TeacherLogin() {
       },
     });
     setLoading(false);
-    if (error) toast.error(error.message);
-    else toast.success("Account created — signing you in.");
+    if (error) {
+      toast.error(error.message);
+    } else if (data.session) {
+      // Email confirmation is off (or already satisfied) — a session came
+      // back immediately, so "signing you in" is actually true.
+      toast.success("Account created — signing you in.");
+    } else {
+      // No session means Supabase is waiting on email confirmation before
+      // any sign-in can happen — say so, rather than claiming success.
+      toast.success("Account created — check your email to confirm before signing in.");
+    }
   };
 
   const google = async () => {

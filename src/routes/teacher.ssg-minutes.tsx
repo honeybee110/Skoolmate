@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
-import { RequireAuth } from "@/components/role-gate";
+import { PortalGuard } from "@/components/portal-guard";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -50,11 +50,11 @@ import { useFormDraft } from "@/lib/use-form-draft";
 export const Route = createFileRoute("/teacher/ssg-minutes")({
   head: () => ({ meta: [{ title: "SSG Minutes · skoolmate" }] }),
   component: () => (
-    <RequireAuth>
+    <PortalGuard portal="teacher">
       <AppShell variant="teacher">
         <TeacherSSGMinutes />
       </AppShell>
-    </RequireAuth>
+    </PortalGuard>
   ),
 });
 

@@ -8,10 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Timer, LogIn, LogOut, Coffee, MapPin, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/timeclock")({
   head: () => ({ meta: [{ title: "Clock-in · skoolmate" }] }),
-  component: TimeclockPage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <TimeclockPage />
+    </PortalGuard>
+  ),
 });
 
 type State = "out" | "in" | "break";

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { PortalGuard } from "@/components/portal-guard";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Search, Upload, FileText, FileImage, FileSpreadsheet, Presentation,
@@ -37,9 +38,11 @@ export const Route = createFileRoute("/search")({
     ],
   }),
   component: () => (
-    <AppShell>
-      <DocumentSearch />
-    </AppShell>
+    <PortalGuard portal="teacher">
+      <AppShell>
+        <DocumentSearch />
+      </AppShell>
+    </PortalGuard>
   ),
 });
 

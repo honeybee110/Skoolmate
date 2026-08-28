@@ -12,6 +12,7 @@ import { useActiveSemester, type SemesterScope } from "@/lib/semester-context";
 import { scopedSearch, type ScopedSearch } from "@/lib/scope";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/evidence")({
   head: () => ({ meta: [{ title: "Evidence Hub · skoolmate" }] }),
@@ -21,7 +22,11 @@ export const Route = createFileRoute("/evidence")({
     goal: typeof s.goal === "string" ? s.goal : undefined,
   }),
 
-  component: EvidencePage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <EvidencePage />
+    </PortalGuard>
+  ),
 });
 
 

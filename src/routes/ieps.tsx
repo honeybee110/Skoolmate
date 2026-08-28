@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dialog";
 import { useRef } from "react";
 import { Laptop, Cloud, HardDrive, Trash2, Paperclip } from "lucide-react";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/ieps")({
   head: () => ({ meta: [{ title: "IEP Builder · skoolmate" }] }),
@@ -51,7 +52,11 @@ export const Route = createFileRoute("/ieps")({
     semester: typeof s.semester === "string" ? (s.semester as Semester | "all") : undefined,
   }),
 
-  component: IepBuilderPage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <IepBuilderPage />
+    </PortalGuard>
+  ),
 });
 
 // ---------- Cell state ----------

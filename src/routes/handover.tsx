@@ -20,10 +20,15 @@ import { useSyncExternalStore } from "react";
 import { classInfo } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/handover")({
   head: () => ({ meta: [{ title: "Handover Workspace · skoolmate" }] }),
-  component: Handover,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <Handover />
+    </PortalGuard>
+  ),
 });
 
 // -----------------------------------------------------------------------------

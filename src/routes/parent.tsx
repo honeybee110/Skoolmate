@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { RequireAuth } from "@/components/role-gate";
 import { iepGoals, students, evidenceItems, iepReports, classInfo, availableSemesters, type IepGoal, type IepReportStatus } from "@/lib/mock-data";
 import { useActiveSemester, semesterShortLabel } from "@/lib/semester-context";
 import { Sparkles, Heart, BookOpen, Camera, FileDown, ChevronRight, FileText, CalendarRange } from "lucide-react";
@@ -14,7 +15,11 @@ export const Route = createFileRoute("/parent")({
     { title: "Parent Portal · skoolmate" },
     { name: "description", content: "A simple, friendly view of your child's learning goals, progress and evidence." },
   ] }),
-  component: ParentPortal,
+  component: () => (
+    <RequireAuth>
+      <ParentPortal />
+    </RequireAuth>
+  ),
 });
 
 const stageMeta: Record<string, { label: string; pct: number; tone: string }> = {

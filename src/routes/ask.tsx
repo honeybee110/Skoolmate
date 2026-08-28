@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { createAskThread, deleteAskThread, listAskThreads } from "@/lib/ask-threads.functions";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/ask")({
   head: () => ({
@@ -29,7 +30,11 @@ export const Route = createFileRoute("/ask")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: AskLayout,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <AskLayout />
+    </PortalGuard>
+  ),
 });
 
 function AskLayout() {

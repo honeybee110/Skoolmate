@@ -6,10 +6,15 @@ import { Card } from "@/components/ui/card";
 import { students } from "@/lib/mock-data";
 import { BehaviourPill, AttendanceDot } from "@/components/status-chips";
 import { Filter, Plus, Search } from "lucide-react";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/students")({
   head: () => ({ meta: [{ title: "Students · skoolmate" }] }),
-  component: StudentsList,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <StudentsList />
+    </PortalGuard>
+  ),
 });
 
 function StudentsList() {

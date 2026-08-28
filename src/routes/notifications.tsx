@@ -7,10 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bell, CheckCheck, Target, BookOpen, MessageSquare, Camera, ShieldCheck, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/notifications")({
   head: () => ({ meta: [{ title: "Notifications · skoolmate" }] }),
-  component: NotificationsPage,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <NotificationsPage />
+    </PortalGuard>
+  ),
 });
 
 type Cat = "all" | "approvals" | "iep" | "evidence" | "messages" | "system";

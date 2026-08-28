@@ -30,6 +30,7 @@ import {
   FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PortalGuard } from "@/components/portal-guard";
 
 export const Route = createFileRoute("/classes")({
   head: () => ({
@@ -38,7 +39,11 @@ export const Route = createFileRoute("/classes")({
       { name: "description", content: "P7 class dashboard — attendance, behaviour, IEP progress, evidence and lesson timeline at a glance." },
     ],
   }),
-  component: ClassDashboard,
+  component: () => (
+    <PortalGuard portal="teacher">
+      <ClassDashboard />
+    </PortalGuard>
+  ),
 });
 
 const blockColor: Record<string, string> = {
